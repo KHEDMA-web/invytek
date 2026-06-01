@@ -97,6 +97,10 @@ npm run db:studio    # Prisma Studio UI
 
 ## Ce qui reste à faire (par priorité)
 - [ ] **Brancher Neon (PostgreSQL) sur Vercel** → route /i/[slug] en prod
+      → Dashboard Vercel > Storage > Create > Neon (gratuit, 2 clics)
+      → Vercel injecte DATABASE_URL automatiquement
+      → Mettre à jour lib/db.ts pour le bon adapter en prod
+      → `prisma migrate deploy` → tables créées → live
 - [ ] Auth.js — câbler login/signup (NextAuth + email/Google)
 - [ ] Dashboard `/dashboard` — liste invitations de l'user
 - [ ] Formulaire création invitation `/create` (form → DB → slug)
