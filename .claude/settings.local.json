@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\PC PRO DZ\\\\invytek\" -Force -Recurse -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })",
+      "PowerShell($f1 = Get-FileHash \"c:\\\\Users\\\\PC PRO DZ\\\\Downloads\\\\invitation_mariage_final.html\" -Algorithm MD5; $f2 = Get-FileHash \"c:\\\\Users\\\\PC PRO DZ\\\\Downloads\\\\invitation_mariage_final \\(1\\).html\" -Algorithm MD5; \"File1: $\\($f1.Hash\\)\"; \"File2: $\\($f2.Hash\\)\"; if\\($f1.Hash -eq $f2.Hash\\){\"IDENTIQUES\"} else {\"DIFFÉRENTS\"})"
+    ]
+  }
+}
