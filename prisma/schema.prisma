@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  name        String?
+  image       String?
+  createdAt   DateTime     @default(now())
+  invitations Invitation[]
+}
+
+model Invitation {
+  id          String   @id @default(cuid())
+  userId      String
+  slug        String   @unique
+  category    String   // wedding | business | medical | birthday
+  themeId     String
+  status      String   @default("draft") // draft | published | archived
+  content     String   // JSON
+  options     String   // JSON
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guests      Guest[]
+}
+
+model Theme {
+  id           String  @id @default(cuid())
+  category     String
+  name         String
+  slug         String  @unique
+  previewImage String?
+  isPremium    Boolean @default(false)
+  config       String  // JSON — design tokens + shape + opening + layout
+}
+
+model Guest {
+  id           String     @id @default(cuid())
+  invitationId String
+  name         String
+  contact      String?
+  status       String     @default("pending") // pending | attending | declined
+  partySize    Int        @default(1)
+  message      String?
+  respondedAt  DateTime?
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+}

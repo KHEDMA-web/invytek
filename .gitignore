@@ -39,3 +39,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# database (dev local)
+*.db
+*.db-shm
+*.db-wal
+
+# claude local settings (machine-specific)
+.claude/settings.local.json
+
+# playwright (installé temporairement pour les screenshots)
+/playwright-report/
+/test-results/
