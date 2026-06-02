@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FDF6F0" />
+<title>Baby Shower — Invytek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#FDF6F0; --bg-2:#EAF4FB; --paper:#FFFFFF;
+    --a:#8FCDE8; --a-deep:#5fa8cc; --b:#F8C9B0; --soft:rgba(143,205,232,.18);
+    --ink:#445660; --muted:#7d8b93; --faint:#aab6bc; --line:rgba(95,168,204,.24);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body { min-height:100vh; min-height:100dvh;
+    background:linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+    color:var(--ink); font-family:'Quicksand',sans-serif; display:flex; align-items:center; justify-content:center;
+    padding:calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom)); overflow-x:hidden; }
+  .float-bg { position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; }
+  .float-bg span { position:absolute; bottom:-40px; font-size:1.4rem; opacity:.5; animation:floatUp linear infinite; }
+  @keyframes floatUp { 0%{transform:translateY(0) rotate(0);opacity:0;} 12%{opacity:.6;} 100%{transform:translateY(-112vh) rotate(40deg);opacity:0;} }
+
+  .scene { width:100%; max-width:440px; position:relative; z-index:2; }
+  .card { position:relative; width:100%; background:linear-gradient(168deg,var(--paper),#fbfdff); border-radius:28px; padding:3rem 2.2rem 2.6rem; text-align:center;
+    box-shadow:0 50px 100px -40px rgba(70,120,150,.3), 0 0 0 1px var(--line); overflow:hidden; }
+  .card::after { content:''; position:absolute; left:0; right:0; top:0; height:5px; background:linear-gradient(90deg,var(--a),var(--b)); }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .8s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .badge-top { display:inline-flex; align-items:center; gap:.5rem; font-family:'Quicksand',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--a-deep); padding:.45rem 1rem; border-radius:40px; background:var(--soft); }
+  .icon { font-size:2.6rem; margin-top:1rem; }
+  .kicker { font-family:'Quicksand',sans-serif; font-weight:600; font-size:.92rem; letter-spacing:.04em; color:var(--muted); margin-top:.8rem; }
+  .babyname { font-family:'Caveat',cursive; font-weight:700; font-size:clamp(3.4rem,16vw,5rem); line-height:.9; color:var(--a-deep); margin-top:.2rem; }
+  .sub { font-family:'Quicksand',sans-serif; font-weight:500; font-size:1.05rem; color:var(--muted); margin-top:.5rem; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.7rem; margin:1.6rem auto; width:60%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--line)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--line),transparent); }
+  .sep .h { color:var(--b); font-size:1rem; }
+
+  .parents { font-family:'Quicksand',sans-serif; font-weight:600; font-size:1.15rem; color:var(--ink); }
+  .when { font-family:'Quicksand',sans-serif; font-weight:600; font-size:1rem; letter-spacing:.04em; color:var(--a-deep); margin-top:1.2rem; }
+  .where { font-family:'Quicksand',sans-serif; font-weight:500; font-size:1rem; color:var(--muted); margin-top:.35rem; }
+
+  .countdown { display:flex; justify-content:center; gap:.8rem; margin:1.8rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:56px; padding:.7rem .4rem; border:1px solid var(--line); border-radius:16px; background:var(--soft); }
+  .cd .num { font-family:'Quicksand',sans-serif; font-weight:700; font-size:1.6rem; color:var(--a-deep); line-height:1; }
+  .cd .lab { font-family:'Quicksand',sans-serif; font-weight:600; font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-top:.4rem; }
+
+  .cta { margin-top:1.9rem; display:flex; gap:.7rem; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Quicksand',sans-serif; font-weight:700; font-size:.74rem; letter-spacing:.06em; text-transform:uppercase;
+    padding:.9rem 1.5rem; border-radius:40px; cursor:pointer; text-decoration:none; border:2px solid transparent; transition:all .25s; }
+  .btn-primary { color:#fff; background:linear-gradient(135deg,var(--a),var(--a-deep)); box-shadow:0 10px 24px -10px var(--a-deep); }
+  .btn-primary:hover { transform:translateY(-2px); }
+  .btn-ghost { color:var(--a-deep); border-color:var(--line); }
+  .btn-ghost:hover { transform:translateY(-2px); border-color:var(--a); background:var(--soft); }
+  .btn svg { width:14px; height:14px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;
+    background:linear-gradient(180deg,#fff,var(--bg-2)); transition:opacity .8s ease .5s, visibility 0s 1s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  /* clouds */
+  .cloud { position:absolute; top:0; bottom:0; width:52%; z-index:3; background:#fff; transition:transform 1s cubic-bezier(.7,0,.3,1); box-shadow:0 0 60px rgba(143,205,232,.4); }
+  .cloud.l { left:0; border-radius:0 60% 60% 0/0 50% 50% 0; }
+  .cloud.r { right:0; border-radius:60% 0 0 60%/50% 0 0 50%; }
+  #gate[data-open="balloon"] .cloud { display:none; }
+  #gate[data-open="cloud"].opening .cloud.l { transform:translateX(-92%); }
+  #gate[data-open="cloud"].opening .cloud.r { transform:translateX(92%); }
+  /* balloons */
+  .balloons { position:absolute; inset:0; z-index:3; display:none; }
+  #gate[data-open="balloon"] .balloons { display:block; }
+  .bln { position:absolute; bottom:-10%; width:90px; height:112px; border-radius:50% 50% 48% 48%/55% 55% 45% 45%; transition:transform 1.1s cubic-bezier(.5,0,.3,1), opacity .8s; }
+  .bln::after { content:''; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); border-left:6px solid transparent; border-right:6px solid transparent; border-top:9px solid currentColor; }
+  #gate[data-open="balloon"].opening .bln { transform:translateY(-130vh); opacity:0; }
+  .gate-stage { position:relative; z-index:5; text-align:center; transition:opacity .5s,transform .6s; }
+  #gate.opening .gate-stage { opacity:0; transform:scale(.9); }
+  .gate-ic { font-size:3.4rem; }
+  .gate-ti { font-family:'Caveat',cursive; font-weight:700; font-size:2.6rem; color:var(--a-deep); margin-top:.4rem; }
+  .gate-hint { position:absolute; bottom:9%; left:0; right:0; text-align:center; font-family:'Quicksand',sans-serif; font-weight:600; font-size:.64rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); z-index:6; animation:blink 2.2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:.4;} 50%{opacity:.95;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--a-deep); color:#fff;
+    font-family:'Quicksand',sans-serif; font-weight:600; font-size:.95rem; padding:.8rem 1.4rem; border-radius:40px; opacity:0; pointer-events:none; transition:all .4s ease; z-index:140; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px){ .card{padding:2.4rem 1.5rem;} }
+  @media (prefers-reduced-motion:reduce){ .rev{animation:none;opacity:1;transform:none;} .float-bg span{animation:none;} }
+</style>
+</head>
+<body>
+
+<div class="float-bg" id="floatBg"></div>
+
+<!-- GATE -->
+<div id="gate" data-open="cloud" onclick="openGate()">
+  <span class="cloud l"></span><span class="cloud r"></span>
+  <div class="balloons" id="balloons"></div>
+  <div class="gate-stage">
+    <div class="gate-ic">🍼</div>
+    <div class="gate-ti" data-gate-ti>Bientôt…</div>
+  </div>
+  <div class="gate-hint">Touchez pour découvrir</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card">
+    <span class="badge-top rev" style="animation-delay:.08s" data-f="badge">Baby Shower</span>
+    <div class="icon rev" style="animation-delay:.16s" data-icon>🍼</div>
+    <div class="kicker rev" style="animation-delay:.24s" data-f="kicker">Un petit trésor arrive…</div>
+    <div class="babyname rev" style="animation-delay:.32s" data-f="babyname">Bébé Selma</div>
+    <div class="sub rev" style="animation-delay:.4s" data-f="sub">Fêtons son arrivée ensemble</div>
+
+    <div class="sep rev" style="animation-delay:.48s"><span class="ln"></span><span class="h">♥</span><span class="ln r"></span></div>
+
+    <div class="parents rev" style="animation-delay:.54s" data-f="parents">Chez Selma &amp; Karim</div>
+    <div class="when rev" style="animation-delay:.6s" data-f="when">Dimanche 24 Mai 2026 — 15h00</div>
+    <div class="where rev" style="animation-delay:.66s" data-f="where">15 rue des Jasmins, Alger</div>
+
+    <div class="countdown rev" style="animation-delay:.74s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.82s">
+      <button class="btn btn-primary" onclick="toast('Quelle joie — à très vite ！')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Je serai là
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PALS={ neutre:['#8FCDE8','#5fa8cc','#F8C9B0','🍼'], garcon:['#8FB8F0','#5b86c9','#BcdCF5','👶'], fille:['#F3A9C4','#d4789e','#F8D2DE','👶'] };
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; const g=document.getElementById('gate'); g.classList.add('opening'); setTimeout(()=>g.classList.add('opened'),1000); }
+  function setOpening(s){ document.getElementById('gate').setAttribute('data-open', s==='balloon'?'balloon':'cloud'); }
+  function setPalette(p){ const v=PALS[p]||PALS.neutre; const r=document.documentElement.style;
+    r.setProperty('--a',v[0]); r.setProperty('--a-deep',v[1]); r.setProperty('--b',v[2]); r.setProperty('--soft',v[0]+'2e'); r.setProperty('--line',v[1]+'3d');
+    document.querySelectorAll('[data-icon],.gate-ic').forEach(e=>e.textContent=v[3]); }
+
+  let cdTarget=new Date('2026-05-24T15:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1900);
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+  function syncGate(){ document.querySelector('[data-gate-ti]').textContent=document.querySelector('[data-f="babyname"]').textContent.trim()||'Bientôt…'; }
+
+  // floating hearts/stars bg + balloons
+  (function(){ const f=document.getElementById('floatBg'); const ic=['♥','✦','●','♡'];
+    for(let i=0;i<14;i++){ const s=document.createElement('span'); s.textContent=ic[i%ic.length]; s.style.left=Math.random()*100+'vw'; s.style.color=i%2?'var(--b)':'var(--a)';
+      s.style.animationDuration=(Math.random()*8+10)+'s'; s.style.animationDelay=(Math.random()*12)+'s'; s.style.fontSize=(Math.random()*1+.8)+'rem'; f.appendChild(s); } })();
+  (function(){ const b=document.getElementById('balloons'); const cols=['#8FCDE8','#F8C9B0','#F3A9C4','#BfE6CE','#C9B8F0'];
+    for(let i=0;i<7;i++){ const e=document.createElement('div'); e.className='bln'; e.style.left=(8+i*13)+'%'; e.style.color=cols[i%cols.length]; e.style.background='radial-gradient(circle at 36% 30%, #fff6, '+cols[i%cols.length]+')';
+      e.style.bottom=(-10-Math.random()*20)+'%'; e.style.transitionDelay=(Math.random()*.3)+'s'; e.style.transform='translateY('+(Math.random()*30)+'px)'; b.appendChild(e); } })();
+
+  window.INVYTEK_CONFIG={
+    theme:'baby-shower', accent:'#8FCDE8', accent2:'#5fa8cc', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'opening', label:'Animation d\'ouverture', type:'select', val:'cloud', options:[{value:'cloud',label:'Nuages qui s\'écartent'},{value:'balloon',label:'Ballons qui s\'envolent'}]},
+      {key:'palette', label:'Ambiance', type:'select', val:'neutre', options:[{value:'neutre',label:'Neutre (bleu/pêche)'},{value:'garcon',label:'Garçon (bleu)'},{value:'fille',label:'Fille (rose)'}]},
+      {key:'badge', label:'Badge', sel:'[data-f="badge"]', type:'text'},
+      {key:'kicker', label:'Accroche', sel:'[data-f="kicker"]', type:'text'},
+      {key:'babyname', label:'Nom du bébé', sel:'[data-f="babyname"]', type:'text'},
+      {key:'sub', label:'Sous-titre', sel:'[data-f="sub"]', type:'text'},
+      {key:'parents', label:'Hôtes / parents', sel:'[data-f="parents"]', type:'text'},
+      {key:'when', label:'Date & heure', sel:'[data-f="when"]', type:'text'},
+      {key:'where', label:'Lieu', sel:'[data-f="where"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-05-24T15:00'}
+    ],
+    onChange:function(d){ if(d.opening) setOpening(d.opening); if(d.palette) setPalette(d.palette); syncGate(); }
+  };
+</script>
+<script src="../assets/editor.js"></script>
+<script>syncGate();</script>
+</body>
+</html>

@@ -20,7 +20,7 @@ const THEMES: {
     slug: "conference-tech",
     name: "Conférence Tech",
     catLabel: "Business",
-    href: "#",
+    href: "/themes-preview/conference-tech.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 18%,#162042,#0b1020 72%)" }}>
@@ -38,7 +38,7 @@ const THEMES: {
     slug: "inauguration",
     name: "Inauguration",
     catLabel: "Business",
-    href: "#",
+    href: "/themes-preview/inauguration.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini" style={{ background: "linear-gradient(170deg,#fff,#f3eee2)" }}>
@@ -54,7 +54,7 @@ const THEMES: {
     slug: "soiree-prestige",
     name: "Soirée Prestige",
     catLabel: "Business",
-    href: "#",
+    href: "/themes-preview/soiree-prestige.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Disponible", variant: "" }],
     preview: (
       <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 18%,#14141f,#0a0a0f 70%)" }}>
@@ -74,7 +74,7 @@ const THEMES: {
     slug: "congres-medical",
     name: "Congrès Médical",
     catLabel: "Médical",
-    href: "#",
+    href: "/themes-preview/congres-medical.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini" style={{ background: "linear-gradient(170deg,#fff,#eef5f6)" }}>
@@ -92,7 +92,7 @@ const THEMES: {
     slug: "sensibilisation",
     name: "Sensibilisation",
     catLabel: "Médical",
-    href: "#",
+    href: "/themes-preview/sensibilisation.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini" style={{ background: "linear-gradient(170deg,#fff,#f6eeec)" }}>
@@ -110,7 +110,7 @@ const THEMES: {
     slug: "blouse-lys",
     name: "Blouse & Lys",
     catLabel: "Médical",
-    href: "#",
+    href: "/themes-preview/blouse-lys.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 18%,#18211a,#0f1210 70%)" }}>
@@ -130,7 +130,7 @@ const THEMES: {
     slug: "anniv-neon",
     name: "18 / 20 ans — Néon",
     catLabel: "Anniversaire",
-    href: "#",
+    href: "/themes-preview/anniv-neon.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 18%,#1a1430,#0a0a0f 72%)" }}>
@@ -146,7 +146,7 @@ const THEMES: {
     slug: "baby-shower",
     name: "Baby Shower",
     catLabel: "Anniversaire",
-    href: "#",
+    href: "/themes-preview/baby-shower.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini" style={{ background: "linear-gradient(180deg,#fdf6f0,#eaf4fb)" }}>
@@ -162,7 +162,7 @@ const THEMES: {
     slug: "confettis-or",
     name: "Confettis d'Or",
     catLabel: "Anniversaire",
-    href: "#",
+    href: "/themes-preview/confettis-or.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Disponible", variant: "" }],
     preview: (
       <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 18%,#251c10,#14100a 70%)" }}>
@@ -180,7 +180,7 @@ const THEMES: {
     slug: "bordeaux-oval",
     name: "Bordeaux & Ovale Floral",
     catLabel: "Mariage · Arabe",
-    href: "#",
+    href: "/themes-preview/bordeaux-oval.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Disponible", variant: "" }],
     preview: (
       <div className="mini bordeaux">
@@ -212,7 +212,7 @@ const THEMES: {
     slug: "ivoire-minimal",
     name: "Ivoire Minimal",
     catLabel: "Mariage",
-    href: "#",
+    href: "/themes-preview/ivoire-minimal.html",
     badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
     preview: (
       <div className="mini" style={{ background: "radial-gradient(120% 70% at 50% 18%,#262015,#14100a 72%)" }}>

@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0F1210" />
+<title>Inauguration — Clinique El Nour</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0F1210; --bg-2:#141A15; --card:#161d17;
+    --sage:#4A6B52; --sage-light:#7AA882; --sage-glow:rgba(122,168,130,.5);
+    --gold:#B8923C; --gold-vivid:#D4AF61; --gold-soft:rgba(184,146,60,.45);
+    --ivory:#FCFAF5; --ivory-warm:#F0EEE6;
+    --text:rgba(240,238,230,.82); --text-soft:rgba(240,238,230,.5); --text-faint:rgba(240,238,230,.32);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(120% 70% at 50% -5%, #18211a 0%, var(--bg) 62%), var(--bg);
+    color:var(--text); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(2.5rem + env(safe-area-inset-top)) 1.2rem calc(2.5rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+
+  /* medical cross filigree bg */
+  .filigree { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.05;
+    background-image:
+      repeating-linear-gradient(0deg, transparent 0 38px, rgba(122,168,130,.4) 38px 40px, transparent 40px 78px),
+      repeating-linear-gradient(90deg, transparent 0 38px, rgba(122,168,130,.4) 38px 40px, transparent 40px 78px);
+    background-size:78px 78px; mask-image:radial-gradient(circle at 50% 50%, #000 0%, transparent 75%);
+    animation:filiPulse 5s ease-in-out infinite; }
+  @keyframes filiPulse { 0%,100%{opacity:.04;} 50%{opacity:.085;} }
+
+  .scene { width:100%; max-width:480px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%;
+    background:linear-gradient(172deg, #1a221b 0%, var(--card) 100%);
+    border:1px solid rgba(74,107,82,.4);
+    padding:3rem 2.4rem 3.2rem; text-align:center; overflow:hidden;
+    box-shadow:0 50px 110px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.03);
+  }
+  .card::before { content:''; position:absolute; inset:12px; border:1px solid rgba(74,107,82,.22); pointer-events:none; }
+
+  /* lily */
+  .lily { width:88px; height:88px; margin:0 auto; display:block; transform-origin:center bottom;
+    animation:lilySway 6s ease-in-out infinite; }
+  @keyframes lilySway { 0%,100%{transform:rotate(-2deg);} 50%{transform:rotate(2deg);} }
+  .lily .petal { fill:rgba(252,250,245,.92); stroke:var(--gold); stroke-width:1.1;
+    stroke-dasharray:130; stroke-dashoffset:130; }
+  .lily.bloom .petal { animation:petalDraw 1s ease forwards; }
+  .lily.bloom .petal:nth-child(1){animation-delay:.0s;} .lily.bloom .petal:nth-child(2){animation-delay:.13s;}
+  .lily.bloom .petal:nth-child(3){animation-delay:.26s;} .lily.bloom .petal:nth-child(4){animation-delay:.39s;}
+  .lily.bloom .petal:nth-child(5){animation-delay:.52s;} .lily.bloom .petal:nth-child(6){animation-delay:.65s;}
+  @keyframes petalDraw { to { stroke-dashoffset:0; } }
+  .lily .stamen { stroke:var(--gold-vivid); stroke-width:1.4; stroke-linecap:round; }
+  .lily .anther { fill:var(--gold-vivid); }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .8s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .honor { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.16rem; color:var(--text-soft);
+    line-height:1.6; margin-top:1.4rem; max-width:30ch; margin-left:auto; margin-right:auto; }
+
+  .evtype { font-family:'Marcellus',serif; font-size:clamp(1.7rem,7vw,2.4rem); letter-spacing:.16em; text-transform:uppercase;
+    color:var(--ivory); text-indent:.16em; margin-top:1.5rem; line-height:1.1; }
+  .evsub { font-family:'Cormorant Garamond',serif; font-size:.96rem; letter-spacing:.34em; text-transform:uppercase;
+    color:var(--sage-light); text-indent:.34em; margin-top:.7rem; }
+
+  .doctor { font-family:'Marcellus',serif; font-size:1.7rem; color:var(--gold-vivid); margin-top:1.8rem; line-height:1.2;
+    text-shadow:0 0 22px rgba(122,168,130,.28); }
+  .speciality { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.22rem; color:var(--sage-light); margin-top:.4rem; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.9rem; margin:1.9rem auto; width:66%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--gold-soft),transparent); }
+  .sep svg { width:18px; height:18px; flex-shrink:0; }
+
+  .info { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--text); line-height:1.7; }
+  .info .place { font-style:italic; color:var(--sage-light); }
+
+  .program { text-align:left; max-width:280px; margin:1.8rem auto 0; }
+  .program h4 { font-family:'Marcellus',serif; font-size:.74rem; letter-spacing:.24em; text-transform:uppercase; color:var(--gold);
+    text-align:center; margin-bottom:1rem; text-indent:.24em; }
+  .program ol { list-style:none; counter-reset:prg; }
+  .program li { counter-increment:prg; position:relative; padding:.5rem 0 .5rem 2.4rem; font-size:1.1rem; color:var(--text);
+    border-bottom:1px solid rgba(74,107,82,.18); }
+  .program li:last-child { border-bottom:none; }
+  .program li::before { content:counter(prg,decimal-leading-zero); position:absolute; left:0; top:.55rem;
+    font-family:'Marcellus',serif; font-size:.82rem; color:var(--gold-vivid); letter-spacing:.05em; }
+  .program li .t { font-style:italic; color:var(--sage-light); font-size:.94rem; margin-left:.5rem; }
+
+  .countdown { display:flex; justify-content:center; gap:1.3rem; margin:2.2rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:54px; padding:.7rem .4rem;
+    border:1px solid rgba(74,107,82,.3); background:rgba(74,107,82,.06); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.6rem; color:var(--ivory); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Cormorant Garamond',serif; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:.45rem; text-indent:.16em; }
+
+  .cta { margin-top:2.4rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.16em;
+    text-transform:uppercase; text-indent:.16em; padding:.92rem 1.6rem; cursor:pointer; text-decoration:none; transition:all .3s ease; }
+  .btn-primary { background:linear-gradient(135deg,var(--sage-light),var(--sage)); color:#0c120d; border:1px solid transparent;
+    box-shadow:0 8px 24px -8px rgba(122,168,130,.5); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 30px -8px rgba(122,168,130,.65); }
+  .btn-ghost { background:transparent; color:var(--text-soft); border:1px solid rgba(184,146,60,.4); }
+  .btn-ghost:hover { color:var(--gold-vivid); border-color:var(--gold); transform:translateY(-2px); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(120% 80% at 50% 35%, #18211a, var(--bg) 72%); text-align:center; padding:2rem;
+    transition:opacity .8s ease, visibility 0s .8s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  #gate .lily { width:120px; height:120px; margin-bottom:1.6rem; }
+  .gate-title { font-family:'Marcellus',serif; font-size:1.5rem; letter-spacing:.3em; text-transform:uppercase; color:var(--gold-vivid); text-indent:.3em; }
+  .gate-sub { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.2rem; color:var(--text-soft); margin-top:.7rem; }
+  .gate-btn { margin-top:2.2rem; font-family:'Marcellus',serif; font-size:.74rem; letter-spacing:.18em; text-transform:uppercase;
+    text-indent:.18em; padding:.95rem 1.8rem; cursor:pointer; color:var(--ivory); background:transparent; border:1px solid var(--sage);
+    transition:all .3s ease; }
+  .gate-btn:hover { background:rgba(74,107,82,.16); transform:translateY(-2px); }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-2); color:var(--ivory);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border:1px solid var(--sage); opacity:0;
+    pointer-events:none; transition:all .4s ease; z-index:120; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px) { .card { padding:2.4rem 1.5rem 2.6rem; } }
+  @media (prefers-reduced-motion:reduce) { .rev{animation:none;opacity:1;transform:none;} .lily .petal{stroke-dashoffset:0;} .lily{animation:none;} }
+</style>
+</head>
+<body>
+
+<div class="filigree"></div>
+
+<!-- GATE -->
+<div id="gate">
+  <svg class="lily bloom" id="gateLily" viewBox="0 0 100 100" aria-hidden="true">
+    <path class="petal" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(0 50 52)"/>
+    <path class="petal" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(60 50 52)"/>
+    <path class="petal" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(120 50 52)"/>
+    <path class="petal" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(180 50 52)"/>
+    <path class="petal" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(240 50 52)"/>
+    <path class="petal" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(300 50 52)"/>
+    <line class="stamen" x1="50" y1="52" x2="50" y2="34"/>
+    <line class="stamen" x1="50" y1="52" x2="42" y2="38"/>
+    <line class="stamen" x1="50" y1="52" x2="58" y2="38"/>
+    <circle class="anther" cx="50" cy="33" r="2.4"/>
+    <circle class="anther" cx="42" cy="37" r="2.2"/>
+    <circle class="anther" cx="58" cy="37" r="2.2"/>
+  </svg>
+  <div class="gate-title">Invitation</div>
+  <div class="gate-sub" data-gate-sub>Clinique El Nour</div>
+  <button class="gate-btn" onclick="openGate()">Ouvrir l'invitation</button>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card">
+    <svg class="lily" viewBox="0 0 100 100" aria-hidden="true">
+      <path class="petal" style="stroke-dashoffset:0" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(0 50 52)"/>
+      <path class="petal" style="stroke-dashoffset:0" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(60 50 52)"/>
+      <path class="petal" style="stroke-dashoffset:0" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(120 50 52)"/>
+      <path class="petal" style="stroke-dashoffset:0" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(180 50 52)"/>
+      <path class="petal" style="stroke-dashoffset:0" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(240 50 52)"/>
+      <path class="petal" style="stroke-dashoffset:0" d="M50 52 C40 34 42 14 50 4 C58 14 60 34 50 52 Z" transform="rotate(300 50 52)"/>
+      <line class="stamen" x1="50" y1="52" x2="50" y2="34"/>
+      <line class="stamen" x1="50" y1="52" x2="42" y2="38"/>
+      <line class="stamen" x1="50" y1="52" x2="58" y2="38"/>
+      <circle class="anther" cx="50" cy="33" r="2.4"/>
+      <circle class="anther" cx="42" cy="37" r="2.2"/>
+      <circle class="anther" cx="58" cy="37" r="2.2"/>
+    </svg>
+
+    <p class="honor rev" style="animation-delay:.1s" data-f="honor">L'équipe de la Clinique El Nour a l'honneur de vous convier à</p>
+
+    <div class="evtype rev" style="animation-delay:.2s" data-f="evtype">Inauguration</div>
+    <div class="evsub rev" style="animation-delay:.28s" data-f="evsub">Pôle de Chirurgie Cardiaque</div>
+
+    <div class="doctor rev" style="animation-delay:.4s" data-f="doctor">Dr. Réda Benhamou</div>
+    <div class="speciality rev" style="animation-delay:.46s" data-f="speciality">Chef de service · Cardiologie interventionnelle</div>
+
+    <div class="sep rev" style="animation-delay:.55s"><span class="ln"></span>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 C10 8 11 12 12 13 C13 12 14 8 12 3Z M12 13 C9 11 6 12 4 14 C7 15 10 15 12 13Z M12 13 C15 11 18 12 20 14 C17 15 14 15 12 13Z" fill="#B8923C"/></svg>
+      <span class="ln r"></span></div>
+
+    <p class="info rev" style="animation-delay:.62s"><span data-f="date">Jeudi 8 Octobre 2026 — 14h00</span><br><span class="place" data-f="place">Clinique El Nour, Boulevard des Martyrs, Alger</span></p>
+
+    <div class="program rev" style="animation-delay:.72s">
+      <h4>Programme</h4>
+      <ol>
+        <li>Accueil &amp; allocution<span class="t">14h00</span></li>
+        <li>Visite du nouveau pôle<span class="t">15h00</span></li>
+        <li>Cocktail dînatoire<span class="t">16h30</span></li>
+      </ol>
+    </div>
+
+    <div class="countdown rev" style="animation-delay:.82s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.9s">
+      <button class="btn btn-primary" onclick="saveDate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Confirmer ma présence
+      </button>
+      <button class="btn btn-ghost" onclick="toast('Programme complet envoyé')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+        Programme complet
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Clinique+El+Nour+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; document.getElementById('gate').classList.add('opened'); }
+
+  let cdTarget=new Date('2026-10-08T14:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1700);
+
+  window.INVYTEK_CONFIG={
+    theme:'blouse-lys', accent:'#7AA882', accent2:'#4A6B52', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'honor', label:'Mention d\'honneur', sel:'[data-f="honor"]', type:'textarea'},
+      {key:'evtype', label:'Type d\'événement', sel:'[data-f="evtype"]', type:'text'},
+      {key:'evsub', label:'Sous-titre', sel:'[data-f="evsub"]', type:'text'},
+      {key:'doctor', label:'Nom / institution', sel:'[data-f="doctor"]', type:'text'},
+      {key:'speciality', label:'Spécialité / fonction', sel:'[data-f="speciality"]', type:'text'},
+      {key:'date', label:'Date & heure (texte)', sel:'[data-f="date"]', type:'text'},
+      {key:'place', label:'Lieu', sel:'[data-f="place"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-10-08T14:00'}
+    ]
+  };
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+  function saveDate(){
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Invytek//FR','BEGIN:VEVENT',
+      'DTSTART:20261008T140000','DTEND:20261008T180000','SUMMARY:Inauguration - Clinique El Nour',
+      'LOCATION:Clinique El Nour\\, Boulevard des Martyrs\\, Alger','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='inauguration-el-nour.ics'; a.click();
+    toast('Présence confirmée — date enregistrée');
+  }
+</script>
+<script src="../assets/editor.js"></script>
+</body>
+</html>

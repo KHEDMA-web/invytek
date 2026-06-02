@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#FBF8F2" />
+<title>Inauguration — Invytek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --cream:#FBF8F2; --cream-2:#F3EEE2; --paper:#FFFFFF;
+    --green:#1F5B43; --green-deep:#143b2c; --ink:#26302A; --muted:#5d685f;
+    --gold:#C19A4B; --gold-vivid:#D9B567; --gold-soft:rgba(193,154,75,.4);
+    --line:rgba(31,91,67,.18);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(130% 80% at 50% -8%, #fff 0%, var(--cream) 55%), var(--cream);
+    color:var(--ink); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom)); overflow-x:hidden;
+  }
+  .scene { width:100%; max-width:450px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%; background:linear-gradient(168deg,var(--paper),var(--cream-2));
+    border-radius:6px; padding:3rem 2.4rem 2.8rem; text-align:center;
+    box-shadow:0 50px 100px -40px rgba(20,40,30,.4), 0 0 0 1px var(--line); overflow:hidden;
+  }
+  .card::before { content:''; position:absolute; inset:12px; border:1px solid var(--line); pointer-events:none; }
+  .card::after { content:''; position:absolute; left:0; right:0; top:0; height:4px; background:linear-gradient(90deg,var(--gold),var(--gold-vivid),var(--gold)); }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .8s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .crest { width:58px; height:58px; margin:.4rem auto 0; border:1px solid var(--gold-soft); border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.1rem; color:var(--green); letter-spacing:.02em; }
+  .kicker { font-family:'Space Grotesk',sans-serif; font-size:.66rem; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin-top:1.3rem; text-indent:.28em; }
+  .evtype { font-family:'Marcellus',serif; font-size:clamp(2.1rem,8vw,3rem); letter-spacing:.04em; text-transform:uppercase; color:var(--green-deep); margin-top:.8rem; line-height:1.05; }
+  .org { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.4rem; color:var(--muted); margin-top:.7rem; }
+
+  .ribbon-sep { display:flex; align-items:center; justify-content:center; gap:.8rem; margin:1.8rem auto; width:64%; }
+  .ribbon-sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft)); }
+  .ribbon-sep .ln.r { background:linear-gradient(90deg,var(--gold-soft),transparent); }
+  .ribbon-sep .d { width:8px; height:8px; transform:rotate(45deg); background:var(--gold); }
+
+  .lead { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--ink); line-height:1.6; max-width:30ch; margin:0 auto; }
+  .when { font-family:'Marcellus',serif; font-size:1.04rem; letter-spacing:.2em; text-transform:uppercase; color:var(--green-deep); margin-top:1.4rem; text-indent:.2em; }
+  .where { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.22rem; color:var(--muted); margin-top:.5rem; }
+
+  .countdown { display:flex; justify-content:center; gap:1.1rem; margin:2rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:54px; padding:.7rem .4rem; border:1px solid var(--line); border-radius:8px; background:rgba(31,91,67,.04); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.6rem; color:var(--green-deep); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Space Grotesk',sans-serif; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:.4rem; }
+
+  .cta { margin-top:2rem; display:flex; gap:.7rem; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+    padding:.9rem 1.5rem; border-radius:40px; cursor:pointer; text-decoration:none; border:1px solid transparent; transition:all .25s; }
+  .btn-primary { color:var(--cream); background:linear-gradient(135deg,var(--green),var(--green-deep)); box-shadow:0 10px 24px -10px rgba(20,59,44,.5); }
+  .btn-primary:hover { transform:translateY(-2px); }
+  .btn-ghost { color:var(--green-deep); border-color:var(--gold-soft); }
+  .btn-ghost:hover { transform:translateY(-2px); border-color:var(--gold); background:rgba(193,154,75,.08); }
+  .btn svg { width:14px; height:14px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;
+    background:radial-gradient(120% 80% at 50% 35%, #fff, var(--cream) 70%); transition:opacity .8s ease .5s, visibility 0s 1s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  /* ribbon */
+  .ribbon { position:absolute; left:0; right:0; top:50%; height:74px; transform:translateY(-50%); z-index:3; display:flex; align-items:center; }
+  .rib { position:absolute; top:0; height:100%; width:50%; background:linear-gradient(180deg,var(--gold-vivid),var(--gold) 50%,#a07e36);
+    box-shadow:0 14px 30px -10px rgba(160,126,54,.5); transition:transform 1s cubic-bezier(.7,0,.3,1); }
+  .rib::after { content:''; position:absolute; inset:0; background:repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.18) 30px 31px); }
+  .rib.l { left:0; transform-origin:left; } .rib.r { right:0; transform-origin:right; }
+  .knot { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:4; width:60px; height:60px; border-radius:50%;
+    background:radial-gradient(circle at 38% 34%,var(--gold-vivid),#a07e36); box-shadow:0 8px 20px rgba(0,0,0,.25), inset 0 -3px 6px rgba(0,0,0,.3);
+    display:flex; align-items:center; justify-content:center; font-family:'Marcellus',serif; color:#fff; font-size:1.4rem; transition:transform .5s,opacity .4s; }
+  #gate[data-open="ribbon"].opening .rib.l { transform:translateX(-100%); }
+  #gate[data-open="ribbon"].opening .rib.r { transform:translateX(100%); }
+  #gate[data-open="ribbon"].opening .knot { transform:translate(-50%,-50%) scale(0); opacity:0; }
+  .scissors { position:absolute; left:50%; bottom:24%; transform:translateX(-50%); z-index:5; color:var(--green); animation:snip 2.4s ease-in-out infinite; }
+  .scissors svg { width:34px; height:34px; }
+  @keyframes snip { 0%,100%{transform:translateX(-50%) rotate(0);} 50%{transform:translateX(-50%) rotate(-12deg);} }
+  /* spotlight mode */
+  #gate[data-open="spot"] { background:#0f1512; }
+  #gate[data-open="spot"] .ribbon, #gate[data-open="spot"] .scissors { display:none; }
+  .spot { position:absolute; inset:0; z-index:2; display:none;
+    background:radial-gradient(circle at 50% 42%, rgba(217,181,103,.4), transparent 38%); animation:sweep 4s ease-in-out infinite; }
+  #gate[data-open="spot"] .spot { display:block; }
+  #gate[data-open="spot"] .gate-emblem { color:#fff; }
+  @keyframes sweep { 0%,100%{transform:translateX(-12%);} 50%{transform:translateX(12%);} }
+  .gate-emblem { position:absolute; left:50%; top:32%; transform:translateX(-50%); z-index:5; text-align:center; transition:opacity .5s; }
+  #gate.opening .gate-emblem { opacity:0; }
+  .gate-emblem .em { width:64px; height:64px; margin:0 auto; border:1px solid var(--gold-soft); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--gold); font-size:1.2rem; }
+  .gate-emblem .ti { font-family:'Marcellus',serif; font-size:1.3rem; letter-spacing:.24em; text-transform:uppercase; color:var(--green-deep); margin-top:1rem; text-indent:.24em; }
+  #gate[data-open="spot"] .gate-emblem .ti { color:#fff; }
+  .gate-hint { position:absolute; bottom:9%; left:0; right:0; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:.64rem;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--muted); z-index:6; animation:blink 2.2s ease-in-out infinite; }
+  #gate[data-open="spot"] .gate-hint { color:rgba(255,255,255,.6); }
+  @keyframes blink { 0%,100%{opacity:.4;} 50%{opacity:.9;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--green-deep); color:var(--cream);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border-radius:40px; opacity:0; pointer-events:none; transition:all .4s ease; z-index:140; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px){ .card{padding:2.4rem 1.6rem;} }
+  @media (prefers-reduced-motion:reduce){ .rev{animation:none;opacity:1;transform:none;} .scissors,.spot{animation:none;} }
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate" data-open="ribbon" onclick="openGate()">
+  <div class="spot"></div>
+  <div class="gate-emblem"><div class="em" data-logo>AC</div><div class="ti">Inauguration</div></div>
+  <div class="ribbon"><span class="rib l"></span><span class="rib r"></span><span class="knot">✦</span></div>
+  <div class="scissors"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg></div>
+  <div class="gate-hint">Touchez pour couper le ruban</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card">
+    <div class="crest rev" style="animation-delay:.1s" data-logo>AC</div>
+    <div class="kicker rev" style="animation-delay:.18s" data-f="kicker">Vous êtes convié·e à l'inauguration de</div>
+    <div class="evtype rev" style="animation-delay:.26s" data-f="evtype">Atlas Tower</div>
+    <div class="org rev" style="animation-delay:.34s" data-f="org">Atlas Corporation</div>
+
+    <div class="ribbon-sep rev" style="animation-delay:.42s"><span class="ln"></span><span class="d"></span><span class="ln r"></span></div>
+
+    <p class="lead rev" style="animation-delay:.48s" data-f="lead">Nous avons l'honneur de vous convier à la cérémonie d'ouverture de notre nouveau siège.</p>
+    <div class="when rev" style="animation-delay:.56s" data-f="when">Mardi 14 Avril 2026 — 11h00</div>
+    <div class="where rev" style="animation-delay:.62s" data-f="where">12 Boulevard du Front de Mer, Alger</div>
+
+    <div class="countdown rev" style="animation-delay:.7s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.78s">
+      <button class="btn btn-primary" onclick="toast('Présence confirmée — merci !')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Confirmer
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Front+de+Mer+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; const g=document.getElementById('gate'); g.classList.add('opening'); setTimeout(()=>g.classList.add('opened'),1000); }
+  function setOpening(s){ document.getElementById('gate').setAttribute('data-open', s==='spot'?'spot':'ribbon'); }
+
+  let cdTarget=new Date('2026-04-14T11:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1800);
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+  function syncLogo(){ const o=document.querySelector('[data-f="org"]').textContent.trim(); const ini=o.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'AC'; document.querySelectorAll('[data-logo]').forEach(e=>e.textContent=ini); }
+
+  window.INVYTEK_CONFIG={
+    theme:'inauguration', accent:'#C19A4B', accent2:'#1F5B43', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'opening', label:'Animation d\'ouverture', type:'select', val:'ribbon', options:[{value:'ribbon',label:'Couper le ruban'},{value:'spot',label:'Projecteur'}]},
+      {key:'kicker', label:'Introduction', sel:'[data-f="kicker"]', type:'text'},
+      {key:'evtype', label:'Nom du lieu / projet', sel:'[data-f="evtype"]', type:'text'},
+      {key:'org', label:'Entreprise', sel:'[data-f="org"]', type:'text'},
+      {key:'lead', label:'Message', sel:'[data-f="lead"]', type:'textarea'},
+      {key:'when', label:'Date & heure', sel:'[data-f="when"]', type:'text'},
+      {key:'where', label:'Adresse', sel:'[data-f="where"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-04-14T11:00'}
+    ],
+    onChange:function(d){ if(d.opening) setOpening(d.opening); syncLogo(); }
+  };
+</script>
+<script src="../assets/editor.js"></script>
+<script>syncLogo();</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#14100a" />
+<title>Yacine & Lina — Mariage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Amiri:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#14100a; --bg-2:#1b1409;
+    --gold:#B8923C; --gold-vivid:#D4AF61; --gold-light:#E8D8B0; --gold-line:#6E5618;
+    --ivory:#FCFAF5; --ivory-warm:#F7F1E6; --ink:#3A3220; --ink-soft:#7a6a44;
+    --hair:rgba(184,146,60,.4); --hair-soft:rgba(184,146,60,.22);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(125% 75% at 50% -6%, #2a200f 0%, var(--bg) 58%), var(--bg);
+    color:var(--ink); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  .sparkles { position:fixed; inset:0; pointer-events:none; z-index:1; overflow:hidden; }
+  .sp { position:absolute; border-radius:50%; background:var(--gold-light); box-shadow:0 0 6px var(--gold-vivid); animation:spFloat linear infinite; opacity:0; }
+  @keyframes spFloat { 0%{transform:translateY(105vh) scale(0);opacity:0;} 12%{opacity:.7;} 88%{opacity:.4;} 100%{transform:translateY(-8vh) scale(1.3);opacity:0;} }
+  .glow { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; width:380px; height:380px; background:rgba(184,146,60,.12); top:-90px; left:50%; transform:translateX(-50%); }
+
+  .scene { width:100%; max-width:440px; position:relative; z-index:2; }
+
+  /* ARCH CARD */
+  .card {
+    position:relative; width:100%;
+    background:radial-gradient(130% 70% at 50% 0%, #fff 0%, var(--ivory) 42%, var(--ivory-warm) 100%);
+    border-radius:50% 50% 10px 10px / 26% 26% 10px 10px;
+    padding:4.4rem 2.4rem 3rem; text-align:center; overflow:hidden;
+    box-shadow:0 60px 120px -42px rgba(0,0,0,.8), 0 0 0 1px rgba(184,146,60,.25);
+  }
+  .card::before { content:''; position:absolute; inset:13px; border:1px solid var(--hair-soft);
+    border-radius:50% 50% 6px 6px / 26% 26% 6px 6px; pointer-events:none; }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .9s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .arabic { font-family:'Amiri',serif; font-size:1.5rem; color:var(--gold); direction:rtl; line-height:1; }
+  .crest { width:54px; height:54px; margin:.9rem auto 0; position:relative; display:flex; align-items:center; justify-content:center; }
+  .crest .ring { position:absolute; inset:0; border:1px solid var(--hair); border-radius:50%; }
+  .crest .mg { font-family:'Marcellus',serif; font-size:1.05rem; color:var(--gold-line); letter-spacing:.04em; white-space:nowrap; }
+  .crest .dot { position:absolute; top:-2px; left:50%; margin-left:-2.5px; width:5px; height:5px; background:var(--gold); transform:rotate(45deg); }
+
+  .kicker { font-family:'Marcellus',serif; font-size:.74rem; letter-spacing:.28em; text-transform:uppercase; color:var(--ink-soft); text-indent:.28em; margin-top:1.4rem; }
+
+  .names { margin:.7rem 0 .4rem; }
+  .names .n { font-family:'Pinyon Script',cursive; font-size:clamp(3rem,14vw,4.6rem); line-height:.86; color:var(--gold-line); display:block;
+    background:linear-gradient(110deg,#5a4716,var(--gold) 40%,var(--gold-vivid) 52%,var(--gold) 64%,#5a4716);
+    background-size:240% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+    animation:shine 6s ease-in-out infinite; }
+  @keyframes shine { 0%,100%{background-position:0 center;} 50%{background-position:100% center;} }
+  .names .amp { font-family:'Pinyon Script',cursive; font-size:clamp(1.4rem,6vw,2rem); color:var(--gold); display:block; margin:0; line-height:1; }
+
+  .divider { display:flex; align-items:center; justify-content:center; gap:.8rem; margin:1.6rem auto; width:62%; }
+  .divider .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--hair)); }
+  .divider .ln.r { background:linear-gradient(90deg,var(--hair),transparent); }
+  .divider .dia { width:7px; height:7px; transform:rotate(45deg); border:1px solid var(--gold); position:relative; flex-shrink:0; }
+  .divider .dia::after { content:''; position:absolute; inset:2px; background:var(--gold); }
+
+  .date { font-family:'Marcellus',serif; font-size:1rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink); text-indent:.22em; }
+  .time { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.16rem; color:var(--ink-soft); margin-top:.4rem; }
+  .venue { font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:600; font-size:1.3rem; color:var(--gold-line); margin-top:1rem; line-height:1.4; }
+
+  .countdown { display:flex; justify-content:center; gap:.7rem; margin:2rem 0 .3rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:58px; padding:.6rem .4rem;
+    background:linear-gradient(160deg,#fff,#f7eedd); border:1px solid rgba(184,146,60,.35); border-radius:10px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.7); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.5rem; color:var(--gold-line); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Marcellus',serif; font-size:.56rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-soft); margin-top:.35rem; text-indent:.14em; }
+
+  .cta { margin-top:2.2rem; display:flex; gap:.7rem; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Marcellus',serif; font-size:.7rem; letter-spacing:.14em;
+    text-transform:uppercase; text-indent:.14em; padding:.85rem 1.4rem; border-radius:40px; cursor:pointer; text-decoration:none; border:1px solid transparent; transition:all .3s ease; }
+  .btn-primary { background:linear-gradient(135deg,var(--gold-vivid),var(--gold)); color:#241a08; box-shadow:0 8px 22px -8px rgba(184,146,60,.5); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 28px -8px rgba(184,146,60,.65); }
+  .btn-ghost { background:transparent; color:var(--gold-line); border-color:var(--hair); }
+  .btn-ghost:hover { background:rgba(184,146,60,.1); transform:translateY(-2px); }
+  .btn svg { width:14px; height:14px; }
+
+  /* ENVELOPE GATE */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(120% 80% at 50% 32%, #2a200f, var(--bg) 70%); transition:opacity .9s ease, visibility 0s .9s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  .env { position:relative; width:312px; height:210px; cursor:pointer; transform-style:preserve-3d; transition:transform 1s cubic-bezier(.7,0,.3,1), opacity .9s ease; }
+  #gate.opened .env { transform:translateY(-58vh) scale(.9); opacity:0; }
+  .env-body { position:absolute; inset:0; border-radius:8px; background:linear-gradient(165deg,#2e240f,#1d160b);
+    box-shadow:0 44px 90px -30px rgba(0,0,0,.7), inset 0 0 0 1px var(--hair); }
+  .env-flap { position:absolute; top:0; left:0; width:100%; height:56%; transform-origin:top center;
+    background:linear-gradient(165deg,#3a2c12,#281d0c); clip-path:polygon(0 0,100% 0,50% 100%); transition:transform 1s cubic-bezier(.7,0,.3,1);
+    z-index:4; filter:drop-shadow(0 5px 8px rgba(0,0,0,.4)); }
+  #gate.opening .env-flap, #gate.opened .env-flap { transform:rotateX(180deg); z-index:0; }
+  .seal { position:absolute; left:50%; top:56%; transform:translate(-50%,-50%); width:60px; height:60px; border-radius:50%; z-index:6;
+    background:radial-gradient(circle at 38% 32%, var(--gold-vivid) 0%, var(--gold) 48%, var(--gold-line) 100%);
+    box-shadow:0 8px 18px rgba(0,0,0,.45), inset 0 -4px 8px rgba(0,0,0,.4), inset 0 3px 6px rgba(255,240,210,.4);
+    display:flex; align-items:center; justify-content:center; transition:transform .5s ease,opacity .4s; }
+  .seal::after { content:''; position:absolute; inset:6px; border-radius:50%; border:1px solid rgba(255,245,220,.35); }
+  .seal .amp { font-family:'Pinyon Script',cursive; font-size:2rem; line-height:1; color:#fff6e0; text-shadow:0 1px 2px rgba(0,0,0,.45); margin-top:-2px; }
+  #gate.opening .seal { transform:translate(-50%,-50%) scale(.4); opacity:0; }
+  .env-cap { position:absolute; left:0; right:0; top:80%; transform:translateY(-50%); text-align:center; z-index:3;
+    font-family:'Marcellus',serif; font-size:.6rem; letter-spacing:.34em; text-transform:uppercase; text-indent:.34em; color:var(--gold-light); transition:opacity .4s; }
+  #gate.opening .env-cap { opacity:0; }
+  .gate-hint { position:absolute; bottom:-3.4rem; left:0; right:0; text-align:center; font-family:'Marcellus',serif; font-size:.66rem;
+    letter-spacing:.26em; text-transform:uppercase; text-indent:.26em; color:rgba(232,216,176,.4); animation:blink 2.2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:.35;} 50%{opacity:.9;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-2); color:var(--gold-light);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border:1px solid var(--hair); border-radius:40px; opacity:0;
+    pointer-events:none; transition:all .4s ease; z-index:140; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px) { .card { padding:3.6rem 1.6rem 2.6rem; } .env { width:264px; height:178px; } }
+  @media (prefers-reduced-motion:reduce) { .rev{animation:none;opacity:1;transform:none;} .names{animation:none;} }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+<div class="sparkles" id="sparkles"></div>
+
+<!-- GATE -->
+<div id="gate" onclick="openGate()">
+  <div class="env">
+    <div class="env-body"></div>
+    <div class="env-flap"></div>
+    <div class="seal"><span class="amp">&amp;</span></div>
+    <div class="env-cap">Vous êtes conviés</div>
+    <div class="gate-hint">Touchez pour ouvrir</div>
+  </div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card">
+    <div class="arabic rev" style="animation-delay:.1s" data-f="arabic">و دعوتكم بسعادة</div>
+    <div class="crest rev" style="animation-delay:.2s"><span class="dot"></span><span class="ring"></span><span class="mg" data-mono>Y · L</span></div>
+
+    <div class="kicker rev" style="animation-delay:.3s" data-f="kicker">Invitation au mariage de</div>
+    <div class="names">
+      <span class="n rev" style="animation-delay:.4s" data-f="name1">Yacine</span>
+      <span class="amp rev" style="animation-delay:.48s">&amp;</span>
+      <span class="n rev" style="animation-delay:.56s" data-f="name2">Lina</span>
+    </div>
+
+    <div class="divider rev" style="animation-delay:.66s"><span class="ln"></span><span class="dia"></span><span class="ln r"></span></div>
+
+    <div class="date rev" style="animation-delay:.74s" data-f="date">Samedi 12 Septembre 2026</div>
+    <div class="time rev" style="animation-delay:.8s" data-f="time">à partir de 18h00</div>
+    <div class="venue rev" style="animation-delay:.88s" data-f="venue">Palais des Roses — El Biar, Alger</div>
+
+    <div class="countdown rev" style="animation-delay:.96s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:1.04s">
+      <button class="btn btn-primary" onclick="saveDate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Confirmer
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=El+Biar+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; const g=document.getElementById('gate'); g.classList.add('opening'); setTimeout(()=>g.classList.add('opened'),650); }
+
+  let cdTarget=new Date('2026-09-12T18:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 2000);
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+  function saveDate(){
+    const n1=document.querySelector('[data-f="name1"]').textContent, n2=document.querySelector('[data-f="name2"]').textContent;
+    const d=new Date(cdTarget); const pad=x=>String(x).padStart(2,'0');
+    const dt=d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Invytek//FR','BEGIN:VEVENT','DTSTART:'+dt,
+      'SUMMARY:Mariage de '+n1+' & '+n2,'LOCATION:'+document.querySelector('[data-f="venue"]').textContent,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='mariage.ics'; a.click();
+    toast('Présence confirmée — date enregistrée');
+  }
+
+  function syncMono(){
+    const n1=(document.querySelector('[data-f="name1"]').textContent.trim()[0]||'Y').toUpperCase();
+    const n2=(document.querySelector('[data-f="name2"]').textContent.trim()[0]||'L').toUpperCase();
+    document.querySelectorAll('[data-mono]').forEach(e=>e.textContent=n1+' · '+n2);
+  }
+
+  // sparkles
+  const sc=document.getElementById('sparkles');
+  for(let i=0;i<46;i++){ const sp=document.createElement('div'); sp.className='sp'; sp.style.left=Math.random()*100+'vw';
+    const s=Math.random()*2.5+1.2; sp.style.width=sp.style.height=s+'px';
+    sp.style.animationDuration=(Math.random()*13+9)+'s'; sp.style.animationDelay=(Math.random()*12)+'s'; sc.appendChild(sp); }
+
+  window.INVYTEK_CONFIG={
+    theme:'or-arche', accent:'#D4AF61', accent2:'#B8923C', backHref:'../themes.html', onChange:syncMono,
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'arabic', label:'Ligne arabe (optionnel)', sel:'[data-f="arabic"]', type:'text'},
+      {key:'kicker', label:'Introduction', sel:'[data-f="kicker"]', type:'text'},
+      {key:'name1', label:'Premier prénom', sel:'[data-f="name1"]', type:'text'},
+      {key:'name2', label:'Second prénom', sel:'[data-f="name2"]', type:'text'},
+      {key:'date', label:'Date (texte)', sel:'[data-f="date"]', type:'text'},
+      {key:'time', label:'Horaire', sel:'[data-f="time"]', type:'text'},
+      {key:'venue', label:'Lieu', sel:'[data-f="venue"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-09-12T18:00'}
+    ]
+  };
+</script>
+<script src="../assets/editor.js"></script>
+<script>syncMono();</script>
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0B1020" />
+<title>Conférence — Invytek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0B1020; --bg-2:#0E1530; --panel:rgba(18,26,54,.72);
+    --cyan:#38E1FF; --blue:#5B8CFF; --violet:#9A7BFF;
+    --white:#EAF0FF; --muted:rgba(234,240,255,.6); --faint:rgba(234,240,255,.34);
+    --line:rgba(91,140,255,.28); --line-strong:rgba(56,225,255,.5);
+    --accent:var(--cyan);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:
+      radial-gradient(120% 80% at 80% -10%, rgba(56,225,255,.12), transparent 50%),
+      radial-gradient(120% 80% at 0% 110%, rgba(154,123,255,.14), transparent 55%),
+      var(--bg);
+    color:var(--white); font-family:'IBM Plex Sans',sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  .grid-bg { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:linear-gradient(rgba(91,140,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(91,140,255,.06) 1px,transparent 1px);
+    background-size:46px 46px; mask-image:radial-gradient(circle at 50% 40%,#000,transparent 78%); }
+  #particles { position:fixed; inset:0; z-index:1; pointer-events:none; }
+
+  .scene { width:100%; max-width:460px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%; border-radius:22px; padding:2.6rem 2rem 2.4rem;
+    background:linear-gradient(165deg, rgba(22,32,66,.82), rgba(12,18,40,.86));
+    border:1px solid var(--line); backdrop-filter:blur(14px);
+    box-shadow:0 50px 110px -40px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06), 0 0 60px -28px rgba(56,225,255,.5);
+    transform-style:preserve-3d;
+  }
+  .card::before { content:''; position:absolute; inset:0; border-radius:22px; padding:1px; pointer-events:none;
+    background:linear-gradient(140deg, var(--cyan), transparent 40%, transparent 60%, var(--violet));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; opacity:.6; }
+
+  .rev { opacity:0; transform:translateY(16px); animation:rise .8s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .toprow { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.8rem; }
+  .chip { display:inline-flex; align-items:center; gap:.5rem; font-family:'Space Grotesk',sans-serif; font-size:.66rem; font-weight:600;
+    letter-spacing:.22em; text-transform:uppercase; color:var(--cyan); padding:.4rem .8rem; border:1px solid var(--line-strong); border-radius:40px;
+    background:rgba(56,225,255,.06); }
+  .chip .live { width:7px; height:7px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px var(--cyan); animation:pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(.7);} }
+  .edition { font-family:'Space Grotesk',sans-serif; font-size:.72rem; letter-spacing:.16em; color:var(--faint); }
+
+  .kicker { font-family:'Space Grotesk',sans-serif; font-size:.74rem; font-weight:500; letter-spacing:.3em; text-transform:uppercase; color:var(--blue); text-indent:.3em; }
+  .title { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(2.4rem,9vw,3.4rem); line-height:1.02; letter-spacing:-.02em; margin-top:.7rem;
+    background:linear-gradient(120deg,var(--white),var(--cyan) 60%,var(--blue)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+  .org { font-family:'IBM Plex Sans',sans-serif; font-size:1.05rem; color:var(--muted); margin-top:.7rem; }
+
+  .speaker { display:flex; align-items:center; gap:.9rem; margin-top:1.6rem; padding:.9rem 1rem; border:1px solid var(--line); border-radius:14px; background:rgba(91,140,255,.06); text-align:left; }
+  .speaker .av { width:42px; height:42px; border-radius:50%; flex:0 0 auto; background:linear-gradient(135deg,var(--cyan),var(--violet)); display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:600; color:#0B1020; }
+  .speaker .who { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1rem; color:var(--white); }
+  .speaker .role { font-size:.9rem; color:var(--muted); }
+
+  .meta { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1.4rem; }
+  .meta .m { text-align:left; padding:.85rem 1rem; border:1px solid var(--line); border-radius:14px; background:rgba(12,18,40,.4); }
+  .meta .m .l { font-family:'Space Grotesk',sans-serif; font-size:.6rem; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); }
+  .meta .m .v { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:1rem; color:var(--white); margin-top:.25rem; line-height:1.25; }
+
+  .countdown { display:flex; justify-content:center; gap:.7rem; margin:1.8rem 0 .2rem; }
+  .cd { flex:1; display:flex; flex-direction:column; align-items:center; padding:.7rem .3rem; border:1px solid var(--line); border-radius:12px; background:rgba(56,225,255,.05); }
+  .cd .num { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.6rem; color:var(--cyan); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Space Grotesk',sans-serif; font-size:.58rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin-top:.4rem; }
+
+  .cta { margin-top:1.8rem; display:flex; gap:.7rem; flex-wrap:wrap; }
+  .btn { flex:1; min-width:140px; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.78rem;
+    letter-spacing:.08em; text-transform:uppercase; padding:.95rem 1.2rem; border-radius:12px; cursor:pointer; text-decoration:none; border:1px solid transparent; transition:all .25s; }
+  .btn-primary { color:#06101f; background:linear-gradient(135deg,var(--cyan),var(--blue)); box-shadow:0 10px 26px -10px rgba(56,225,255,.6); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 16px 34px -10px rgba(56,225,255,.75); }
+  .btn-ghost { color:var(--white); border-color:var(--line-strong); background:rgba(56,225,255,.05); }
+  .btn-ghost:hover { transform:translateY(-2px); border-color:var(--cyan); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    background:radial-gradient(120% 80% at 50% 30%, #121a36, var(--bg) 72%); transition:opacity .8s ease .35s, visibility 0s .9s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+
+  /* doors (split) */
+  .door { position:absolute; top:0; bottom:0; width:51%; z-index:3; background:linear-gradient(160deg,#101934,#0a1124); display:none;
+    transition:transform 1s cubic-bezier(.76,0,.24,1); }
+  .door.l { left:0; border-right:1px solid var(--line-strong); }
+  .door.r { right:0; border-left:1px solid var(--line-strong); }
+  #gate[data-open="split"] .door { display:block; }
+  #gate[data-open="split"].opening .door.l { transform:translateX(-100%); }
+  #gate[data-open="split"].opening .door.r { transform:translateX(100%); }
+  .door .logo { position:absolute; top:50%; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:2rem; color:var(--cyan); transform:translateY(-50%); opacity:.5; }
+  .door.l .logo { right:-.5em; } .door.r .logo { left:-.5em; }
+
+  /* badge + lanyard */
+  .gate-stage { position:relative; z-index:4; display:flex; flex-direction:column; align-items:center; transition:transform .9s cubic-bezier(.7,0,.3,1), opacity .7s; }
+  #gate.opening .gate-stage { opacity:0; }
+  #gate[data-open="badge"].opening .gate-stage { transform:translateY(-70vh) rotate(4deg); }
+  #gate[data-open="split"].opening .gate-stage { transform:scale(.85); }
+  .lanyard { width:14px; height:90px; background:linear-gradient(180deg,var(--violet),var(--blue)); border-radius:4px; box-shadow:0 0 18px rgba(91,140,255,.4); }
+  .badge { width:210px; padding:1.5rem 1.3rem 1.3rem; border-radius:18px; margin-top:-2px;
+    background:linear-gradient(165deg, rgba(26,38,78,.95), rgba(12,18,40,.96)); border:1px solid var(--line-strong);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.7), 0 0 40px -16px rgba(56,225,255,.6); transform-origin:top center; animation:sway 4s ease-in-out infinite; }
+  @keyframes sway { 0%,100%{transform:rotate(-2.5deg);} 50%{transform:rotate(2.5deg);} }
+  .badge .hole { width:46px; height:8px; border-radius:6px; background:#06101f; margin:0 auto .9rem; box-shadow:inset 0 1px 2px rgba(0,0,0,.8); }
+  .badge .top { font-family:'Space Grotesk',sans-serif; font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--cyan); }
+  .badge .nm { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.7rem; color:var(--white); margin-top:.3rem; line-height:1; }
+  .badge .role { font-size:.92rem; color:var(--muted); margin-top:.4rem; }
+  .badge .barcode { height:30px; margin-top:1rem; border-radius:5px;
+    background:repeating-linear-gradient(90deg,var(--white) 0 2px,transparent 2px 4px,var(--white) 4px 5px,transparent 5px 9px); opacity:.8; }
+  .gate-hint { position:absolute; bottom:8%; left:0; right:0; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:.66rem;
+    letter-spacing:.24em; text-transform:uppercase; color:var(--faint); z-index:5; animation:blink 2.2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:.35;} 50%{opacity:.9;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-2); color:var(--white);
+    font-family:'IBM Plex Sans',sans-serif; font-size:.95rem; padding:.8rem 1.4rem; border:1px solid var(--line-strong); border-radius:40px;
+    opacity:0; pointer-events:none; transition:all .4s ease; z-index:140; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px){ .card{padding:2rem 1.4rem;} .meta{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion:reduce){ .rev{animation:none;opacity:1;transform:none;} .badge{animation:none;} }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<canvas id="particles"></canvas>
+
+<!-- GATE -->
+<div id="gate" data-open="badge" onclick="openGate()">
+  <span class="door l"><span class="logo" data-logo>DC</span></span>
+  <span class="door r"><span class="logo" data-logo>DC</span></span>
+  <div class="gate-stage">
+    <div class="lanyard"></div>
+    <div class="badge">
+      <div class="hole"></div>
+      <div class="top">Accès · Invitation</div>
+      <div class="nm" data-badge>DevConf</div>
+      <div class="role">Laissez-passer nominatif</div>
+      <div class="barcode"></div>
+    </div>
+  </div>
+  <div class="gate-hint">Touchez pour entrer</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card" id="card">
+    <div class="toprow rev" style="animation-delay:.05s">
+      <span class="chip"><span class="live"></span> <span data-f="chip">Conférence</span></span>
+      <span class="edition" data-f="edition">Édition 2026</span>
+    </div>
+
+    <div class="kicker rev" style="animation-delay:.12s" data-f="kicker">Vous êtes convié·e à</div>
+    <div class="title rev" style="animation-delay:.2s" data-f="title">DevConf Alger</div>
+    <div class="org rev" style="animation-delay:.28s" data-f="org">Le rendez-vous des bâtisseurs du web</div>
+
+    <div class="speaker rev" style="animation-delay:.36s">
+      <div class="av" data-av>RK</div>
+      <div>
+        <div class="who" data-f="speaker">Keynote — Rania Kaci</div>
+        <div class="role" data-f="speakerRole">VP Engineering, Atlas Cloud</div>
+      </div>
+    </div>
+
+    <div class="meta rev" style="animation-delay:.44s">
+      <div class="m"><div class="l">Date</div><div class="v" data-f="date">Jeu. 5 Mars 2026 · 9h</div></div>
+      <div class="m"><div class="l">Lieu</div><div class="v" data-f="venue">Cité des Sciences, Alger</div></div>
+    </div>
+
+    <div class="countdown rev" style="animation-delay:.52s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.6s">
+      <button class="btn btn-primary" onclick="toast('Place réservée — à très vite !')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Je participe
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Cite+des+Sciences+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; const g=document.getElementById('gate'); g.classList.add('opening'); setTimeout(()=>g.classList.add('opened'),950); }
+  function setOpening(style){ document.getElementById('gate').setAttribute('data-open', style==='split'?'split':'badge'); }
+
+  let cdTarget=new Date('2026-03-05T09:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1800);
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+  function syncBits(){
+    const title=document.querySelector('[data-f="title"]').textContent.trim();
+    const initials=title.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'DC';
+    document.querySelectorAll('[data-logo]').forEach(e=>e.textContent=initials);
+    document.querySelector('[data-badge]').textContent=title.split(/\s+/)[0]||'Event';
+    const sp=document.querySelector('[data-f="speaker"]').textContent.replace(/^keynote\s*[—-]\s*/i,'').trim();
+    const ini=sp.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'★';
+    const av=document.querySelector('[data-av]'); if(av) av.textContent=ini;
+  }
+
+  // particles (rising light dots)
+  (function(){
+    const c=document.getElementById('particles'); const x=c.getContext('2d'); let W,H,dots;
+    function rs(){ W=c.width=innerWidth; H=c.height=innerHeight; dots=Array.from({length:Math.min(60,Math.round(W*H/24000))},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.6+.4,v:Math.random()*.3+.05,a:Math.random()*6})); }
+    function fr(){ x.clearRect(0,0,W,H); for(const d of dots){ d.y-=d.v; d.a+=.02; if(d.y<-5){d.y=H+5;d.x=Math.random()*W;} const o=(Math.sin(d.a)*.5+.5)*.6+.1; x.beginPath(); x.arc(d.x,d.y,d.r,0,6.28); x.fillStyle='rgba(56,225,255,'+o.toFixed(2)+')'; x.shadowBlur=6; x.shadowColor='rgba(56,225,255,.7)'; x.fill(); } x.shadowBlur=0; requestAnimationFrame(fr); }
+    addEventListener('resize',rs); rs(); if(!matchMedia('(prefers-reduced-motion:reduce)').matches) fr();
+  })();
+
+  // parallax tilt
+  (function(){ const card=document.getElementById('card'); if(matchMedia('(prefers-reduced-motion:reduce)').matches) return; let raf;
+    addEventListener('pointermove',e=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>{ const rx=(e.clientY/innerHeight-.5)*-5, ry=(e.clientX/innerWidth-.5)*5; card.style.transform=`perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg)`; }); });
+    addEventListener('pointerleave',()=>{ card.style.transform='none'; });
+  })();
+
+  window.INVYTEK_CONFIG={
+    theme:'conference-tech', accent:'#38E1FF', accent2:'#5B8CFF', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'opening', label:'Animation d\'ouverture', type:'select', val:'badge', options:[{value:'badge',label:'Badge nominatif'},{value:'split',label:'Rideau (split)'}]},
+      {key:'chip', label:'Type d\'événement', sel:'[data-f="chip"]', type:'text'},
+      {key:'edition', label:'Édition', sel:'[data-f="edition"]', type:'text'},
+      {key:'kicker', label:'Introduction', sel:'[data-f="kicker"]', type:'text'},
+      {key:'title', label:'Nom de la conférence', sel:'[data-f="title"]', type:'text'},
+      {key:'org', label:'Accroche', sel:'[data-f="org"]', type:'text'},
+      {key:'speaker', label:'Intervenant principal', sel:'[data-f="speaker"]', type:'text'},
+      {key:'speakerRole', label:'Fonction de l\'intervenant', sel:'[data-f="speakerRole"]', type:'text'},
+      {key:'date', label:'Date & heure (texte)', sel:'[data-f="date"]', type:'text'},
+      {key:'venue', label:'Lieu', sel:'[data-f="venue"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-03-05T09:00'}
+    ],
+    onChange:function(d){ if(d.opening) setOpening(d.opening); syncBits(); }
+  };
+</script>
+<script src="../assets/editor.js"></script>
+<script>syncBits();</script>
+</body>
+</html>

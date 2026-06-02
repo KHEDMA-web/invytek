@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0A0A0F" />
+<title>Anniversaire — Invytek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@300;400;500&family=Caveat:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#0A0A0F; --bg-2:#12101c; --panel:rgba(24,18,40,.7);
+    --magenta:#FF3CAC; --cyan:#2FF3FF; --violet:#9A5BFF; --lime:#C6FF4F;
+    --white:#F2EEFF; --muted:rgba(242,238,255,.6); --faint:rgba(242,238,255,.34);
+    --line:rgba(255,60,172,.3);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body { min-height:100vh; min-height:100dvh;
+    background:radial-gradient(120% 80% at 80% -10%, rgba(255,60,172,.18), transparent 50%), radial-gradient(120% 80% at 0% 110%, rgba(47,243,255,.16), transparent 55%), var(--bg);
+    color:var(--white); font-family:'IBM Plex Sans',sans-serif; display:flex; align-items:center; justify-content:center;
+    padding:calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom)); overflow-x:hidden; }
+  #particles { position:fixed; inset:0; z-index:1; pointer-events:none; }
+  .burst { position:fixed; inset:0; z-index:60; pointer-events:none; overflow:hidden; }
+  .scene { width:100%; max-width:440px; position:relative; z-index:2; }
+  .card { position:relative; width:100%; border-radius:24px; padding:2.8rem 2rem 2.4rem; text-align:center;
+    background:linear-gradient(165deg, rgba(30,22,52,.8), rgba(12,10,22,.86)); border:1px solid var(--line); backdrop-filter:blur(12px);
+    box-shadow:0 50px 110px -40px rgba(0,0,0,.85), 0 0 60px -26px rgba(255,60,172,.6); overflow:hidden; }
+  .card::before { content:''; position:absolute; inset:0; border-radius:24px; padding:1px; pointer-events:none;
+    background:linear-gradient(140deg,var(--magenta),transparent 40%,transparent 60%,var(--cyan));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; opacity:.7; }
+
+  .rev { opacity:0; transform:translateY(16px); animation:rise .8s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .eyebrow { font-family:'Space Grotesk',sans-serif; font-size:.7rem; font-weight:600; letter-spacing:.26em; text-transform:uppercase; color:var(--cyan); text-indent:.26em; }
+  .firstname { font-family:'Caveat',cursive; font-weight:700; font-size:clamp(3.4rem,16vw,5rem); line-height:.9; margin-top:.4rem; color:var(--magenta);
+    text-shadow:0 0 18px rgba(255,60,172,.7), 0 0 40px rgba(255,60,172,.4); }
+  .age-wrap { margin:.6rem 0; position:relative; }
+  .age { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(5rem,28vw,8.5rem); line-height:.82; letter-spacing:-.03em;
+    background:linear-gradient(135deg,var(--cyan),var(--violet) 45%,var(--magenta)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent;
+    filter:drop-shadow(0 0 20px rgba(154,91,255,.5)); }
+  .ans { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.1rem; letter-spacing:.34em; text-transform:uppercase; color:var(--muted); text-indent:.34em; margin-top:-.3rem; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.7rem; margin:1.7rem auto; width:66%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--line)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--line),transparent); }
+  .sep .s { color:var(--cyan); font-size:.8rem; }
+
+  .meta { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:.4rem; }
+  .meta .m { padding:.85rem 1rem; border:1px solid var(--line); border-radius:14px; background:rgba(255,60,172,.06); text-align:left; }
+  .meta .m .l { font-family:'Space Grotesk',sans-serif; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); }
+  .meta .m .v { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:.98rem; color:var(--white); margin-top:.25rem; line-height:1.25; }
+  .message { font-family:'Caveat',cursive; font-weight:600; font-size:1.5rem; color:var(--cyan); margin-top:1.3rem; line-height:1.2; }
+
+  .countdown { display:flex; justify-content:center; gap:.7rem; margin:1.6rem 0 .2rem; }
+  .cd { flex:1; display:flex; flex-direction:column; align-items:center; padding:.7rem .3rem; border:1px solid var(--line); border-radius:12px; background:rgba(47,243,255,.05); }
+  .cd .num { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.55rem; color:var(--cyan); line-height:1; }
+  .cd .lab { font-family:'Space Grotesk',sans-serif; font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-top:.4rem; }
+
+  .cta { margin-top:1.7rem; display:flex; gap:.7rem; flex-wrap:wrap; }
+  .btn { flex:1; min-width:130px; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.76rem; letter-spacing:.06em; text-transform:uppercase;
+    padding:.95rem 1.1rem; border-radius:40px; cursor:pointer; text-decoration:none; border:1px solid transparent; transition:all .25s; }
+  .btn-primary { color:#0A0A0F; background:linear-gradient(135deg,var(--magenta),var(--violet)); box-shadow:0 10px 28px -10px rgba(255,60,172,.7); }
+  .btn-primary:hover { transform:translateY(-2px); }
+  .btn-ghost { color:var(--white); border-color:var(--line); background:rgba(47,243,255,.05); }
+  .btn-ghost:hover { transform:translateY(-2px); border-color:var(--cyan); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;
+    background:radial-gradient(120% 80% at 50% 35%, #1a1430, var(--bg) 72%); transition:opacity .7s ease .25s, visibility 0s .9s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  .gate-stage { position:relative; z-index:4; display:flex; flex-direction:column; align-items:center; transition:opacity .5s,transform .6s; }
+  #gate.opening .gate-stage { opacity:0; transform:scale(.85); }
+  .cake-num { position:relative; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(6rem,32vw,9rem); line-height:.9;
+    background:linear-gradient(135deg,var(--cyan),var(--violet) 45%,var(--magenta)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+  .candles { position:absolute; top:-34px; left:0; right:0; display:flex; justify-content:center; gap:26px; }
+  #gate[data-open="boom"] .candles { display:none; }
+  .flame { width:14px; height:24px; border-radius:50% 50% 50% 50%/60% 60% 40% 40%; background:radial-gradient(circle at 50% 70%, #fff 0%, var(--lime) 18%, #FFB23C 48%, var(--magenta) 100%);
+    box-shadow:0 0 14px rgba(255,178,60,.9), 0 0 28px rgba(255,60,172,.5); transform-origin:bottom center; animation:flick .4s ease-in-out infinite alternate; }
+  @keyframes flick { 0%{transform:scaleY(1) rotate(-3deg);} 100%{transform:scaleY(1.12) rotate(3deg);} }
+  #gate.opening .flame { animation:none; transform:scaleY(0); opacity:0; transition:transform .4s ease, opacity .4s ease; }
+  .gate-name { font-family:'Caveat',cursive; font-weight:700; font-size:2.4rem; color:var(--magenta); text-shadow:0 0 16px rgba(255,60,172,.6); margin-top:.6rem; }
+  .gate-hint { position:absolute; bottom:9%; left:0; right:0; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:.64rem; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); z-index:6; animation:blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:.4;} 50%{opacity:.95;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--bg-2); color:var(--white);
+    font-family:'IBM Plex Sans',sans-serif; font-size:.95rem; padding:.8rem 1.4rem; border:1px solid var(--line); border-radius:40px; opacity:0; pointer-events:none; transition:all .4s ease; z-index:140; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .conf { position:absolute; width:10px; height:14px; border-radius:2px; opacity:0; }
+
+  @media (max-width:430px){ .card{padding:2.2rem 1.4rem;} .meta{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion:reduce){ .rev{animation:none;opacity:1;transform:none;} .flame{animation:none;} }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="burst" id="burst"></div>
+
+<!-- GATE -->
+<div id="gate" data-open="candles" onclick="openGate()">
+  <div class="gate-stage">
+    <div class="cake-num"><span class="candles"><span class="flame"></span><span class="flame"></span><span class="flame"></span></span><span data-gate-age>18</span></div>
+    <div class="gate-name" data-gate-name>Sami</div>
+  </div>
+  <div class="gate-hint" data-gate-hint>Souffle les bougies</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card">
+    <div class="eyebrow rev" style="animation-delay:.1s" data-f="eyebrow">On fête les</div>
+    <div class="age-wrap">
+      <div class="age rev" style="animation-delay:.18s" data-f="age">18</div>
+    </div>
+    <div class="ans rev" style="animation-delay:.26s" data-f="ans">ans de</div>
+    <div class="firstname rev" style="animation-delay:.34s" data-f="firstname">Sami</div>
+
+    <div class="sep rev" style="animation-delay:.46s"><span class="ln"></span><span class="s">✦</span><span class="ln r"></span></div>
+
+    <div class="meta rev" style="animation-delay:.52s">
+      <div class="m"><div class="l">Quand</div><div class="v" data-f="date">Sam. 18 Juil. · 21h</div></div>
+      <div class="m"><div class="l">Où</div><div class="v" data-f="venue">Rooftop Sky, Alger</div></div>
+    </div>
+    <div class="message rev" style="animation-delay:.6s" data-f="message">Dress code : total black & néon ✦</div>
+
+    <div class="countdown rev" style="animation-delay:.68s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.76s">
+      <button class="btn btn-primary" onclick="boom();toast('Trop bien — on t\'attend !')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Je viens !
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Rooftop+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PAL=['#FF3CAC','#2FF3FF','#9A5BFF','#C6FF4F','#F2EEFF'];
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; const g=document.getElementById('gate'); if(g.getAttribute('data-open')==='boom') boom(); g.classList.add('opening'); setTimeout(()=>g.classList.add('opened'),700); }
+  function setOpening(s){ const g=document.getElementById('gate'); g.setAttribute('data-open', s==='boom'?'boom':'candles'); document.querySelector('[data-gate-hint]').textContent = s==='boom'?'Touchez pour faire la fête':'Souffle les bougies'; }
+
+  function boom(){
+    const b=document.getElementById('burst'); const cx=innerWidth/2, cy=innerHeight/2, n=52;
+    for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='conf'; c.style.left=cx+'px'; c.style.top=cy+'px'; c.style.background=PAL[i%PAL.length]; c.style.boxShadow='0 0 8px '+PAL[i%PAL.length];
+      const ang=6.28*(i/n)+(Math.random()-.5)*.4, dist=Math.random()*Math.min(innerWidth,innerHeight)*.5+90, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-40, rot=Math.random()*720-360;
+      c.animate([{transform:'translate(0,0) rotate(0)',opacity:1},{transform:`translate(${dx}px,${dy*.6}px) rotate(${rot/2}deg)`,opacity:1,offset:.55},{transform:`translate(${dx*1.05}px,${dy+260}px) rotate(${rot}deg)`,opacity:0}],{duration:1500+Math.random()*900,easing:'cubic-bezier(.16,.7,.3,1)',fill:'forwards'});
+      b.appendChild(c); setTimeout(()=>c.remove(),2600); }
+  }
+
+  let cdTarget=new Date('2026-07-18T21:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1700);
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+  function syncGate(){ document.querySelector('[data-gate-age]').textContent=document.querySelector('[data-f="age"]').textContent.trim()||'18';
+    document.querySelector('[data-gate-name]').textContent=document.querySelector('[data-f="firstname"]').textContent.trim()||''; }
+
+  // neon particles
+  (function(){ const c=document.getElementById('particles'); const x=c.getContext('2d'); let W,H,dots;
+    function rs(){ W=c.width=innerWidth; H=c.height=innerHeight; dots=Array.from({length:Math.min(50,Math.round(W*H/26000))},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.5,v:Math.random()*.3+.05,a:Math.random()*6,c:PAL[Math.floor(Math.random()*3)]})); }
+    function fr(){ x.clearRect(0,0,W,H); for(const d of dots){ d.y-=d.v; d.a+=.03; if(d.y<-5){d.y=H+5;d.x=Math.random()*W;} const o=(Math.sin(d.a)*.5+.5)*.7+.1; x.beginPath(); x.arc(d.x,d.y,d.r,0,6.28); x.fillStyle=d.c; x.globalAlpha=o; x.shadowBlur=8; x.shadowColor=d.c; x.fill(); } x.globalAlpha=1; x.shadowBlur=0; requestAnimationFrame(fr); }
+    addEventListener('resize',rs); rs(); if(!matchMedia('(prefers-reduced-motion:reduce)').matches) fr();
+  })();
+
+  window.INVYTEK_CONFIG={
+    theme:'anniv-neon', accent:'#FF3CAC', accent2:'#9A5BFF', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'opening', label:'Animation d\'ouverture', type:'select', val:'candles', options:[{value:'candles',label:'Souffler les bougies'},{value:'boom',label:'Explosion de confettis'}]},
+      {key:'eyebrow', label:'Introduction', sel:'[data-f="eyebrow"]', type:'text'},
+      {key:'age', label:'Âge', sel:'[data-f="age"]', type:'text'},
+      {key:'ans', label:'Mot après l\'âge', sel:'[data-f="ans"]', type:'text'},
+      {key:'firstname', label:'Prénom', sel:'[data-f="firstname"]', type:'text'},
+      {key:'date', label:'Date & heure', sel:'[data-f="date"]', type:'text'},
+      {key:'venue', label:'Lieu', sel:'[data-f="venue"]', type:'text'},
+      {key:'message', label:'Note (dress code, etc.)', sel:'[data-f="message"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-07-18T21:00'}
+    ],
+    onChange:function(d){ if(d.opening) setOpening(d.opening); syncGate(); }
+  };
+</script>
+<script src="../assets/editor.js"></script>
+<script>syncGate();</script>
+</body>
+</html>

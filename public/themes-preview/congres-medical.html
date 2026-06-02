@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#F4F8FA" />
+<title>Congrès — Invytek</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#F4F8FA; --paper:#FFFFFF; --panel:#EEF5F6;
+    --teal:#128C7E; --teal-deep:#0c5f55; --mint:#3FC6A8; --blue:#3FA9D6;
+    --ink:#16323B; --muted:#5a7079; --faint:#93a5ab; --line:rgba(18,140,126,.18);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body { min-height:100vh; min-height:100dvh;
+    background:radial-gradient(130% 80% at 80% -10%, rgba(63,198,168,.14), transparent 50%), radial-gradient(120% 70% at 0% 110%, rgba(63,169,214,.12), transparent 55%), var(--bg);
+    color:var(--ink); font-family:'IBM Plex Sans',sans-serif; display:flex; align-items:center; justify-content:center;
+    padding:calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom)); overflow-x:hidden; }
+  .scene { width:100%; max-width:460px; position:relative; z-index:2; }
+  .card { position:relative; width:100%; background:linear-gradient(168deg,var(--paper),var(--panel)); border-radius:20px; padding:2.6rem 2rem 2.4rem;
+    box-shadow:0 50px 100px -40px rgba(18,80,72,.32), 0 0 0 1px var(--line); overflow:hidden; }
+  .card::after { content:''; position:absolute; left:0; right:0; top:0; height:4px; background:linear-gradient(90deg,var(--teal),var(--mint),var(--blue)); }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .8s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .toprow { display:flex; align-items:center; justify-content:space-between; }
+  .chip { display:inline-flex; align-items:center; gap:.45rem; font-family:'Space Grotesk',sans-serif; font-size:.62rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--teal-deep); padding:.4rem .8rem; border:1px solid var(--line); border-radius:40px; background:rgba(18,140,126,.06); }
+  .chip .pulse { width:7px; height:7px; border-radius:50%; background:var(--teal); animation:pl 1.6s ease-in-out infinite; }
+  @keyframes pl { 0%,100%{opacity:1;} 50%{opacity:.35;} }
+  .ed { font-family:'Space Grotesk',sans-serif; font-size:.68rem; letter-spacing:.14em; color:var(--faint); }
+
+  .kicker { font-family:'Space Grotesk',sans-serif; font-size:.7rem; font-weight:500; letter-spacing:.26em; text-transform:uppercase; color:var(--blue); margin-top:1.5rem; text-indent:.26em; }
+  .title { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(2rem,7.5vw,2.9rem); line-height:1.05; letter-spacing:-.01em; color:var(--ink); margin-top:.6rem; }
+  .edition2 { font-family:'Space Grotesk',sans-serif; font-weight:600; color:var(--teal); }
+  .org { font-family:'IBM Plex Sans',sans-serif; font-style:italic; font-size:1.1rem; color:var(--muted); margin-top:.7rem; }
+
+  .topic { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1.3rem; }
+  .tag { font-family:'Space Grotesk',sans-serif; font-size:.66rem; font-weight:500; color:var(--teal-deep); padding:.35rem .75rem; border-radius:40px; background:rgba(63,198,168,.14); border:1px solid var(--line); }
+
+  .meta { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1.4rem; }
+  .meta .m { text-align:left; padding:.85rem 1rem; border:1px solid var(--line); border-radius:12px; background:rgba(255,255,255,.5); }
+  .meta .m .l { font-family:'Space Grotesk',sans-serif; font-size:.58rem; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); }
+  .meta .m .v { font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:.98rem; color:var(--ink); margin-top:.25rem; line-height:1.25; }
+
+  .countdown { display:flex; justify-content:center; gap:.7rem; margin:1.8rem 0 .2rem; }
+  .cd { flex:1; display:flex; flex-direction:column; align-items:center; padding:.7rem .3rem; border:1px solid var(--line); border-radius:12px; background:rgba(18,140,126,.05); }
+  .cd .num { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.55rem; color:var(--teal-deep); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Space Grotesk',sans-serif; font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-top:.4rem; }
+
+  .cta { margin-top:1.7rem; display:flex; gap:.7rem; flex-wrap:wrap; }
+  .btn { flex:1; min-width:130px; display:inline-flex; align-items:center; justify-content:center; gap:.5rem; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.74rem; letter-spacing:.08em; text-transform:uppercase;
+    padding:.9rem 1.1rem; border-radius:12px; cursor:pointer; text-decoration:none; border:1px solid transparent; transition:all .25s; }
+  .btn-primary { color:#fff; background:linear-gradient(135deg,var(--teal),var(--teal-deep)); box-shadow:0 10px 24px -10px rgba(12,95,85,.5); }
+  .btn-primary:hover { transform:translateY(-2px); }
+  .btn-ghost { color:var(--teal-deep); border-color:var(--line); background:rgba(18,140,126,.04); }
+  .btn-ghost:hover { transform:translateY(-2px); border-color:var(--teal); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer;
+    background:radial-gradient(120% 80% at 50% 38%, #fff, var(--bg) 72%); transition:opacity .8s ease .4s, visibility 0s .9s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  .gate-stage { position:relative; z-index:4; display:flex; flex-direction:column; align-items:center; transition:opacity .5s, transform .7s; }
+  #gate.opening .gate-stage { opacity:0; transform:scale(.94); }
+  /* ECG */
+  .ecg { width:min(380px,82vw); height:120px; display:block; }
+  .ecg path { fill:none; stroke:var(--teal); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1400; stroke-dashoffset:1400; animation:ecgDraw 2.4s ease-in-out infinite; filter:drop-shadow(0 0 6px rgba(18,140,126,.5)); }
+  @keyframes ecgDraw { 0%{stroke-dashoffset:1400;} 60%,100%{stroke-dashoffset:0;} }
+  #gate[data-open="molecule"] .ecg { display:none; }
+  /* molecule */
+  .mol { width:200px; height:200px; display:none; animation:spin 16s linear infinite; }
+  #gate[data-open="molecule"] .mol { display:block; }
+  .mol line { stroke:var(--line); stroke-width:2; }
+  .mol circle { fill:var(--mint); stroke:var(--teal-deep); stroke-width:1.5; }
+  .mol .big { fill:var(--teal); }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .gate-ti { font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:1.2rem; letter-spacing:.2em; text-transform:uppercase; color:var(--teal-deep); margin-top:1.4rem; text-indent:.2em; }
+  .gate-hint { position:absolute; bottom:9%; left:0; right:0; text-align:center; font-family:'Space Grotesk',sans-serif; font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); z-index:6; animation:blink 2.2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:.4;} 50%{opacity:.9;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--teal-deep); color:#fff;
+    font-family:'IBM Plex Sans',sans-serif; font-size:.95rem; padding:.8rem 1.4rem; border-radius:40px; opacity:0; pointer-events:none; transition:all .4s ease; z-index:140; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px){ .card{padding:2rem 1.4rem;} .meta{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion:reduce){ .rev{animation:none;opacity:1;transform:none;} .ecg path,.mol{animation:none;stroke-dashoffset:0;} }
+</style>
+</head>
+<body>
+
+<!-- GATE -->
+<div id="gate" data-open="ecg" onclick="openGate()">
+  <div class="gate-stage">
+    <svg class="ecg" viewBox="0 0 400 120" preserveAspectRatio="xMidYMid meet"><path d="M0 60 H120 L140 60 L150 30 L165 92 L180 16 L196 60 L215 60 L230 48 L245 60 H400"/></svg>
+    <svg class="mol" viewBox="0 0 200 200">
+      <line x1="100" y1="100" x2="100" y2="40"/><line x1="100" y1="100" x2="152" y2="70"/><line x1="100" y1="100" x2="152" y2="130"/><line x1="100" y1="100" x2="100" y2="160"/><line x1="100" y1="100" x2="48" y2="130"/><line x1="100" y1="100" x2="48" y2="70"/>
+      <circle class="big" cx="100" cy="100" r="13"/>
+      <circle cx="100" cy="40" r="9"/><circle cx="152" cy="70" r="9"/><circle cx="152" cy="130" r="9"/><circle cx="100" cy="160" r="9"/><circle cx="48" cy="130" r="9"/><circle cx="48" cy="70" r="9"/>
+    </svg>
+    <div class="gate-ti" data-f="gateTi">Congrès</div>
+  </div>
+  <div class="gate-hint">Touchez pour ouvrir</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card">
+    <div class="toprow rev" style="animation-delay:.05s">
+      <span class="chip"><span class="pulse"></span> <span data-f="chip">Congrès médical</span></span>
+      <span class="ed" data-f="edition">12ᵉ édition</span>
+    </div>
+
+    <div class="kicker rev" style="animation-delay:.14s" data-f="kicker">Société Algérienne de Cardiologie</div>
+    <div class="title rev" style="animation-delay:.22s"><span data-f="title">Congrès National de Cardiologie</span></div>
+    <div class="org rev" style="animation-delay:.3s" data-f="org">« Innover pour le cœur de demain »</div>
+
+    <div class="topic rev" style="animation-delay:.38s">
+      <span class="tag" data-f="tag1">Cardiologie</span>
+      <span class="tag" data-f="tag2">Recherche</span>
+      <span class="tag" data-f="tag3">Ateliers</span>
+    </div>
+
+    <div class="meta rev" style="animation-delay:.46s">
+      <div class="m"><div class="l">Dates</div><div class="v" data-f="date">14–16 Mai 2026</div></div>
+      <div class="m"><div class="l">Lieu</div><div class="v" data-f="venue">CIC, Alger</div></div>
+    </div>
+
+    <div class="countdown rev" style="animation-delay:.54s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.62s">
+      <button class="btn btn-primary" onclick="toast('Inscription enregistrée — à bientôt !')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Je m'inscris
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Centre+International+Conferences+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; const g=document.getElementById('gate'); g.classList.add('opening'); setTimeout(()=>g.classList.add('opened'),800); }
+  function setOpening(s){ document.getElementById('gate').setAttribute('data-open', s==='molecule'?'molecule':'ecg'); }
+
+  let cdTarget=new Date('2026-05-14T09:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1800);
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+
+  function syncGate(){ const t=document.querySelector('[data-f="title"]').textContent.trim().split(/\s+/)[0]||'Congrès'; document.querySelector('[data-f="gateTi"]').textContent=t; }
+
+  window.INVYTEK_CONFIG={
+    theme:'congres-medical', accent:'#128C7E', accent2:'#0c5f55', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
+      {key:'opening', label:'Animation d\'ouverture', type:'select', val:'ecg', options:[{value:'ecg',label:'Ligne ECG'},{value:'molecule',label:'Molécule'}]},
+      {key:'chip', label:'Catégorie', sel:'[data-f="chip"]', type:'text'},
+      {key:'edition', label:'Édition', sel:'[data-f="edition"]', type:'text'},
+      {key:'kicker', label:'Organisateur', sel:'[data-f="kicker"]', type:'text'},
+      {key:'title', label:'Titre du congrès', sel:'[data-f="title"]', type:'text'},
+      {key:'org', label:'Thème / slogan', sel:'[data-f="org"]', type:'text'},
+      {key:'tag1', label:'Mot-clé 1', sel:'[data-f="tag1"]', type:'text'},
+      {key:'tag2', label:'Mot-clé 2', sel:'[data-f="tag2"]', type:'text'},
+      {key:'tag3', label:'Mot-clé 3', sel:'[data-f="tag3"]', type:'text'},
+      {key:'date', label:'Dates', sel:'[data-f="date"]', type:'text'},
+      {key:'venue', label:'Lieu', sel:'[data-f="venue"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-05-14T09:00'}
+    ],
+    onChange:function(d){ if(d.opening) setOpening(d.opening); syncGate(); }
+  };
+</script>
+<script src="../assets/editor.js"></script>
+<script>syncGate();</script>
+</body>
+</html>
