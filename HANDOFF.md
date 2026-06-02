@@ -84,7 +84,45 @@ Chaque thème HTML a besoin d'une implémentation React pour que `/i/[slug]` fon
 - [ ] (+ 7 autres thèmes)
 - [ ] `app/i/[slug]/page.tsx` : ajouter les cas pour chaque nouveau thème
 
-### Priorité 4 — Features futures
+### Priorité 4 — QR Code nominatif (feature demandée)
+
+**Concept :** chaque invitation personnalisée (`/i/[slug]/g/[token]`) génère un QR code unique
+qui encode le lien nominatif de l'invité. L'hôte peut activer/désactiver cette option.
+À l'entrée de l'événement, un scanner lit le QR → vérifie l'invité → marque comme arrivé.
+
+**Implémentation proposée :**
+
+- [ ] **Option `showQrCode: boolean`** dans `WeddingOptions` (schema Prisma + Zod) — activable par l'hôte depuis `/dashboard/[id]`
+- [ ] **Composant `<QrCode url={...} />`** dans `themes/wedding/gold-arch/Theme.tsx`
+  - Affiché en bas de la carte uniquement sur `/i/[slug]/g/[token]` (pas sur le lien public)
+  - URL encodée dans le QR = `https://[domaine]/i/[slug]/g/[token]` (le lien nominatif lui-même)
+  - Librairie recommandée : `qrcode.react` (légère, SVG, pas de canvas)
+  - Style : fond ivoire, couleur or, taille ~160px, centré sous les CTA
+- [ ] **API `POST /api/checkin`** — scan du QR à l'entrée
+  - Body : `{ token: string }`
+  - Action : met à jour `Guest.status = "checked_in"` + `checkedInAt: DateTime`
+  - Retourne : `{ name, status, partySize }` — affiché sur l'écran du scanner
+- [ ] **Champ `checkedInAt DateTime?`** à ajouter au modèle `Guest` dans `schema.prisma`
+- [ ] **Page `/checkin`** (optionnelle) — interface simple pour l'hôte/vigile
+  - Scan ou saisie manuelle du token
+  - Affiche le nom + statut en grand
+  - Bouton "Marquer comme arrivé"
+- [ ] **Dashboard** : colonne "Arrivés" dans les stats (`checkedInAt != null`)
+
+**Résumé du flow :**
+```
+Hôte active "QR Code" dans les options de l'invitation
+    ↓
+Chaque invité nominatif voit son QR en bas de carte
+    ↓
+À l'entrée : scan du QR → POST /api/checkin { token }
+    ↓
+Réponse : "Ahmed Benali — 2 personnes — Confirmé ✓"
+    ↓
+Dashboard : colonne Arrivés mise à jour en temps réel
+```
+
+### Priorité 5 — Features futures
 - [ ] **Tarifs** — page `/pricing`
 - [ ] **Auth OAuth** — Google/GitHub (Auth.js provider à ajouter)
 - [ ] **Email** — envoyer le lien nominatif par email/WhatsApp depuis le dashboard
