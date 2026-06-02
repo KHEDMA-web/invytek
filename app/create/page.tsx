@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
@@ -19,6 +19,10 @@ function slugify(s: string) {
 }
 
 export default function CreatePage() {
+  return <Suspense><CreateForm /></Suspense>;
+}
+
+function CreateForm() {
   const router = useRouter();
   const params = useSearchParams();
 
