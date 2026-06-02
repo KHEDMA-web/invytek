@@ -63,7 +63,7 @@ export default function HomePage() {
 
           <div style={{ display: "flex", gap: "clamp(20px,5vw,64px)", justifyContent: "center", alignItems: "flex-end", flexWrap: "wrap" }}>
             {/* Or & Arche */}
-            <div className="reveal d1" style={{ textAlign: "center" }}>
+            <Link href="/i/demo-mariage-2026" className="reveal d1" style={{ textAlign: "center", display: "block", textDecoration: "none" }}>
               <div className="phone" data-parallax="6">
                 <div className="notch" />
                 <div className="screen">
@@ -78,10 +78,10 @@ export default function HomePage() {
               <p style={{ marginTop: 18, fontFamily: "var(--font-title)", letterSpacing: ".16em", fontSize: 13, color: "var(--gold-light)" }}>
                 OR &amp; ARCHE
               </p>
-            </div>
+            </Link>
 
             {/* Bordeaux & Ovale */}
-            <div className="reveal d2" style={{ textAlign: "center" }}>
+            <a href="/themes-preview/bordeaux-oval.html" className="reveal d2" style={{ textAlign: "center", display: "block", textDecoration: "none" }}>
               <div className="phone" data-parallax="10" style={{ width: 250 }}>
                 <div className="notch" />
                 <div className="screen">
@@ -93,16 +93,15 @@ export default function HomePage() {
                     <div className="nm">سارة &amp; أمين</div>
                     <div className="dt" style={{ fontFamily: "var(--font-ar)", direction: "rtl" }}>٢٠ أكتوبر ٢٠٢٦</div>
                   </div>
-                  <span className="badge soon" style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)" }}>Bientôt</span>
                 </div>
               </div>
               <p style={{ marginTop: 18, fontFamily: "var(--font-title)", letterSpacing: ".16em", fontSize: 13, color: "var(--gold-light)" }}>
                 BORDEAUX &amp; OVALE
               </p>
-            </div>
+            </a>
 
             {/* Business */}
-            <div className="reveal d3" style={{ textAlign: "center" }}>
+            <a href="/themes-preview/soiree-prestige.html" className="reveal d3" style={{ textAlign: "center", display: "block", textDecoration: "none" }}>
               <div className="phone" data-parallax="6">
                 <div className="notch" />
                 <div className="screen">
@@ -114,13 +113,12 @@ export default function HomePage() {
                     <div style={{ fontFamily: "var(--font-title)", fontSize: 22, color: "var(--gold-light)", marginTop: 10, letterSpacing: ".04em" }}>Gala 2026</div>
                     <div className="dt">SAVE THE DATE</div>
                   </div>
-                  <span className="badge soon" style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)" }}>Bientôt</span>
                 </div>
               </div>
               <p style={{ marginTop: 18, fontFamily: "var(--font-title)", letterSpacing: ".16em", fontSize: 13, color: "var(--gold-light)" }}>
                 SOIRÉE PRESTIGE
               </p>
-            </div>
+            </a>
           </div>
 
           <div className="center reveal" style={{ marginTop: 54 }}>
