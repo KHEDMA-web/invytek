@@ -192,6 +192,30 @@
 
 .content { position: relative; z-index: 3; text-align: center; }
 
+/* ════════ Guest badge ════════ */
+.guestBadge {
+  display: inline-flex; flex-direction: column; align-items: center;
+  gap: 0.15rem;
+  margin-bottom: 1.2rem;
+  padding: 0.6rem 1.6rem;
+  border: 1px solid rgba(184,146,60,0.35);
+  border-radius: 40px;
+  background: rgba(184,146,60,0.06);
+  opacity: 0; animation: rise 0.7s 0.3s ease forwards;
+}
+.guestBadgePre {
+  font-family: 'Marcellus', serif;
+  font-size: 0.62rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--gold); text-indent: 0.28em;
+}
+.guestBadgeName {
+  font-family: 'Pinyon Script', cursive;
+  font-size: 1.9rem; line-height: 1;
+  background: linear-gradient(110deg, var(--gold-darker), var(--gold-deep), var(--gold));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* ════════ Bismillah ════════ */
 .bismillah {
   font-size: 1.7rem;

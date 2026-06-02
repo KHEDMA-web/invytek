@@ -50,5 +50,6 @@ model Guest {
   partySize    Int        @default(1)
   message      String?
   respondedAt  DateTime?
+  token        String     @unique @default(cuid())
   invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
 }

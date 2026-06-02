@@ -67,7 +67,29 @@ async function main() {
     },
   });
 
+  // Demo guests with unique tokens
+  const demoGuests = [
+    { name: "Ahmed Benali",    contact: "ahmed@example.com",  token: "demo-tk-ahmed"   },
+    { name: "Fatima Cherif",   contact: "fatima@example.com", token: "demo-tk-fatima"  },
+    { name: "Karim Meziane",   contact: "karim@example.com",  token: "demo-tk-karim"   },
+  ];
+
+  const inv = await prisma.invitation.findUnique({ where: { slug: "demo-mariage-2026" } });
+  if (inv) {
+    for (const g of demoGuests) {
+      await prisma.guest.upsert({
+        where: { token: g.token },
+        update: { name: g.name, contact: g.contact },
+        create: { invitationId: inv.id, name: g.name, contact: g.contact, token: g.token },
+      });
+    }
+  }
+
   console.log("Seed done — invitation: /i/demo-mariage-2026");
+  console.log("Demo guest links:");
+  demoGuests.forEach(g =>
+    console.log(`  /i/demo-mariage-2026/g/${g.token}  — ${g.name}`)
+  );
 }
 
 main()

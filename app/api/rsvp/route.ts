@@ -8,6 +8,7 @@ const schema = z.object({
   status: z.enum(["attending", "declined"]),
   partySize: z.number().int().min(1).max(20).default(1),
   message: z.string().max(500).optional(),
+  token: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Données invalides" }, { status: 400 });
   }
 
-  const { invitationId, name, status, partySize, message } = parsed.data;
+  const { invitationId, name, status, partySize, message, token } = parsed.data;
 
   const invitation = await prisma.invitation.findUnique({
     where: { id: invitationId, status: "published" },
@@ -32,16 +33,29 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invitation introuvable" }, { status: 404 });
   }
 
-  await prisma.guest.create({
-    data: {
-      invitationId,
-      name,
-      status,
-      partySize: status === "attending" ? partySize : 1,
-      message: message || null,
-      respondedAt: new Date(),
-    },
-  });
+  if (token) {
+    // Nominatif : mise à jour de l'invité existant
+    const guest = await prisma.guest.findUnique({ where: { token } });
+    if (!guest || guest.invitationId !== invitationId) {
+      return NextResponse.json({ error: "Lien invalide" }, { status: 404 });
+    }
+    await prisma.guest.update({
+      where: { token },
+      data: { name, status, partySize: status === "attending" ? partySize : 1, message: message || null, respondedAt: new Date() },
+    });
+  } else {
+    // Lien public : création d'un nouvel invité
+    await prisma.guest.create({
+      data: {
+        invitationId,
+        name,
+        status,
+        partySize: status === "attending" ? partySize : 1,
+        message: message || null,
+        respondedAt: new Date(),
+      },
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }

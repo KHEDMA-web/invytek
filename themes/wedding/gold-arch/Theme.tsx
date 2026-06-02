@@ -8,9 +8,12 @@ interface Props {
   content: WeddingContent;
   options?: Partial<WeddingOptions>;
   invitationId?: string;
+  guestName?: string;
+  guestToken?: string;
+  alreadyResponded?: boolean;
 }
 
-export default function GoldArchTheme({ content, options = {}, invitationId }: Props) {
+export default function GoldArchTheme({ content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false }: Props) {
   const {
     showCountdown = true,
     showArabic = true,
@@ -24,7 +27,7 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
   const [toast, setToast] = useState<string | null>(null);
 
   // RSVP
-  const [rsvpName, setRsvpName] = useState("");
+  const [rsvpName, setRsvpName] = useState(guestName ?? "");
   const [rsvpAttending, setRsvpAttending] = useState<"attending" | "declined" | null>(null);
   const [rsvpSize, setRsvpSize] = useState(1);
   const [rsvpMessage, setRsvpMessage] = useState("");
@@ -145,6 +148,7 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
           status: rsvpAttending,
           partySize: rsvpSize,
           message: rsvpMessage.trim() || undefined,
+          token: guestToken,
         }),
       });
       if (!res.ok) throw new Error();
@@ -275,6 +279,14 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
           </svg>
 
           <div className={styles.content}>
+            {/* Nominatif */}
+            {guestName && (
+              <div className={styles.guestBadge}>
+                <span className={styles.guestBadgePre}>À l&apos;attention de</span>
+                <span className={styles.guestBadgeName}>{guestName}</span>
+              </div>
+            )}
+
             {/* Bismillah */}
             {showArabic && content.bismillah && (
               <div className={styles.bismillah}>بِسْمِ اللهِ الرَّحْمٰنِ الرَّحِيْمِ</div>
@@ -411,17 +423,20 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
 
                 <h2 className={styles.rsvpTitle}>Confirmez votre présence</h2>
 
-                {rsvpSent ? (
+                {rsvpSent || alreadyResponded ? (
                   <div className={styles.rsvpDone}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width={36} height={36}>
                       <circle cx="12" cy="12" r="10"/>
                       <path d="M8 12l3 3 5-5"/>
                     </svg>
                     <p>
-                      Merci <strong>{rsvpName}</strong> !<br/>
-                      {rsvpAttending === "attending"
-                        ? "Votre présence a bien été confirmée. Nous vous attendons avec joie."
-                        : "Votre réponse a bien été enregistrée. Merci de nous avoir informés."}
+                      {alreadyResponded && !rsvpSent
+                        ? <>Vous avez déjà répondu à cette invitation,<br/><strong>{guestName ?? rsvpName}</strong>. Merci !</>
+                        : <>Merci <strong>{rsvpName}</strong> !<br/>
+                          {rsvpAttending === "attending"
+                            ? "Votre présence a bien été confirmée. Nous vous attendons avec joie."
+                            : "Votre réponse a bien été enregistrée. Merci de nous avoir informés."}</>
+                      }
                     </p>
                   </div>
                 ) : (
