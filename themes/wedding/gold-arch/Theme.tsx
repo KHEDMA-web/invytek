@@ -22,6 +22,15 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
   const [countdown, setCountdown] = useState({ j: "––", h: "––", m: "––", s: "––" });
   const [cdDone, setCdDone] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  // RSVP
+  const [rsvpName, setRsvpName] = useState("");
+  const [rsvpAttending, setRsvpAttending] = useState<"attending" | "declined" | null>(null);
+  const [rsvpSize, setRsvpSize] = useState(1);
+  const [rsvpMessage, setRsvpMessage] = useState("");
+  const [rsvpSent, setRsvpSent] = useState(false);
+  const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [rsvpError, setRsvpError] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const sparklesRef = useRef<HTMLDivElement>(null);
   const petalRef = useRef<HTMLDivElement>(null);
@@ -120,6 +129,32 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
   }, [toast]);
 
   function showToast(msg: string) { setToast(msg); }
+
+  async function submitRsvp(e: React.FormEvent) {
+    e.preventDefault();
+    if (!invitationId || !rsvpAttending || rsvpName.trim().length < 2) return;
+    setRsvpLoading(true);
+    setRsvpError(null);
+    try {
+      const res = await fetch("/api/rsvp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          invitationId,
+          name: rsvpName.trim(),
+          status: rsvpAttending,
+          partySize: rsvpSize,
+          message: rsvpMessage.trim() || undefined,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setRsvpSent(true);
+    } catch {
+      setRsvpError("Une erreur est survenue. Réessayez.");
+    } finally {
+      setRsvpLoading(false);
+    }
+  }
 
   function saveDate() {
     const [y, mo, d] = content.date.split("-");
@@ -355,7 +390,7 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
                 </a>
               )}
               {showRsvp && invitationId && (
-                <a className={`${styles.btn} ${styles.btnGhost}`} href={`#rsvp`}>
+                <a className={`${styles.btn} ${styles.btnGhost}`} href="#rsvp">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                     <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/>
                   </svg>
@@ -363,6 +398,101 @@ export default function GoldArchTheme({ content, options = {}, invitationId }: P
                 </a>
               )}
             </div>
+            {/* RSVP */}
+            {showRsvp && invitationId && (
+              <section className={styles.rsvp} id="rsvp">
+                <div className={styles.orn} style={{ marginTop: "2rem" }}>
+                  <span className={styles.ornLine} />
+                  <svg viewBox="0 0 24 24" fill="none" width={26} height={26}>
+                    <path d="M12 2 C14 7 17 9 12 12 C7 9 10 7 12 2Z M12 22 C10 17 7 15 12 12 C17 15 14 17 12 22Z M2 12 C7 14 9 17 12 12 C9 7 7 10 2 12Z M22 12 C17 14 15 17 12 12 C15 7 17 10 22 12Z" fill="#B8923C"/>
+                  </svg>
+                  <span className={`${styles.ornLine} ${styles.ornLineR}`} />
+                </div>
+
+                <h2 className={styles.rsvpTitle}>Confirmez votre présence</h2>
+
+                {rsvpSent ? (
+                  <div className={styles.rsvpDone}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width={36} height={36}>
+                      <circle cx="12" cy="12" r="10"/>
+                      <path d="M8 12l3 3 5-5"/>
+                    </svg>
+                    <p>
+                      Merci <strong>{rsvpName}</strong> !<br/>
+                      {rsvpAttending === "attending"
+                        ? "Votre présence a bien été confirmée. Nous vous attendons avec joie."
+                        : "Votre réponse a bien été enregistrée. Merci de nous avoir informés."}
+                    </p>
+                  </div>
+                ) : (
+                  <form className={styles.rsvpForm} onSubmit={submitRsvp}>
+                    <input
+                      className={styles.rsvpInput}
+                      type="text"
+                      placeholder="Votre nom complet"
+                      value={rsvpName}
+                      onChange={e => setRsvpName(e.target.value)}
+                      required
+                      minLength={2}
+                      maxLength={80}
+                    />
+
+                    <div className={styles.rsvpToggle}>
+                      <button
+                        type="button"
+                        className={`${styles.rsvpToggleBtn} ${rsvpAttending === "attending" ? styles.rsvpToggleActive : ""}`}
+                        onClick={() => setRsvpAttending("attending")}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width={16} height={16}>
+                          <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        Je serai là
+                      </button>
+                      <button
+                        type="button"
+                        className={`${styles.rsvpToggleBtn} ${rsvpAttending === "declined" ? styles.rsvpToggleDeclined : ""}`}
+                        onClick={() => setRsvpAttending("declined")}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width={16} height={16}>
+                          <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                        Je ne pourrai pas
+                      </button>
+                    </div>
+
+                    {rsvpAttending === "attending" && (
+                      <div className={styles.rsvpSizeRow}>
+                        <span className={styles.rsvpSizeLabel}>Nombre de personnes</span>
+                        <div className={styles.rsvpSizeCtrl}>
+                          <button type="button" className={styles.rsvpSizeBtn} onClick={() => setRsvpSize(s => Math.max(1, s - 1))}>−</button>
+                          <span className={styles.rsvpSizeVal}>{rsvpSize}</span>
+                          <button type="button" className={styles.rsvpSizeBtn} onClick={() => setRsvpSize(s => Math.min(20, s + 1))}>+</button>
+                        </div>
+                      </div>
+                    )}
+
+                    <textarea
+                      className={styles.rsvpTextarea}
+                      placeholder="Un message (optionnel)"
+                      value={rsvpMessage}
+                      onChange={e => setRsvpMessage(e.target.value)}
+                      maxLength={500}
+                      rows={3}
+                    />
+
+                    {rsvpError && <p className={styles.rsvpError}>{rsvpError}</p>}
+
+                    <button
+                      type="submit"
+                      className={`${styles.btn} ${styles.btnPrimary} ${styles.rsvpSubmit}`}
+                      disabled={!rsvpAttending || rsvpName.trim().length < 2 || rsvpLoading}
+                    >
+                      {rsvpLoading ? "Envoi…" : "Confirmer →"}
+                    </button>
+                  </form>
+                )}
+              </section>
+            )}
           </div>
         </div>
       </div>

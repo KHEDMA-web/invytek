@@ -580,6 +580,131 @@
 }
 @keyframes hintBlink { 0%,100%{opacity:0.4;} 50%{opacity:1;} }
 
+/* ════════ RSVP ════════ */
+.rsvp {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  scroll-margin-top: 24px;
+}
+
+.rsvpTitle {
+  font-family: 'Marcellus', serif;
+  font-size: 1.3rem; font-weight: 400;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--gold-deep); text-indent: 0.14em;
+  margin: 1.2rem 0 1.4rem;
+  opacity: 0; animation: rise 0.8s 0.1s ease forwards;
+}
+
+.rsvpForm {
+  display: flex; flex-direction: column; gap: 0.9rem;
+  opacity: 0; animation: rise 0.8s 0.2s ease forwards;
+}
+
+.rsvpInput, .rsvpTextarea {
+  width: 100%;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem; color: var(--ink);
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(184,146,60,0.35);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: none;
+}
+.rsvpInput::placeholder, .rsvpTextarea::placeholder {
+  color: var(--ink-soft); opacity: 0.6;
+}
+.rsvpInput:focus, .rsvpTextarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184,146,60,0.12);
+}
+
+.rsvpToggle {
+  display: flex; gap: 0.6rem;
+}
+.rsvpToggleBtn {
+  flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  font-family: 'Marcellus', serif;
+  font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.75rem 0.5rem; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(184,146,60,0.3);
+  background: rgba(255,255,255,0.5);
+  color: var(--ink-soft);
+  transition: all 0.2s ease;
+}
+.rsvpToggleBtn:hover {
+  border-color: var(--gold); color: var(--gold-deep);
+}
+.rsvpToggleActive {
+  background: linear-gradient(135deg, var(--gold-bright), var(--gold-deep));
+  color: #fff; border-color: transparent;
+  box-shadow: 0 4px 14px rgba(184,146,60,0.35);
+}
+.rsvpToggleDeclined {
+  background: rgba(90,70,18,0.1);
+  color: var(--gold-deep); border-color: var(--gold);
+}
+
+.rsvpSizeRow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(184,146,60,0.25);
+  border-radius: 8px;
+}
+.rsvpSizeLabel {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; color: var(--ink-soft);
+}
+.rsvpSizeCtrl {
+  display: flex; align-items: center; gap: 0.8rem;
+}
+.rsvpSizeBtn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(184,146,60,0.4);
+  background: white; color: var(--gold-deep);
+  font-size: 1.1rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.rsvpSizeBtn:hover {
+  background: var(--gold-pale); border-color: var(--gold);
+}
+.rsvpSizeVal {
+  font-family: 'Marcellus', serif;
+  font-size: 1.3rem; color: var(--gold-deep); min-width: 1.4rem; text-align: center;
+}
+
+.rsvpSubmit {
+  width: 100%; justify-content: center;
+  margin-top: 0.2rem;
+}
+.rsvpSubmit:disabled {
+  opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important;
+}
+
+.rsvpError {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem; color: #8B2F2F;
+  text-align: center; margin: 0;
+}
+
+.rsvpDone {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  padding: 1.8rem 1rem;
+  color: var(--gold-deep);
+  opacity: 0; animation: rise 0.7s ease forwards;
+}
+.rsvpDone svg { color: var(--gold-bright); }
+.rsvpDone p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.18rem; line-height: 1.7;
+  color: var(--ink-body); text-align: center; margin: 0;
+}
+.rsvpDone strong { color: var(--gold-deep); font-weight: 500; }
+
 /* prefers-reduced-motion */
 @media (prefers-reduced-motion: reduce) {
   .card, .card::before, .card::after,
