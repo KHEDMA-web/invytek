@@ -221,7 +221,7 @@
   function syncOrg(){ const c=document.querySelector('[data-f="company"]').textContent.trim(); document.querySelector('[data-gate-org]').textContent=c; }
 
   window.INVYTEK_CONFIG={
-    theme:'soiree-prestige', accent:'#D4AF61', accent2:'#B8923C', backHref:'../themes.html', onChange:syncOrg,
+    theme:'soiree-prestige', accent:'#D4AF61', accent2:'#B8923C', backHref:'/themes', onChange:syncOrg,
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.back'},
       {key:'eyebrow', label:'Formule d\'invitation', sel:'[data-f="eyebrow"]', type:'text'},
@@ -255,6 +255,6 @@
 
   syncOrg();
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 </body>
 </html>

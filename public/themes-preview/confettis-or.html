@@ -249,7 +249,7 @@
   syncName();
 
   window.INVYTEK_CONFIG={
-    theme:'confettis-or', accent:'#D4AF61', accent2:'#B8923C', backHref:'../themes.html', onChange:syncName,
+    theme:'confettis-or', accent:'#D4AF61', accent2:'#B8923C', backHref:'/themes', onChange:syncName,
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'gateText', label:'Texte de la boîte cadeau', sel:'[data-f="gateText"]', type:'text'},
@@ -285,6 +285,6 @@
   // Safety: guarantee content is visible even if entrance animations are throttled
   setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1700);
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 </body>
 </html>

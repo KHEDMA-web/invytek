@@ -247,7 +247,7 @@
   })();
 
   window.INVYTEK_CONFIG={
-    theme:'conference-tech', accent:'#38E1FF', accent2:'#5B8CFF', backHref:'../themes.html',
+    theme:'conference-tech', accent:'#38E1FF', accent2:'#5B8CFF', backHref:'/themes',
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'opening', label:'Animation d\'ouverture', type:'select', val:'badge', options:[{value:'badge',label:'Badge nominatif'},{value:'split',label:'Rideau (split)'}]},
@@ -266,7 +266,7 @@
     onChange:function(d){ if(d.opening) setOpening(d.opening); syncBits(); }
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 <script>syncBits();</script>
 </body>
 </html>

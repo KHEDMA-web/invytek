@@ -190,7 +190,7 @@
   })();
 
   window.INVYTEK_CONFIG={
-    theme:'anniv-neon', accent:'#FF3CAC', accent2:'#9A5BFF', backHref:'../themes.html',
+    theme:'anniv-neon', accent:'#FF3CAC', accent2:'#9A5BFF', backHref:'/themes',
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'opening', label:'Animation d\'ouverture', type:'select', val:'candles', options:[{value:'candles',label:'Souffler les bougies'},{value:'boom',label:'Explosion de confettis'}]},
@@ -207,7 +207,7 @@
     onChange:function(d){ if(d.opening) setOpening(d.opening); syncGate(); }
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 <script>syncGate();</script>
 </body>
 </html>

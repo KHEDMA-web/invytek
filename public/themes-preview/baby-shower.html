@@ -182,7 +182,7 @@
       e.style.bottom=(-10-Math.random()*20)+'%'; e.style.transitionDelay=(Math.random()*.3)+'s'; e.style.transform='translateY('+(Math.random()*30)+'px)'; b.appendChild(e); } })();
 
   window.INVYTEK_CONFIG={
-    theme:'baby-shower', accent:'#8FCDE8', accent2:'#5fa8cc', backHref:'../themes.html',
+    theme:'baby-shower', accent:'#8FCDE8', accent2:'#5fa8cc', backHref:'/themes',
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'opening', label:'Animation d\'ouverture', type:'select', val:'cloud', options:[{value:'cloud',label:'Nuages qui s\'écartent'},{value:'balloon',label:'Ballons qui s\'envolent'}]},
@@ -200,7 +200,7 @@
     onChange:function(d){ if(d.opening) setOpening(d.opening); if(d.palette) setPalette(d.palette); syncGate(); }
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 <script>syncGate();</script>
 </body>
 </html>

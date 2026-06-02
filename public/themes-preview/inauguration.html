@@ -181,7 +181,7 @@
   function syncLogo(){ const o=document.querySelector('[data-f="org"]').textContent.trim(); const ini=o.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'AC'; document.querySelectorAll('[data-logo]').forEach(e=>e.textContent=ini); }
 
   window.INVYTEK_CONFIG={
-    theme:'inauguration', accent:'#C19A4B', accent2:'#1F5B43', backHref:'../themes.html',
+    theme:'inauguration', accent:'#C19A4B', accent2:'#1F5B43', backHref:'/themes',
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'opening', label:'Animation d\'ouverture', type:'select', val:'ribbon', options:[{value:'ribbon',label:'Couper le ruban'},{value:'spot',label:'Projecteur'}]},
@@ -197,7 +197,7 @@
     onChange:function(d){ if(d.opening) setOpening(d.opening); syncLogo(); }
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 <script>syncLogo();</script>
 </body>
 </html>

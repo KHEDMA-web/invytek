@@ -223,7 +223,7 @@
     sp.style.animationDuration=(Math.random()*13+9)+'s'; sp.style.animationDelay=(Math.random()*12)+'s'; sc.appendChild(sp); }
 
   window.INVYTEK_CONFIG={
-    theme:'or-arche', accent:'#D4AF61', accent2:'#B8923C', backHref:'../themes.html', onChange:syncMono,
+    theme:'or-arche', accent:'#D4AF61', accent2:'#B8923C', backHref:'/themes', onChange:syncMono,
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'arabic', label:'Ligne arabe (optionnel)', sel:'[data-f="arabic"]', type:'text'},
@@ -238,7 +238,7 @@
     ]
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 <script>syncMono();</script>
 </body>
 </html>

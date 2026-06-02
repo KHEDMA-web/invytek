@@ -177,7 +177,7 @@
   function syncGate(){ const t=document.querySelector('[data-f="title"]').textContent.trim().split(/\s+/)[0]||'Congrès'; document.querySelector('[data-f="gateTi"]').textContent=t; }
 
   window.INVYTEK_CONFIG={
-    theme:'congres-medical', accent:'#128C7E', accent2:'#0c5f55', backHref:'../themes.html',
+    theme:'congres-medical', accent:'#128C7E', accent2:'#0c5f55', backHref:'/themes',
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'opening', label:'Animation d\'ouverture', type:'select', val:'ecg', options:[{value:'ecg',label:'Ligne ECG'},{value:'molecule',label:'Molécule'}]},
@@ -197,7 +197,7 @@
     onChange:function(d){ if(d.opening) setOpening(d.opening); syncGate(); }
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 <script>syncGate();</script>
 </body>
 </html>

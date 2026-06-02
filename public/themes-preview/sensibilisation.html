@@ -163,7 +163,7 @@
   function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
 
   window.INVYTEK_CONFIG={
-    theme:'sensibilisation', accent:'#E0518A', accent2:'#b83c6e', backHref:'../themes.html',
+    theme:'sensibilisation', accent:'#E0518A', accent2:'#b83c6e', backHref:'/themes',
     fields:[
       {key:'logo', label:'Logo (PNG transparent, optionnel)', type:'image', mount:'.card'},
       {key:'opening', label:'Animation d\'ouverture', type:'select', val:'ribbon', options:[{value:'ribbon',label:'Ruban de sensibilisation'},{value:'halo',label:'Halo lumineux'}]},
@@ -180,6 +180,6 @@
     onChange:function(d){ if(d.opening) setOpening(d.opening); if(d.cause) setCause(d.cause); }
   };
 </script>
-<script src="../assets/editor.js"></script>
+<script src="assets/editor.js"></script>
 </body>
 </html>
