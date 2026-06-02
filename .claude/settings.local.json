@@ -1,9 +1,15 @@
 {
   "permissions": {
+    "defaultMode": "bypassPermissions",
     "allow": [
       "PowerShell(Get-ChildItem *)",
       "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\PC PRO DZ\\\\invytek\" -Force -Recurse -ErrorAction SilentlyContinue | ForEach-Object { $_.FullName })",
-      "PowerShell($f1 = Get-FileHash \"c:\\\\Users\\\\PC PRO DZ\\\\Downloads\\\\invitation_mariage_final.html\" -Algorithm MD5; $f2 = Get-FileHash \"c:\\\\Users\\\\PC PRO DZ\\\\Downloads\\\\invitation_mariage_final \\(1\\).html\" -Algorithm MD5; \"File1: $\\($f1.Hash\\)\"; \"File2: $\\($f2.Hash\\)\"; if\\($f1.Hash -eq $f2.Hash\\){\"IDENTIQUES\"} else {\"DIFFÉRENTS\"})"
+      "PowerShell($f1 = Get-FileHash \"c:\\\\Users\\\\PC PRO DZ\\\\Downloads\\\\invitation_mariage_final.html\" -Algorithm MD5; $f2 = Get-FileHash \"c:\\\\Users\\\\PC PRO DZ\\\\Downloads\\\\invitation_mariage_final \\(1\\).html\" -Algorithm MD5; \"File1: $\\($f1.Hash\\)\"; \"File2: $\\($f2.Hash\\)\"; if\\($f1.Hash -eq $f2.Hash\\){\"IDENTIQUES\"} else {\"DIFFÉRENTS\"})",
+      "PowerShell(node -e \"const m = require\\('@prisma/adapter-better-sqlite3'\\); console.log\\(m.PrismaBetterSqlite3.toString\\(\\).substring\\(0, 300\\)\\)\"e)",
+      "PowerShell(node -e \"const m = require\\('@prisma/adapter-better-sqlite3'\\); const src = require\\('fs'\\).readFileSync\\(require.resolve\\('@prisma/adapter-better-sqlite3/dist/index.js'\\), 'utf8'\\); const idx = src.indexOf\\('createBetterSQLite3Client'\\); console.log\\(src.substring\\(idx, idx+400\\)\\)\")",
+      "PowerShell(cd \"C:\\\\Users\\\\PC PRO DZ\\\\invytek\"; npx tsx -e \"import { PrismaClient } from '@prisma/client'; import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3'; console.log\\('cwd:', process.cwd\\(\\)\\); const adapter = new PrismaBetterSqlite3\\('C:/Users/PC PRO DZ/invytek/prisma/dev.db'\\); const prisma = new PrismaClient\\({ adapter } as any\\); prisma.user.count\\(\\).then\\(n => console.log\\('count:', n\\)\\).catch\\(e => console.error\\('ERR:', e.message\\)\\).finally\\(\\(\\) => prisma.\\\\$disconnect\\(\\)\\)\" 2>&1)",
+      "PowerShell(Start-Sleep -Seconds 2; $resp = Invoke-WebRequest -Uri \"http://localhost:3000/i/nabil-imene-2026\" -UseBasicParsing -TimeoutSec 15; \"Status: $\\($resp.StatusCode\\)\"; $resp.Content.Substring\\(0, 300\\))",
+      "Skill(update-config)"
     ]
   }
 }

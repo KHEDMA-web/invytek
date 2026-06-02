@@ -32,7 +32,8 @@ export function Nav() {
           <Link href="/#proof">Pourquoi nous</Link>
         </div>
         <div className="nav-cta">
-          <Link className="btn btn-gold btn-sm" href="/themes">Créer mon invitation</Link>
+          <Link className="btn btn-ghost btn-sm" href="/dashboard">Mon espace</Link>
+          <Link className="btn btn-gold btn-sm" href="/create">Créer mon invitation</Link>
         </div>
       </div>
     </nav>

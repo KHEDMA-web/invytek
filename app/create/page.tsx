@@ -1,0 +1,309 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Nav } from "@/components/Nav";
+
+const THEMES = [
+  { id: "gold-arch",        name: "Or & Arche",              cat: "Mariage",       available: true },
+  { id: "bordeaux-oval",    name: "Bordeaux & Ovale Floral", cat: "Mariage · RTL", available: false },
+  { id: "ivoire-minimal",   name: "Ivoire Minimal",          cat: "Mariage",       available: false },
+  { id: "soiree-prestige",  name: "Soirée Prestige",         cat: "Business",      available: false },
+  { id: "confettis-or",     name: "Confettis d'Or",          cat: "Anniversaire",  available: false },
+];
+
+function slugify(s: string) {
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+export default function CreatePage() {
+  const router = useRouter();
+  const params = useSearchParams();
+
+  const [step, setStep] = useState(1);
+  const [themeId, setThemeId] = useState(params.get("theme") || "gold-arch");
+
+  // Content
+  const [name1, setName1] = useState("");
+  const [name2, setName2] = useState("");
+  const [hosts, setHosts] = useState("");
+  const [invLine, setInvLine] = useState("ont l'immense plaisir de vous convier à la cérémonie de mariage de");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("15:00");
+  const [dayLabel, setDayLabel] = useState("Samedi");
+  const [venue, setVenue] = useState("");
+  const [venueSub, setVenueSub] = useState("");
+  const [closing, setClosing] = useState("Soyez les Bienvenus");
+  const [note, setNote] = useState("");
+  const [bismillah, setBismillah] = useState(true);
+  const [showArabic, setShowArabic] = useState(true);
+  const [showCountdown, setShowCountdown] = useState(true);
+  const [showRsvp, setShowRsvp] = useState(true);
+
+  // Slug
+  const [slug, setSlug] = useState("");
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
+  const [slugChecking, setSlugChecking] = useState(false);
+
+  // Submit
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Auto-generate slug from names
+  useEffect(() => {
+    if (name1 && name2) {
+      const year = date ? new Date(date).getFullYear() : new Date().getFullYear();
+      setSlug(slugify(`${name1}-${name2}-${year}`));
+    }
+  }, [name1, name2, date]);
+
+  // Debounced slug check
+  useEffect(() => {
+    if (!slug || slug.length < 3) { setSlugAvailable(null); return; }
+    setSlugChecking(true);
+    const t = setTimeout(async () => {
+      const res = await fetch(`/api/invitations/check-slug?slug=${slug}`);
+      const { available } = await res.json();
+      setSlugAvailable(available);
+      setSlugChecking(false);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [slug]);
+
+  async function publish() {
+    setLoading(true);
+    setError(null);
+    const dateObj = new Date(date + "T12:00:00");
+    const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    const content = {
+      hosts,
+      invitationLine: invLine,
+      names: [name1, name2] as [string, string],
+      namesSeparator: "avec",
+      bismillah,
+      date,
+      time,
+      dayLabel: dayLabels[dateObj.getDay()] || dayLabel,
+      venue,
+      venueSub: venueSub || undefined,
+      note: note || undefined,
+      closing,
+      initials: [name1[0]?.toUpperCase() || "A", name2[0]?.toUpperCase() || "B"] as [string, string],
+    };
+    const options = { showCountdown, showRsvp, showArabic, showNote: !!note };
+
+    const res = await fetch("/api/invitations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ themeId, slug, content, options }),
+    });
+    const data = await res.json();
+    if (!res.ok) { setError(data.error || "Erreur"); setLoading(false); return; }
+    router.push(`/dashboard`);
+  }
+
+  return (
+    <div className="invytek-page" style={{ minHeight: "100dvh", paddingBottom: "4rem" }}>
+      <Nav />
+      <div className="wrap" style={{ paddingTop: 120, maxWidth: 720 }}>
+
+        {/* Steps */}
+        <div style={{ display: "flex", gap: 8, marginBottom: "2.5rem", alignItems: "center" }}>
+          {[1, 2, 3].map(s => (
+            <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                background: step >= s ? "linear-gradient(135deg, var(--gold-vivid), var(--accent))" : "rgba(184,146,60,0.1)",
+                border: step >= s ? "none" : "1px solid var(--hair)",
+                fontFamily: "var(--font-title)", fontSize: 13,
+                color: step >= s ? "#2a2008" : "var(--text-faint)",
+                cursor: step > s ? "pointer" : "default",
+              }} onClick={() => step > s && setStep(s)}>
+                {s}
+              </div>
+              {s < 3 && <div style={{ width: 40, height: 1, background: step > s ? "var(--gold)" : "var(--hair)" }} />}
+            </div>
+          ))}
+          <span style={{ marginLeft: 8, fontFamily: "var(--font-title)", fontSize: 12, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--text-soft)" }}>
+            {step === 1 ? "Thème" : step === 2 ? "Votre événement" : "Lien & publication"}
+          </span>
+        </div>
+
+        {/* Step 1 — Choix du thème */}
+        {step === 1 && (
+          <div>
+            <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
+              Choisissez votre thème
+            </h2>
+            <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>
+              Seul « Or &amp; Arche » est disponible pour l&apos;instant — les autres arrivent.
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 16, marginBottom: "2rem" }}>
+              {THEMES.map(t => (
+                <button key={t.id} onClick={() => t.available && setThemeId(t.id)} style={{
+                  padding: "1.2rem", borderRadius: 10,
+                  border: themeId === t.id ? "2px solid var(--gold)" : "1px solid var(--hair)",
+                  background: themeId === t.id ? "rgba(184,146,60,0.1)" : "rgba(255,255,255,0.02)",
+                  cursor: t.available ? "pointer" : "not-allowed",
+                  opacity: t.available ? 1 : 0.45,
+                  textAlign: "left",
+                }}>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>{t.cat}</div>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 17, color: "var(--ivory)" }}>{t.name}</div>
+                  {!t.available && <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 4 }}>Bientôt</div>}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setStep(2)} className="btn btn-gold">Continuer →</button>
+          </div>
+        )}
+
+        {/* Step 2 — Contenu */}
+        {step === 2 && (
+          <div>
+            <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "2rem" }}>
+              Votre événement
+            </h2>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1.4rem" }}>
+              <Row label="Prénoms des mariés">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <input value={name1} onChange={e => setName1(e.target.value)} placeholder="Adam" style={inp} />
+                  <input value={name2} onChange={e => setName2(e.target.value)} placeholder="Sara" style={inp} />
+                </div>
+              </Row>
+              <Row label="Familles (ex: M. & Mme Benali)">
+                <input value={hosts} onChange={e => setHosts(e.target.value)} placeholder="M. & Mme Benali" style={inp} />
+              </Row>
+              <Row label="Phrase d'invitation">
+                <textarea value={invLine} onChange={e => setInvLine(e.target.value)} rows={2} style={{ ...inp, height: "auto", resize: "vertical" }} />
+              </Row>
+              <Row label="Date & heure">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} />
+                  <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inp} />
+                </div>
+              </Row>
+              <Row label="Lieu">
+                <input value={venue} onChange={e => setVenue(e.target.value)} placeholder="Salle Al Baraka" style={inp} />
+                <input value={venueSub} onChange={e => setVenueSub(e.target.value)} placeholder="Quartier, Ville (optionnel)" style={{ ...inp, marginTop: 8 }} />
+              </Row>
+              <Row label="Mot de clôture">
+                <input value={closing} onChange={e => setClosing(e.target.value)} placeholder="Soyez les Bienvenus" style={inp} />
+              </Row>
+              <Row label="Note (optionnel)">
+                <input value={note} onChange={e => setNote(e.target.value)} placeholder="Merci d'éviter les photos…" style={inp} />
+              </Row>
+              <Row label="Options">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+                  {[
+                    { label: "Bismillah", val: bismillah, set: setBismillah },
+                    { label: "Texte arabe", val: showArabic, set: setShowArabic },
+                    { label: "Compte à rebours", val: showCountdown, set: setShowCountdown },
+                    { label: "RSVP", val: showRsvp, set: setShowRsvp },
+                  ].map(o => (
+                    <label key={o.label} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-soft)", fontSize: "0.95rem" }}>
+                      <input type="checkbox" checked={o.val} onChange={e => o.set(e.target.checked)}
+                        style={{ accentColor: "var(--gold)", width: 15, height: 15 }} />
+                      {o.label}
+                    </label>
+                  ))}
+                </div>
+              </Row>
+            </div>
+            <div style={{ display: "flex", gap: 12, marginTop: "2rem" }}>
+              <button onClick={() => setStep(1)} className="btn btn-ghost">← Retour</button>
+              <button onClick={() => setStep(3)} disabled={!name1 || !name2 || !date || !venue || !hosts} className="btn btn-gold">Continuer →</button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3 — Slug & Publication */}
+        {step === 3 && (
+          <div>
+            <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
+              Lien de votre invitation
+            </h2>
+            <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>
+              C&apos;est le lien que vous enverrez à vos invités.
+            </p>
+
+            <div style={{ background: "rgba(184,146,60,0.06)", border: "1px solid var(--hair)", borderRadius: 10, padding: "1.2rem", marginBottom: "1.5rem" }}>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 8 }}>
+                Votre lien
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 0, background: "rgba(0,0,0,0.2)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--hair)" }}>
+                <span style={{ padding: "0.7rem 0.8rem", color: "var(--text-faint)", fontFamily: "var(--font-title)", fontSize: 13, whiteSpace: "nowrap" }}>
+                  invytek.app/i/
+                </span>
+                <input
+                  value={slug}
+                  onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--ivory)", fontFamily: "var(--font-title)", fontSize: 13, padding: "0.7rem 0.8rem 0.7rem 0" }}
+                />
+                <span style={{ padding: "0.7rem 0.8rem", fontSize: 13 }}>
+                  {slugChecking ? "⏳" : slugAvailable === true ? "✓" : slugAvailable === false ? "✗" : ""}
+                </span>
+              </div>
+              {slugAvailable === false && <p style={{ color: "#c05050", fontSize: 13, marginTop: 6, fontFamily: "var(--font-title)" }}>Ce lien est déjà pris. Modifiez-le.</p>}
+              {slugAvailable === true && <p style={{ color: "var(--gold)", fontSize: 13, marginTop: 6, fontFamily: "var(--font-title)" }}>Disponible ✓</p>}
+            </div>
+
+            {/* Récap */}
+            <div style={{ background: "rgba(184,146,60,0.04)", border: "1px solid var(--hair)", borderRadius: 10, padding: "1.2rem", marginBottom: "2rem" }}>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 12 }}>Récapitulatif</div>
+              <div style={{ display: "grid", gap: 6 }}>
+                {[
+                  ["Mariés", `${name1} & ${name2}`],
+                  ["Date", date ? new Date(date + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "—"],
+                  ["Lieu", `${venue}${venueSub ? `, ${venueSub}` : ""}`],
+                  ["Thème", THEMES.find(t => t.id === themeId)?.name || themeId],
+                ].map(([k, v]) => (
+                  <div key={k} style={{ display: "flex", gap: 12, fontSize: "0.95rem" }}>
+                    <span style={{ color: "var(--text-faint)", minWidth: 70 }}>{k}</span>
+                    <span style={{ color: "var(--text-soft)" }}>{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {error && <p style={{ color: "#c05050", marginBottom: "1rem", fontSize: "0.95rem" }}>{error}</p>}
+
+            <div style={{ display: "flex", gap: 12 }}>
+              <button onClick={() => setStep(2)} className="btn btn-ghost">← Retour</button>
+              <button
+                onClick={publish}
+                disabled={loading || !slug || slugAvailable === false || slugChecking}
+                className="btn btn-gold"
+              >
+                {loading ? "Publication…" : "Publier mon invitation →"}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label style={{ display: "block", fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 8 }}>
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+const inp: React.CSSProperties = {
+  width: "100%", padding: "0.75rem 1rem",
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(184,146,60,0.2)",
+  borderRadius: 8, outline: "none",
+  fontFamily: "'Cormorant Garamond', serif",
+  fontSize: "1.05rem", color: "#FCFAF5",
+  boxSizing: "border-box",
+};

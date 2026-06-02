@@ -1,0 +1,68 @@
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/db";
+import { z } from "zod";
+import { WeddingContentSchema, WeddingOptionsSchema } from "@/lib/schemas/wedding";
+
+const createSchema = z.object({
+  themeId: z.string().min(1),
+  slug: z.string().min(3).max(60).regex(/^[a-z0-9-]+$/, "Slug invalide (lettres minuscules, chiffres, tirets)"),
+  content: WeddingContentSchema,
+  options: WeddingOptionsSchema.partial(),
+});
+
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+
+  let body: unknown;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: "Requête invalide" }, { status: 400 }); }
+
+  const parsed = createSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+
+  const { themeId, slug, content, options } = parsed.data;
+
+  const exists = await prisma.invitation.findUnique({ where: { slug } });
+  if (exists) return NextResponse.json({ error: "Ce lien est déjà utilisé." }, { status: 409 });
+
+  const invitation = await prisma.invitation.create({
+    data: {
+      userId: session.user.id,
+      slug,
+      themeId,
+      category: "wedding",
+      status: "published",
+      content: JSON.stringify(content),
+      options: JSON.stringify(options),
+      publishedAt: new Date(),
+    },
+  });
+
+  return NextResponse.json({ ok: true, slug: invitation.slug });
+}
+
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+
+  const invitations = await prisma.invitation.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      guests: { select: { status: true } },
+    },
+  });
+
+  return NextResponse.json(invitations.map(inv => ({
+    id: inv.id,
+    slug: inv.slug,
+    themeId: inv.themeId,
+    status: inv.status,
+    createdAt: inv.createdAt,
+    content: JSON.parse(inv.content),
+    attending: inv.guests.filter(g => g.status === "attending").length,
+    declined: inv.guests.filter(g => g.status === "declined").length,
+    pending: inv.guests.filter(g => g.status === "pending").length,
+  })));
+}
