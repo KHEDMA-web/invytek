@@ -1,10 +1,14 @@
 import type { ThemeConfig } from "./types";
 import { goldArchConfig } from "./wedding/gold-arch/theme.config";
 import { bordeauxOvalConfig } from "./wedding/bordeaux-oval/theme.config";
+import { ivoireMinimalConfig } from "./wedding/ivoire-minimal/theme.config";
+import { confettisOrConfig } from "./anniversary/confettis-or/theme.config";
 
 export const themeRegistry: ThemeConfig[] = [
   goldArchConfig,
   bordeauxOvalConfig,
+  ivoireMinimalConfig,
+  confettisOrConfig,
 ];
 
 export function getTheme(slug: string): ThemeConfig | undefined {

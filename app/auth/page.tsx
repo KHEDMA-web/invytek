@@ -36,10 +36,14 @@ function AuthForm() {
         action: mode,
       });
       if (res?.error) {
-        if (res.error === "email_exists") setError("Cette adresse email est déjà utilisée.");
-        else if (res.error === "no_account") setError("Aucun compte avec cet email.");
-        else if (res.error === "bad_password") setError("Mot de passe incorrect.");
-        else setError("Une erreur est survenue.");
+        // Auth.js v5 : le code d'erreur est dans res.code ou res.error
+        const code = (res as { code?: string }).code ?? res.error;
+        if (code === "email_exists") setError("Cette adresse email est déjà utilisée.");
+        else if (code === "no_account") setError("Aucun compte trouvé avec cet email.");
+        else if (code === "bad_password") setError("Mot de passe incorrect.");
+        else if (code === "invalid_input") setError("Veuillez remplir tous les champs.");
+        else if (code === "CredentialsSignin") setError("Identifiants incorrects.");
+        else setError("Une erreur est survenue (" + code + ").");
       } else {
         router.push(params.get("callbackUrl") || "/dashboard");
       }

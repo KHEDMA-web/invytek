@@ -1,8 +1,15 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+
+class AuthError extends CredentialsSignin {
+  constructor(code: string) {
+    super();
+    this.code = code;
+  }
+}
 
 const credSchema = z.object({
   email: z.string().email(),
@@ -21,12 +28,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         const parsed = credSchema.safeParse(credentials);
-        if (!parsed.success) return null;
+        if (!parsed.success) throw new AuthError("invalid_input");
         const { email, password, name, action } = parsed.data;
 
         if (action === "register") {
           const exists = await prisma.user.findUnique({ where: { email } });
-          if (exists) throw new Error("email_exists");
+          if (exists) throw new AuthError("email_exists");
           const hash = await bcrypt.hash(password, 12);
           const user = await prisma.user.create({
             data: { email, name: name?.trim() || email.split("@")[0], password: hash },
@@ -35,9 +42,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user?.password) throw new Error("no_account");
+        if (!user?.password) throw new AuthError("no_account");
         const ok = await bcrypt.compare(password, user.password);
-        if (!ok) throw new Error("bad_password");
+        if (!ok) throw new AuthError("bad_password");
         return { id: user.id, email: user.email, name: user.name };
       },
     }),

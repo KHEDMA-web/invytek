@@ -3,11 +3,11 @@ import { prisma } from "@/lib/db";
 import { getTheme } from "@/themes/registry";
 import GoldArchTheme from "@/themes/wedding/gold-arch/Theme";
 import BordeauxOvalTheme from "@/themes/wedding/bordeaux-oval/Theme";
+import IvoireMinimalTheme from "@/themes/wedding/ivoire-minimal/Theme";
+import ConfettisOrTheme from "@/themes/anniversary/confettis-or/Theme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
 
-interface Props {
-  params: Promise<{ slug: string }>;
-}
+interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
@@ -22,7 +22,6 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function InvitationPage({ params }: Props) {
   const { slug } = await params;
-
   const invitation = await prisma.invitation.findUnique({ where: { slug, status: "published" } });
   if (!invitation) notFound();
 
@@ -32,13 +31,12 @@ export default async function InvitationPage({ params }: Props) {
   const content = JSON.parse(invitation.content) as WeddingContent;
   const options = JSON.parse(invitation.options) as Partial<WeddingOptions>;
 
-  if (theme.slug === "gold-arch") {
-    return <GoldArchTheme content={content} options={options} invitationId={invitation.id} />;
-  }
+  const props = { content, options, invitationId: invitation.id };
 
-  if (theme.slug === "bordeaux-oval") {
-    return <BordeauxOvalTheme content={content} options={options} invitationId={invitation.id} />;
-  }
+  if (theme.slug === "gold-arch")      return <GoldArchTheme {...props} />;
+  if (theme.slug === "bordeaux-oval")  return <BordeauxOvalTheme {...props} />;
+  if (theme.slug === "ivoire-minimal") return <IvoireMinimalTheme {...props} />;
+  if (theme.slug === "confettis-or")   return <ConfettisOrTheme {...props} />;
 
   notFound();
 }

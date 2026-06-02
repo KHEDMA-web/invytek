@@ -8,6 +8,7 @@ import { AddGuestForm } from "@/components/AddGuestForm";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { QrCodeToggle } from "@/components/QrCodeToggle";
 import { DeleteInvitationButton } from "@/components/DeleteInvitationButton";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -86,6 +87,9 @@ export default async function ManagePage({ params }: Props) {
           <Link href={`/i/${invitation.slug}`} target="_blank" className="btn btn-ghost btn-sm">
             Voir l&apos;invitation
           </Link>
+          <Link href={`/dashboard/${invitation.id}/edit`} className="btn btn-ghost btn-sm">
+            Modifier
+          </Link>
           <Link href="/checkin" className="btn btn-ghost btn-sm">
             Scanner les entrées →
           </Link>
@@ -123,7 +127,8 @@ export default async function ManagePage({ params }: Props) {
                       {g.checkedInAt && <div style={{ fontSize: 11, color: "#6ecf8a", marginTop: 2 }}>Arrivé {new Date(g.checkedInAt).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</div>}
                     </div>
                     <StatusBadge status={g.status} />
-                    <CopyLinkButton url={`${baseUrl}/i/${invitation.slug}/g/${g.token}`} label="Copier lien" small />
+                    <CopyLinkButton url={`${baseUrl}/i/${invitation.slug}/g/${g.token}`} label="Copier" small />
+                    <WhatsAppButton url={`${baseUrl}/i/${invitation.slug}/g/${g.token}`} guestName={g.name} small />
                   </div>
                 ))}
               </div>
