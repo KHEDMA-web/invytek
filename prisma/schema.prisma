@@ -47,10 +47,11 @@ model Guest {
   invitationId String
   name         String
   contact      String?
-  status       String     @default("pending") // pending | attending | declined
+  status       String     @default("pending") // pending | attending | declined | checked_in
   partySize    Int        @default(1)
   message      String?
   respondedAt  DateTime?
+  checkedInAt  DateTime?
   token        String     @unique @default(cuid())
   invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
 }

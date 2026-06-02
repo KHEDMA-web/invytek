@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
+  const isLoggedIn = status === "authenticated" && !!session;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -32,7 +35,11 @@ export function Nav() {
           <Link href="/#proof">Pourquoi nous</Link>
         </div>
         <div className="nav-cta">
-          <Link className="btn btn-ghost btn-sm" href="/dashboard">Mon espace</Link>
+          {isLoggedIn ? (
+            <Link className="btn btn-ghost btn-sm" href="/dashboard">Mon espace</Link>
+          ) : (
+            <Link className="btn btn-ghost btn-sm" href="/auth">Se connecter</Link>
+          )}
           <Link className="btn btn-gold btn-sm" href="/create">Créer mon invitation</Link>
         </div>
       </div>

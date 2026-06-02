@@ -1,7 +1,11 @@
 import type { ThemeConfig } from "./types";
 import { goldArchConfig } from "./wedding/gold-arch/theme.config";
+import { bordeauxOvalConfig } from "./wedding/bordeaux-oval/theme.config";
 
-export const themeRegistry: ThemeConfig[] = [goldArchConfig];
+export const themeRegistry: ThemeConfig[] = [
+  goldArchConfig,
+  bordeauxOvalConfig,
+];
 
 export function getTheme(slug: string): ThemeConfig | undefined {
   return themeRegistry.find((t) => t.slug === slug);

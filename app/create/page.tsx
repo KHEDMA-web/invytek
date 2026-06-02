@@ -7,7 +7,7 @@ import { Nav } from "@/components/Nav";
 
 const THEMES = [
   { id: "gold-arch",        name: "Or & Arche",              cat: "Mariage",       available: true },
-  { id: "bordeaux-oval",    name: "Bordeaux & Ovale Floral", cat: "Mariage · RTL", available: false },
+  { id: "bordeaux-oval",    name: "Bordeaux & Ovale Floral", cat: "Mariage · RTL", available: true },
   { id: "ivoire-minimal",   name: "Ivoire Minimal",          cat: "Mariage",       available: false },
   { id: "soiree-prestige",  name: "Soirée Prestige",         cat: "Business",      available: false },
   { id: "confettis-or",     name: "Confettis d'Or",          cat: "Anniversaire",  available: false },

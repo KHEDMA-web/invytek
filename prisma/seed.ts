@@ -50,6 +50,7 @@ async function main() {
     showRsvp: true,
     showArabic: true,
     showNote: true,
+    showQrCode: false,
   };
 
   await prisma.invitation.upsert({

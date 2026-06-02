@@ -6,6 +6,7 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import type { WeddingContent } from "@/lib/schemas/wedding";
 import { SignOutButton } from "@/components/SignOutButton";
+import { CopyLinkButton } from "@/components/CopyLinkButton";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -14,8 +15,14 @@ export default async function DashboardPage() {
   const invitations = await prisma.invitation.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
-    include: { guests: { select: { status: true } } },
+    include: { guests: { select: { status: true, checkedInAt: true } } },
   });
+
+  const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000";
 
   return (
     <div className="invytek-page" style={{ minHeight: "100dvh" }}>
@@ -52,21 +59,22 @@ export default async function DashboardPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
             {invitations.map(inv => {
               const content = JSON.parse(inv.content) as WeddingContent;
-              const attending = inv.guests.filter(g => g.status === "attending").length;
-              const declined = inv.guests.filter(g => g.status === "declined").length;
-              const pending = inv.guests.filter(g => g.status === "pending").length;
+              const attending  = inv.guests.filter(g => g.status === "attending").length;
+              const declined   = inv.guests.filter(g => g.status === "declined").length;
+              const pending    = inv.guests.filter(g => g.status === "pending").length;
+              const checkedIn  = inv.guests.filter(g => g.checkedInAt !== null).length;
               const total = inv.guests.length;
               const eventDate = new Date(content.date + "T12:00:00");
+              const invUrl = `${baseUrl}/i/${inv.slug}`;
 
               return (
                 <div key={inv.id} style={{
                   background: "linear-gradient(160deg, var(--bg-raise), var(--bg))",
                   border: "1px solid var(--hair)", borderRadius: 12, overflow: "hidden",
-                  transition: "border-color .3s, box-shadow .3s",
                 }}>
                   <div style={{ padding: "1.4rem 1.4rem 1rem" }}>
                     <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>
-                      {inv.themeId === "gold-arch" ? "Or & Arche" : inv.themeId}
+                      {inv.themeId === "gold-arch" ? "Or & Arche" : inv.themeId === "bordeaux-oval" ? "Bordeaux Ovale" : inv.themeId}
                     </div>
                     <h3 style={{ fontFamily: "var(--font-script)", fontSize: "1.8rem", color: "var(--ivory)", lineHeight: 1, marginBottom: 6 }}>
                       {content.names[0]} & {content.names[1]}
@@ -81,9 +89,10 @@ export default async function DashboardPage() {
                   {total > 0 && (
                     <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.8rem 1.4rem", gap: 0 }}>
                       {[
-                        { n: attending, label: "Présents", color: "var(--gold)" },
-                        { n: declined,  label: "Absents",  color: "var(--text-faint)" },
-                        { n: pending,   label: "En attente", color: "var(--text-soft)" },
+                        { n: attending,  label: "Présents",  color: "var(--gold)" },
+                        { n: declined,   label: "Absents",   color: "var(--text-faint)" },
+                        { n: pending,    label: "Attente",   color: "var(--text-soft)" },
+                        { n: checkedIn,  label: "Arrivés",   color: "#6ecf8a" },
                       ].map(s => (
                         <div key={s.label} style={{ flex: 1, textAlign: "center" }}>
                           <div style={{ fontFamily: "var(--font-title)", fontSize: "1.3rem", color: s.color }}>{s.n}</div>
@@ -94,10 +103,11 @@ export default async function DashboardPage() {
                   )}
 
                   {/* Actions */}
-                  <div style={{ display: "flex", gap: 8, padding: "0.8rem 1.4rem 1.2rem", borderTop: "1px solid var(--hair)" }}>
+                  <div style={{ display: "flex", gap: 8, padding: "0.8rem 1.4rem 1.2rem", borderTop: "1px solid var(--hair)", flexWrap: "wrap" }}>
                     <Link href={`/i/${inv.slug}`} target="_blank" className="btn btn-ghost btn-sm" style={{ flex: 1, justifyContent: "center" }}>
                       Voir
                     </Link>
+                    <CopyLinkButton url={invUrl} label="Copier" small />
                     <Link href={`/dashboard/${inv.id}`} className="btn btn-gold btn-sm" style={{ flex: 1, justifyContent: "center" }}>
                       Gérer
                     </Link>

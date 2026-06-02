@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getTheme } from "@/themes/registry";
 import GoldArchTheme from "@/themes/wedding/gold-arch/Theme";
+import BordeauxOvalTheme from "@/themes/wedding/bordeaux-oval/Theme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
 
 interface Props {
@@ -10,9 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const invitation = await prisma.invitation.findUnique({
-    where: { slug, status: "published" },
-  });
+  const invitation = await prisma.invitation.findUnique({ where: { slug, status: "published" } });
   if (!invitation) return { title: "Invitation" };
   const content = JSON.parse(invitation.content) as WeddingContent;
   return {
@@ -24,26 +23,21 @@ export async function generateMetadata({ params }: Props) {
 export default async function InvitationPage({ params }: Props) {
   const { slug } = await params;
 
-  const invitation = await prisma.invitation.findUnique({
-    where: { slug, status: "published" },
-  });
-
+  const invitation = await prisma.invitation.findUnique({ where: { slug, status: "published" } });
   if (!invitation) notFound();
 
   const theme = getTheme(invitation.themeId);
   if (!theme) notFound();
 
-  const content = JSON.parse(invitation.content);
-  const options = JSON.parse(invitation.options);
+  const content = JSON.parse(invitation.content) as WeddingContent;
+  const options = JSON.parse(invitation.options) as Partial<WeddingOptions>;
 
   if (theme.slug === "gold-arch") {
-    return (
-      <GoldArchTheme
-        content={content as WeddingContent}
-        options={options as Partial<WeddingOptions>}
-        invitationId={invitation.id}
-      />
-    );
+    return <GoldArchTheme content={content} options={options} invitationId={invitation.id} />;
+  }
+
+  if (theme.slug === "bordeaux-oval") {
+    return <BordeauxOvalTheme content={content} options={options} invitationId={invitation.id} />;
   }
 
   notFound();
