@@ -39,19 +39,23 @@ export default async function GuestInvitationPage({ params }: Props) {
   const showQr = (p.options as { showQrCode?: boolean })?.showQrCode === true;
   const lightThemes = new Set(["baby-shower", "congres-medical", "inauguration", "sensibilisation"]);
   const qr = showQr ? <GuestQrCode dark={!lightThemes.has(id)} /> : null;
+  const custom = options.customizations;
+  const styleTag = custom && Object.keys(custom).length > 0
+    ? <style>{`:root{${Object.entries(custom).map(([k, v]) => `${k}:${v}!important`).join(';')}}`}</style>
+    : null;
 
-  if (id === "gold-arch")        return <>{<GoldArchTheme {...p} />}{qr}</>;
-  if (id === "bordeaux-oval")    return <>{<BordeauxOvalTheme {...p} />}{qr}</>;
-  if (id === "ivoire-minimal")   return <>{<IvoireMinimalTheme {...p} />}{qr}</>;
-  if (id === "confettis-or")     return <>{<ConfettisOrTheme {...p} />}{qr}</>;
-  if (id === "soiree-prestige")  return <>{<SoireePrestigeTheme {...p} />}{qr}</>;
-  if (id === "blouse-lys")       return <>{<BlouseLysTheme {...p} />}{qr}</>;
-  if (id === "anniv-neon")       return <>{<AnnivNeonTheme {...p} />}{qr}</>;
-  if (id === "baby-shower")      return <>{<BabyShowerTheme {...p} />}{qr}</>;
-  if (id === "conference-tech")  return <>{<ConferenceTechTheme {...p} />}{qr}</>;
-  if (id === "congres-medical")  return <>{<CongresMedicalTheme {...p} />}{qr}</>;
-  if (id === "inauguration")     return <>{<InaugurationTheme {...p} />}{qr}</>;
-  if (id === "sensibilisation")  return <>{<SensibilisationTheme {...p} />}{qr}</>;
+  if (id === "gold-arch")        return <>{styleTag}{<GoldArchTheme {...p} />}{qr}</>;
+  if (id === "bordeaux-oval")    return <>{styleTag}{<BordeauxOvalTheme {...p} />}{qr}</>;
+  if (id === "ivoire-minimal")   return <>{styleTag}{<IvoireMinimalTheme {...p} />}{qr}</>;
+  if (id === "confettis-or")     return <>{styleTag}{<ConfettisOrTheme {...p} />}{qr}</>;
+  if (id === "soiree-prestige")  return <>{styleTag}{<SoireePrestigeTheme {...p} />}{qr}</>;
+  if (id === "blouse-lys")       return <>{styleTag}{<BlouseLysTheme {...p} />}{qr}</>;
+  if (id === "anniv-neon")       return <>{styleTag}{<AnnivNeonTheme {...p} />}{qr}</>;
+  if (id === "baby-shower")      return <>{styleTag}{<BabyShowerTheme {...p} />}{qr}</>;
+  if (id === "conference-tech")  return <>{styleTag}{<ConferenceTechTheme {...p} />}{qr}</>;
+  if (id === "congres-medical")  return <>{styleTag}{<CongresMedicalTheme {...p} />}{qr}</>;
+  if (id === "inauguration")     return <>{styleTag}{<InaugurationTheme {...p} />}{qr}</>;
+  if (id === "sensibilisation")  return <>{styleTag}{<SensibilisationTheme {...p} />}{qr}</>;
 
   notFound();
 }
