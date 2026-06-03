@@ -160,39 +160,45 @@ function CreateForm() {
   async function publish() {
     setLoading(true);
     setError(null);
-    const dateObj = new Date(date + "T12:00:00");
-    const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-    const n2 = isWedding ? name2 : (name2 || "—");
-    const content = {
-      hosts,
-      invitationLine: invLine,
-      names: [name1, n2] as [string, string],
-      namesSeparator: isWedding ? "avec" : "·",
-      bismillah: isWedding ? bismillah : false,
-      date,
-      time,
-      dayLabel: dayLabels[dateObj.getDay()] || dayLabel,
-      venue,
-      venueSub: venueSub || undefined,
-      note: note || undefined,
-      closing,
-      initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
-    };
-    const options = {
-      showCountdown,
-      showRsvp,
-      showArabic: isWedding ? showArabic : false,
-      showNote: !!note,
-    };
+    try {
+      const dateObj = new Date(date + "T12:00:00");
+      const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+      const n2 = isWedding ? name2 : (name2 || "—");
+      const content = {
+        hosts,
+        invitationLine: invLine,
+        names: [name1, n2] as [string, string],
+        namesSeparator: isWedding ? "avec" : "·",
+        bismillah: isWedding ? bismillah : false,
+        date,
+        time,
+        dayLabel: dayLabels[dateObj.getDay()] || dayLabel,
+        venue,
+        venueSub: venueSub || undefined,
+        note: note || undefined,
+        closing,
+        initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
+      };
+      const options = {
+        showCountdown,
+        showRsvp,
+        showArabic: isWedding ? showArabic : false,
+        showNote: !!note,
+      };
 
-    const res = await fetch("/api/invitations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ themeId, slug, content, options }),
-    });
-    const data = await res.json();
-    if (!res.ok) { setError(data.error || "Erreur"); setLoading(false); return; }
-    router.push(`/dashboard`);
+      const res = await fetch("/api/invitations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ themeId, slug, content, options }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "Erreur serveur"); return; }
+      router.push(`/dashboard`);
+    } catch {
+      setError("Erreur réseau — réessayez.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const canContinue = !!name1 && !!date && !!venue && !!hosts && (isWedding ? !!name2 : true);
