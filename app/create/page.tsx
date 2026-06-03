@@ -10,7 +10,14 @@ const THEMES = [
   { id: "bordeaux-oval",    name: "Bordeaux & Ovale Floral", cat: "Mariage · RTL", available: true },
   { id: "ivoire-minimal",   name: "Ivoire Minimal",          cat: "Mariage",       available: true },
   { id: "confettis-or",     name: "Confettis d'Or",          cat: "Anniversaire",  available: true },
-  { id: "soiree-prestige",  name: "Soirée Prestige",         cat: "Business",      available: false },
+  { id: "anniv-neon",       name: "Neon Burst",              cat: "Anniversaire",  available: true },
+  { id: "baby-shower",      name: "Baby Shower",             cat: "Bébé",          available: true },
+  { id: "soiree-prestige",  name: "Soirée Prestige",         cat: "Business",      available: true },
+  { id: "conference-tech",  name: "Conférence Tech",         cat: "Business",      available: true },
+  { id: "inauguration",     name: "Inauguration",            cat: "Business",      available: true },
+  { id: "blouse-lys",       name: "Blouse & Lys",            cat: "Médical",       available: true },
+  { id: "congres-medical",  name: "Congrès Médical",         cat: "Médical",       available: true },
+  { id: "sensibilisation",  name: "Sensibilisation",         cat: "Médical",       available: true },
 ];
 
 function slugify(s: string) {
@@ -142,7 +149,7 @@ function CreateForm() {
               Choisissez votre thème
             </h2>
             <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>
-              Seul « Or &amp; Arche » est disponible pour l&apos;instant — les autres arrivent.
+              Choisissez le thème qui correspond à votre événement.
             </p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 16, marginBottom: "2rem" }}>
               {THEMES.map(t => (

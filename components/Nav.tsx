@@ -35,10 +35,10 @@ export function Nav() {
           <Link href="/#proof">Pourquoi nous</Link>
         </div>
         <div className="nav-cta">
-          {isLoggedIn ? (
-            <Link className="btn btn-ghost btn-sm" href="/dashboard">Mon espace</Link>
-          ) : (
-            <Link className="btn btn-ghost btn-sm" href="/auth">Se connecter</Link>
+          {status !== "loading" && (
+            isLoggedIn
+              ? <Link className="btn btn-ghost btn-sm" href="/dashboard">Mon espace</Link>
+              : <Link className="btn btn-ghost btn-sm" href="/auth">Se connecter</Link>
           )}
           <Link className="btn btn-gold btn-sm" href="/create">Créer mon invitation</Link>
         </div>

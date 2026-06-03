@@ -5,7 +5,8 @@ export default auth((req) => {
   const isAuth = !!req.auth;
   const path = req.nextUrl.pathname;
   if (!isAuth && (path.startsWith("/dashboard") || path.startsWith("/create"))) {
-    return NextResponse.redirect(new URL("/auth", req.url));
+    const callbackUrl = encodeURIComponent(req.nextUrl.pathname + req.nextUrl.search);
+    return NextResponse.redirect(new URL(`/auth?callbackUrl=${callbackUrl}`, req.url));
   }
 });
 

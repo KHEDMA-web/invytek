@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function AuthPage() {
@@ -14,7 +14,6 @@ export default function AuthPage() {
 }
 
 function AuthForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [email, setEmail] = useState("");
@@ -45,7 +44,9 @@ function AuthForm() {
         else if (code === "CredentialsSignin") setError("Identifiants incorrects.");
         else setError("Une erreur est survenue (" + code + ").");
       } else {
-        router.push(params.get("callbackUrl") || "/dashboard");
+        const raw = params.get("callbackUrl");
+        const dest = raw?.startsWith("/") ? raw : "/dashboard";
+        window.location.href = dest;
       }
     } finally {
       setLoading(false);

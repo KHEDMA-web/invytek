@@ -448,72 +448,30 @@ header.hero {
 .tcard.hide { display: none; }
 
 /* ════════════════════════════════════════════════════════════
-   RESPONSIVE — Dashboard + Create (mobile-first fixes)
+   RESPONSIVE — Mobile-first fixes
    ════════════════════════════════════════════════════════════ */
 
-/* Général mobile */
 @media (max-width: 640px) {
   .wrap { padding: 0 16px; }
-
-  /* Nav CTA — masquer "Se connecter" sur très petit écran, garder "Créer" */
   .nav-cta .btn-ghost { display: none; }
   .nav .wrap { height: 58px; }
-
-  /* Buttons — pleine largeur sur mobile */
   .btn { padding: 15px 20px; font-size: 12px; }
   .btn-sm { padding: 11px 16px; font-size: 11px; }
 }
 
-/* Dashboard principal */
-@media (max-width: 600px) {
-  /* Grille des cartes invitation */
-  [style*="repeat(auto-fill,minmax(300px"] {
-    grid-template-columns: 1fr !important;
-  }
-  /* Header du dashboard */
-  [style*="justifyContent: \"space-between\""] {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-  }
-}
-
 /* Dashboard /dashboard/[id] */
 @media (max-width: 700px) {
-  /* Grid 2 colonnes → 1 colonne */
-  [style*="grid-template-columns: \"1fr 1fr\""],
-  [style*="gridTemplateColumns: \"1fr 1fr\""] {
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .dash-manage-grid {
     grid-template-columns: 1fr !important;
-  }
-
-  /* Stats 4 colonnes → 2 colonnes */
-  [style*="repeat(4,1fr)"] {
-    grid-template-columns: repeat(2,1fr) !important;
-  }
-
-  /* Actions bar → wrap */
-  [style*="display: \"flex\""][style*="gap: 10"] {
-    flex-wrap: wrap !important;
   }
 }
 
-/* Create wizard */
-@media (max-width: 600px) {
-  /* Grille prénoms → empilé */
-  [style*="grid-template-columns: \"1fr 1fr\""] {
+/* Formulaires — grilles 2 colonnes → 1 colonne */
+@media (max-width: 500px) {
+  .form-2col {
     grid-template-columns: 1fr !important;
-  }
-
-  /* Steps indicator */
-  [style*="gap: 8"][style*="marginBottom: \"2.5rem\""] {
-    overflow-x: auto;
-    padding-bottom: 8px;
-  }
-}
-
-/* Checkin page mobile */
-@media (max-width: 480px) {
-  [style*="maxWidth: 520"] {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
   }
 }

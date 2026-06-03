@@ -5,6 +5,14 @@ import GoldArchTheme from "@/themes/wedding/gold-arch/Theme";
 import BordeauxOvalTheme from "@/themes/wedding/bordeaux-oval/Theme";
 import IvoireMinimalTheme from "@/themes/wedding/ivoire-minimal/Theme";
 import ConfettisOrTheme from "@/themes/anniversary/confettis-or/Theme";
+import SoireePrestigeTheme from "@/themes/business/soiree-prestige/Theme";
+import BlouseLysTheme from "@/themes/medical/blouse-lys/Theme";
+import AnnivNeonTheme from "@/themes/anniversary/anniv-neon/Theme";
+import BabyShowerTheme from "@/themes/baby/baby-shower/Theme";
+import ConferenceTechTheme from "@/themes/business/conference-tech/Theme";
+import CongresMedicalTheme from "@/themes/medical/congres-medical/Theme";
+import InaugurationTheme from "@/themes/business/inauguration/Theme";
+import SensibilisationTheme from "@/themes/medical/sensibilisation/Theme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
 
 interface Props { params: Promise<{ slug: string }> }
@@ -33,10 +41,18 @@ export default async function InvitationPage({ params }: Props) {
 
   const props = { content, options, invitationId: invitation.id };
 
-  if (theme.slug === "gold-arch")      return <GoldArchTheme {...props} />;
-  if (theme.slug === "bordeaux-oval")  return <BordeauxOvalTheme {...props} />;
-  if (theme.slug === "ivoire-minimal") return <IvoireMinimalTheme {...props} />;
-  if (theme.slug === "confettis-or")   return <ConfettisOrTheme {...props} />;
+  if (theme.slug === "gold-arch")        return <GoldArchTheme {...props} />;
+  if (theme.slug === "bordeaux-oval")    return <BordeauxOvalTheme {...props} />;
+  if (theme.slug === "ivoire-minimal")   return <IvoireMinimalTheme {...props} />;
+  if (theme.slug === "confettis-or")     return <ConfettisOrTheme {...props} />;
+  if (theme.slug === "soiree-prestige")  return <SoireePrestigeTheme {...props} />;
+  if (theme.slug === "blouse-lys")       return <BlouseLysTheme {...props} />;
+  if (theme.slug === "anniv-neon")       return <AnnivNeonTheme {...props} />;
+  if (theme.slug === "baby-shower")      return <BabyShowerTheme {...props} />;
+  if (theme.slug === "conference-tech")  return <ConferenceTechTheme {...props} />;
+  if (theme.slug === "congres-medical")  return <CongresMedicalTheme {...props} />;
+  if (theme.slug === "inauguration")     return <InaugurationTheme {...props} />;
+  if (theme.slug === "sensibilisation")  return <SensibilisationTheme {...props} />;
 
   notFound();
 }

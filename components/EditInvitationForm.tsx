@@ -93,7 +93,7 @@ export function EditInvitationForm({ invitationId, content, options }: Props) {
     <form onSubmit={handleSubmit}>
       <div style={{ display: "flex", flexDirection: "column", gap: "1.4rem" }}>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div><label style={label}>Prénom 1</label><input style={inp} value={name1} onChange={e => setName1(e.target.value)} required /></div>
           <div><label style={label}>Prénom 2</label><input style={inp} value={name2} onChange={e => setName2(e.target.value)} required /></div>
         </div>
@@ -104,7 +104,7 @@ export function EditInvitationForm({ invitationId, content, options }: Props) {
           <textarea style={{ ...inp, minHeight: 64, resize: "vertical" }} value={invLine} onChange={e => setInvLine(e.target.value)} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+        <div className="form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
           <div><label style={label}>Date</label><input style={inp} type="date" value={date} onChange={e => setDate(e.target.value)} required /></div>
           <div><label style={label}>Heure</label><input style={inp} type="time" value={time} onChange={e => setTime(e.target.value)} required /></div>
         </div>
