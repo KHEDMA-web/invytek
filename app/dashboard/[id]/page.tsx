@@ -9,6 +9,7 @@ import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { QrCodeToggle } from "@/components/QrCodeToggle";
 import { DeleteInvitationButton } from "@/components/DeleteInvitationButton";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { EmailButton } from "@/components/EmailButton";
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -129,6 +130,7 @@ export default async function ManagePage({ params }: Props) {
                     <StatusBadge status={g.status} />
                     <CopyLinkButton url={`${baseUrl}/i/${invitation.slug}/g/${g.token}`} label="Copier" small />
                     <WhatsAppButton url={`${baseUrl}/i/${invitation.slug}/g/${g.token}`} guestName={g.name} small />
+                    <EmailButton url={`${baseUrl}/i/${invitation.slug}/g/${g.token}`} guestName={g.name} contactEmail={g.contact?.includes("@") ? g.contact : undefined} small />
                   </div>
                 ))}
               </div>
