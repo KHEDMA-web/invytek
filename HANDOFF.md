@@ -129,6 +129,56 @@ Landing à 3 chemins :
 
 ---
 
+### 5. Modèle B2B — Espace Agence + Portail Client Final ⚠️ GRANDE FEATURE
+
+**Vision** : Invytek vendu aux agences de communication / wedding planners. L'agence crée les invitations pour ses clients. Chaque client final a son propre espace simplifié.
+
+#### Deux rôles distincts
+
+**Agence (compte actuel)** — dashboard complet :
+- Créer des invitations pour ses clients
+- Gérer tous les invités
+- Accéder aux stats, exports CSV, QR check-in
+- Accès à l'IA, thèmes personnalisés
+- Peut inviter le client final via un lien sécurisé
+
+**Client final** — portail simplifié `/client/[accessToken]` :
+- Voir sa carte d'invitation (aperçu de son thème)
+- Voir les stats RSVP (présents / absents / en attente)
+- Gérer sa liste d'invités (ajouter, copier liens, WhatsApp)
+- Pas de création, pas d'IA, pas d'accès au dashboard agence
+
+#### Architecture proposée
+
+**Prisma** — ajouter sur `Invitation` :
+```prisma
+clientAccessToken  String   @unique @default(cuid())
+clientEmail        String?  // email du client final (optionnel)
+clientName         String?  // nom affiché dans son espace
+```
+
+**Page client** : `/client/[accessToken]` — accessible sans login (token secret dans l'URL, comme Notion shared)
+- Affiche : aperçu invitation + stats RSVP + liste invités + actions (copier lien, WhatsApp)
+- Pas de suppression, pas d'édition du contenu, pas d'accès au dashboard agence
+
+**Dashboard agence** — ajouter sur `/dashboard/[id]` :
+- Bouton "Partager avec le client" → copie l'URL `/client/[accessToken]`
+- Champs optionnels : email client, nom client (pour personnaliser l'espace)
+- Optionnel : envoyer l'accès par email automatiquement via Resend
+
+**Sécurité** :
+- Le `clientAccessToken` est un CUID aléatoire non devinable
+- La page `/client/[token]` n'expose pas les infos de l'agence
+- L'agence peut régénérer le token si besoin (invalider l'ancien accès)
+
+#### Ordre d'implémentation suggéré
+1. Ajouter `clientAccessToken`, `clientEmail`, `clientName` sur `Invitation` → `prisma db push`
+2. Créer `/client/[accessToken]/page.tsx` — portail lecture seule + gestion invités
+3. Ajouter bouton "Partager avec le client" dans `/dashboard/[id]`
+4. Optionnel : email automatique via Resend quand l'agence partage
+
+---
+
 ## Architecture clés
 
 ```
