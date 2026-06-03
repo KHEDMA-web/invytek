@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { auth } from "@/auth";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return NextResponse.json({ error: "Email non configuré" }, { status: 503 });
+  const resend = new Resend(apiKey);
 
   const { to, guestName, url } = await req.json();
   if (!to || !url) return NextResponse.json({ error: "Missing fields" }, { status: 400 });
