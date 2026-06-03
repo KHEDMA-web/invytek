@@ -84,18 +84,22 @@
 
 ### Priorité 1 — Features
 - [ ] **Stats avancées** — voir qui a ouvert l'invitation sans créer de compte (tracking vues)
-- [ ] **Google OAuth en prod** — ajouter `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` sur Vercel (Google Cloud Console → OAuth 2.0 Client ID, redirect URI : `https://[domaine]/api/auth/callback/google`)
+- [x] **Google OAuth en prod** — `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET` + `AUTH_SECRET` + `AUTH_URL` ajoutés sur Vercel ✅
 
 ### Priorité 2 — Améliorations
-- [ ] **Email serveur** — remplacer `mailto:` par Resend pour envoi direct depuis le dashboard (nécessite `RESEND_API_KEY`)
-- [ ] **Page `/create`** : adapter le wizard pour les thèmes avec données différentes (ex: tags pour congres-medical)
-- [ ] **Responsive mobile** — vérification sur vrai appareil
+- [x] **Email serveur** — `POST /api/send-email` avec Resend ✅ (nécessite `RESEND_API_KEY` + `RESEND_FROM_EMAIL` sur Vercel, domaine vérifié sur resend.com)
+- [x] **Page `/create`** — preview thème à droite (iframe scalé) + labels contextuels déjà en place ✅
+- [x] **Responsive mobile** — grilles dashboard fixées, preview cachée sur mobile ✅
 
 ### Priorité 3 — Futur
 - [ ] Auth OAuth autres providers (GitHub, etc.)
 - [ ] Export CSV invités & RSVP
 - [ ] API webhooks RSVP
 - [ ] Page invité publique avec formulaire RSVP pour lien non-nominatif
+
+### Peut-être — À explorer plus tard
+- [ ] **Éditeur de personnalisation de thème** — Panneau live où le client modifie couleurs, polices, textes sur n'importe quel thème React. Nécessite migrer les thèmes vers CSS custom properties. Sauvegarder les customisations en JSON dans `Invitation.customizations`.
+- [ ] **Génération de thème par IA + Crédits (Chargily)** — L'user décrit son invitation en texte, Claude API génère la config complète (structured output Zod). Système de crédits : champ `credits` sur `User`, déduction par action IA. Recharge via Chargily Pay (CIB/Edahabia) — packs 2 000 / 5 000 / 10 000 DZD avec webhook de confirmation. Nécessite compte marchand Chargily + `CHARGILY_API_KEY` + `CHARGILY_WEBHOOK_SECRET`.
 
 ---
 
@@ -136,9 +140,12 @@ themes/
 ## Variables d'environnement (Vercel)
 - `DATABASE_URL` — Neon pooled (auto)
 - `DATABASE_URL_UNPOOLED` — Neon direct (migrations)
-- `AUTH_SECRET` — Secret JWT Auth.js (**aussi dans .env.local local**)
-- `AUTH_GOOGLE_ID` — À ajouter pour activer OAuth Google
-- `AUTH_GOOGLE_SECRET` — À ajouter pour activer OAuth Google
+- `AUTH_SECRET` — Secret JWT Auth.js (**aussi dans .env.local local**) ✅
+- `AUTH_URL` — URL de base en prod (`https://invytek.vercel.app`) ✅
+- `AUTH_GOOGLE_ID` — OAuth Google Client ID ✅
+- `AUTH_GOOGLE_SECRET` — OAuth Google Client Secret ✅
+- `RESEND_API_KEY` — Clé API Resend (à ajouter pour emails serveur)
+- `RESEND_FROM_EMAIL` — Expéditeur email ex: `Invytek <hello@tondomaine.com>` (nécessite domaine vérifié)
 
 ## Commandes utiles
 ```bash

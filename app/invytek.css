@@ -484,3 +484,8 @@ header.hero {
     justify-content: center;
   }
 }
+
+/* Create — cacher l'aperçu thème sur mobile */
+@media (max-width: 768px) {
+  .create-preview { display: none; }
+}

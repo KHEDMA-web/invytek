@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 
+const PREVIEW_MAP: Record<string, string> = { "gold-arch": "or-arche" };
+
 const THEMES = [
   { id: "gold-arch",        name: "Or & Arche",              cat: "Mariage",       available: true },
   { id: "bordeaux-oval",    name: "Bordeaux & Ovale Floral", cat: "Mariage · RTL", available: true },
@@ -198,7 +200,7 @@ function CreateForm() {
   return (
     <div className="invytek-page" style={{ minHeight: "100dvh", paddingBottom: "4rem" }}>
       <Nav />
-      <div className="wrap" style={{ paddingTop: 120, maxWidth: 720 }}>
+      <div className="wrap" style={{ paddingTop: 120, maxWidth: step === 1 ? 1080 : 720 }}>
 
         {/* Steps */}
         <div style={{ display: "flex", gap: 8, marginBottom: "2.5rem", alignItems: "center" }}>
@@ -224,30 +226,50 @@ function CreateForm() {
 
         {/* Step 1 — Choix du thème */}
         {step === 1 && (
-          <div>
-            <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
-              Choisissez votre thème
-            </h2>
-            <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>
-              Choisissez le thème qui correspond à votre événement.
-            </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(200px,1fr))", gap: 16, marginBottom: "2rem" }}>
-              {THEMES.map(t => (
-                <button key={t.id} onClick={() => t.available && setThemeId(t.id)} style={{
-                  padding: "1.2rem", borderRadius: 10,
-                  border: themeId === t.id ? "2px solid var(--gold)" : "1px solid var(--hair)",
-                  background: themeId === t.id ? "rgba(184,146,60,0.1)" : "rgba(255,255,255,0.02)",
-                  cursor: t.available ? "pointer" : "not-allowed",
-                  opacity: t.available ? 1 : 0.45,
-                  textAlign: "left",
-                }}>
-                  <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>{t.cat}</div>
-                  <div style={{ fontFamily: "var(--font-title)", fontSize: 17, color: "var(--ivory)" }}>{t.name}</div>
-                  {!t.available && <div style={{ fontSize: 11, color: "var(--text-faint)", marginTop: 4 }}>Bientôt</div>}
-                </button>
-              ))}
+          <div style={{ display: "flex", gap: 32, alignItems: "start", flexWrap: "wrap" }}>
+
+            {/* Left — sélection */}
+            <div style={{ flex: "0 1 360px", minWidth: 260 }}>
+              <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
+                Choisissez votre thème
+              </h2>
+              <p style={{ color: "var(--text-soft)", marginBottom: "1.5rem" }}>
+                Sélectionnez le thème qui correspond à votre événement.
+              </p>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: "1.5rem" }}>
+                {THEMES.map(t => (
+                  <button key={t.id} onClick={() => t.available && setThemeId(t.id)} style={{
+                    padding: "1rem", borderRadius: 10,
+                    border: themeId === t.id ? "2px solid var(--gold)" : "1px solid var(--hair)",
+                    background: themeId === t.id ? "rgba(184,146,60,0.1)" : "rgba(255,255,255,0.02)",
+                    cursor: t.available ? "pointer" : "not-allowed",
+                    opacity: t.available ? 1 : 0.45,
+                    textAlign: "left",
+                  }}>
+                    <div style={{ fontFamily: "var(--font-title)", fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 4 }}>{t.cat}</div>
+                    <div style={{ fontFamily: "var(--font-title)", fontSize: 15, color: "var(--ivory)" }}>{t.name}</div>
+                    {!t.available && <div style={{ fontSize: 10, color: "var(--text-faint)", marginTop: 3 }}>Bientôt</div>}
+                  </button>
+                ))}
+              </div>
+              <button onClick={() => setStep(2)} className="btn btn-gold">Continuer →</button>
             </div>
-            <button onClick={() => setStep(2)} className="btn btn-gold">Continuer →</button>
+
+            {/* Right — aperçu */}
+            <div className="create-preview" style={{ flex: "1 1 340px", position: "sticky", top: 100 }}>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 12 }}>
+                Aperçu — {theme.name}
+              </div>
+              <div style={{ width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid var(--hair)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+                <iframe
+                  key={themeId}
+                  src={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
+                  style={{ width: 375, height: 850, border: "none", transform: `scale(${340 / 375})`, transformOrigin: "top left", pointerEvents: "none" }}
+                  title={`Aperçu ${theme.name}`}
+                />
+              </div>
+            </div>
+
           </div>
         )}
 

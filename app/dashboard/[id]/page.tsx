@@ -69,7 +69,7 @@ export default async function ManagePage({ params }: Props) {
         </div>
 
         {/* Stats */}
-        <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: "2rem" }}>
+        <div className="dash-stats" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(130px,1fr))", gap: 12, marginBottom: "2rem" }}>
           {[
             { n: attending, label: "Présents",    color: "var(--gold)" },
             { n: declined,  label: "Absents",     color: "var(--text-faint)" },
@@ -97,7 +97,7 @@ export default async function ManagePage({ params }: Props) {
           <QrCodeToggle invitationId={invitation.id} currentOptions={options} />
         </div>
 
-        <div className="dash-manage-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "start" }}>
+        <div className="dash-manage-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 24, alignItems: "start" }}>
 
           {/* Ajouter un invité */}
           <div style={{ border: "1px solid var(--hair)", borderRadius: 12, padding: "1.5rem" }}>
