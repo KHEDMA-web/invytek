@@ -9,63 +9,72 @@
 ### Infrastructure
 - **Next.js 16.2.6** App Router + TypeScript + Turbopack
 - **Neon PostgreSQL** branché via Vercel Storage (DATABASE_URL injectée)
-- **Prisma 7** avec adapter Neon (`@prisma/adapter-neon`) — `lib/db.ts`
-- **Auth.js v5** câblé : Credentials (email + password + bcrypt) + **Google OAuth** ✅
+- **Prisma 7** — `lib/db.ts` — modèles : User, Invitation, Guest, InvitationView, GeneratedTheme
+- **Auth.js v5** : Credentials (email + bcrypt) + Google OAuth ✅
 - **Vercel** déployé, build passe ✅
+- `@anthropic-ai/sdk` installé
 
 ### Pages publiques
-- `/` — Landing dark luxury (enveloppe animée, mockups, stats, section tarifs, CTA)
+- `/` — Landing dark luxury
 - `/themes` — Vitrine 12 thèmes filtrables
+- `/themes/community` — Galerie des thèmes générés par l'IA (swatches + admin promote)
 - `/pricing` — Page tarifs (3 plans, FAQ)
-- `/i/[slug]` — Invitation live (12 thèmes React) + tracking vue à chaque ouverture
-- `/i/[slug]/g/[token]` — Invitation nominative + overlay QR code
-- `/themes-preview/[theme].html` — 12 thèmes HTML avec panneau "Personnaliser" (editor.js)
+- `/i/[slug]` — Invitation live + CSS customizations injectées + tracking vues
+- `/i/[slug]/g/[token]` — Invitation nominative + QR overlay
+- `/themes-preview/[theme].html` — 12 thèmes HTML statiques
 
 ### Authentification
-- `/auth` — Login / Signup email+password + bouton Google OAuth (opérationnel en prod)
-- `proxy.ts` — Redirige vers `/auth?callbackUrl=...` si non connecté
-- `window.location.href` après login (fix du redirect loop)
+- `/auth` — Login / Signup email+password + Google OAuth
+- 3 crédits offerts à l'inscription (credentials + Google)
 
-### Création d'invitation
-- `/create` — Wizard 3 étapes contextuel par catégorie (Mariage/Anniv/Bébé/Business/Médical)
-- **Preview thème** à droite en Step 1 : iframe scalé du thème sélectionné, caché sur mobile
-- Labels, placeholders, options (Bismillah masqué hors mariage) adaptés par catégorie
-- `POST /api/invitations` — Crée et publie une invitation en DB
-- `GET /api/invitations/check-slug` — Vérifie la dispo du slug en temps réel
+### Création d'invitation — `/create`
+Landing à 3 chemins :
+1. **Thèmes disponibles** — grille 12 thèmes, filtre catégorie, preview iframe, wizard 3 étapes
+2. **Thème personnalisé** — color pickers (4 vars CSS), preview iframe, wizard 3 étapes
+3. **Créer avec l'IA** — textarea → génération Claude → aperçu → publication (2 étapes)
+
+`POST /api/invitations` — crée et publie  
+`GET /api/invitations/check-slug` — vérifie dispo slug
 
 ### Dashboard
-- `/dashboard` — Liste invitations + stats RSVP + **compteur de vues** par invitation
-- `/dashboard/[id]` — Gérer : invités, copier liens, WhatsApp, Email, QR toggle, supprimer
-- `/dashboard/[id]/edit` — Modifier noms/date/lieu/options
-- Boutons : CopyLink, WhatsApp, EmailButton (Resend si email dispo, sinon mailto:), QrCodeToggle, DeleteInvitation
+- `/dashboard` — Liste invitations + stats RSVP + vues + **widget crédits IA** (solde, alerte, achat)
+- `/dashboard/[id]` — Gérer : invités, CopyLink, WhatsApp, Email, QR toggle, Export CSV, supprimer
+- `/dashboard/[id]/edit` — Modifier noms/date/lieu/options/webhook
 
-### Stats & tracking
-- `InvitationView` — table Prisma enregistrant chaque ouverture de `/i/[slug]`
-- Compteur de vues affiché dans chaque carte du dashboard (icône œil)
+### Thème personnalisé — CSS injection
+- `WeddingOptions.customizations: Record<string, string>` — stocké en JSON dans `options`
+- `/i/[slug]` et `/i/[slug]/g/[token]` injectent `<style>:root{--var:val!important}</style>`
+- Fonctionne sur les 12 thèmes React sans modifier aucun composant de thème
 
-### Email
-- `POST /api/send-email` — Envoie un email HTML via Resend avec le lien de l'invité
-- `EmailButton` — Si contactEmail renseigné : appel API avec feedback live (Envoi… / Envoyé ✓), sinon fallback `mailto:`
-
-### RSVP & invités nominatifs
-- `POST /api/rsvp` — Confirme présence (public ou token)
-- `POST /api/guests` — Ajoute un invité (génère token unique)
-- Chaque invité → lien `/i/[slug]/g/[token]` avec badge "À l'attention de"
+### RSVP & invités
+- `POST /api/rsvp` — confirmation publique ou par token + webhook optionnel (`options.webhookUrl`)
+- `PublicRsvpForm` — modale flottante sur `/i/[slug]`
+- `POST /api/guests` — ajoute un invité + token unique
+- `GET /api/invitations/[id]/export` — export CSV invités
 
 ### QR Code check-in
-- `/checkin` — Interface vigile (saisie manuelle token)
-- `POST /api/checkin` — Marque l'invité comme arrivé (`checkedInAt`)
-- `QrCodeToggle` — Activer/désactiver depuis `dashboard/[id]`
-- **Overlay QR** sur toutes les pages nominatives quand `showQrCode=true`
+- `/checkin` — saisie manuelle token
+- `POST /api/checkin` — marque `checkedInAt`
+- `QrCodeToggle` + overlay QR sur pages nominatives
 
-### Éditeur HTML
-- `editor.js` — bouton "Personnaliser" fonctionne (pages HTML chargées en full page via `<a>`)
-- `POST /api/publish-preview` — Publie depuis l'éditeur HTML
+### Email
+- `POST /api/send-email` — Resend HTML ou fallback `mailto:`
 
-### Responsive mobile
-- Grilles dashboard fixées : stats `auto-fill minmax(130px)`, manage grid `auto-fill minmax(320px)`
-- `form-2col` → 1 colonne sous 500px
-- Preview thème cachée sous 768px
+### Crédits IA
+- `User.credits Int @default(0)` — 3 crédits à l'inscription
+- `GET /api/credits` — solde courant
+- `POST /api/credits/checkout` — lien Chargily Pay (test_sk → URL test auto)
+- `POST /api/credits/webhook` — HMAC vérifié → incrémente crédits
+- `CreditsWidget` dans le Nav — pill flottant (violet/orange/rouge selon solde), clic → modal 3 packs
+- `BuyCreditsButton` — aussi dans `/dashboard`
+
+### Génération IA (état actuel — INCOMPLET)
+- `POST /api/ai-create` — Claude Haiku génère themeId + themeLabel + customizations (palette 6 vars) + content
+- **Problème** : l'IA choisit parmi les 12 thèmes existants et applique juste une palette de couleurs
+- Ce n'est **pas** un vrai thème unique généré — c'est un thème existant recoloré
+- Chaque génération est sauvegardée dans `GeneratedTheme` (DB)
+- Galerie `/themes/community` : swatches + "Utiliser" + admin promote
+- Admin email : `aniskhelifiusthb@gmail.com` (env `ADMIN_EMAIL`)
 
 ---
 
@@ -86,28 +95,34 @@
 | `congres-medical` | Médical |
 | `sensibilisation` | Médical |
 
-**Mapping preview HTML (PREVIEW_MAP dans `/create`) :**
-- `gold-arch` → `or-arche.html` (seul cas qui diffère)
-- Tous les autres : slug = nom du fichier HTML
-
-**Mapping données non-mariage (WeddingContent) :**
-- `names[0]` = titre événement / prénom
-- `names[1]` = sous-titre / édition
-- `hosts` = organisation / entreprise
-- `note` = code accès / tags (séparés par virgule pour congres-medical)
+**PREVIEW_MAP** (`/create`) : `gold-arch` → `or-arche.html`, tous les autres slug = filename HTML
 
 ---
 
 ## Ce qui reste à faire 🔧
 
-### Priorité 1 — Futur proche ✅ TOUT FAIT
-- [x] Export CSV invités — `GET /api/invitations/[id]/export` + bouton dashboard
-- [x] API webhooks RSVP — `POST /api/rsvp` notifie `options.webhookUrl`
-- [x] Page RSVP publique — `PublicRsvpForm` modale flottante sur `/i/[slug]`
+### 1. Vraie génération de thème IA unique ⚠️ PRIORITÉ HAUTE
+**Problème actuel** : l'IA recolore un thème existant. Ce n'est pas un vrai thème unique.
 
-### Priorité 2 — Prochaines grandes features
-- [ ] **Éditeur de personnalisation de thème** — Panneau live où le client modifie couleurs, polices, textes sur n'importe quel thème React. Nécessite migrer les thèmes vers CSS custom properties. Sauvegarder les customisations en JSON dans `Invitation.customizations`.
-- [ ] **Génération de thème par IA + Crédits (Chargily)** — L'user décrit son invitation en texte, Claude API génère la config complète (structured output Zod). Système de crédits : champ `credits` sur `User`, déduction par action IA. Recharge via Chargily Pay (CIB/Edahabia) — packs 2 000 / 5 000 / 10 000 DZD avec webhook de confirmation. Nécessite compte marchand Chargily + `CHARGILY_API_KEY` + `CHARGILY_WEBHOOK_SECRET`.
+**Ce qu'il faut** : que chaque invitation IA soit visuellement différente des autres, pas juste une variante colorée de `gold-arch`.
+
+**Pistes à explorer** :
+- **Option A — Génération de composant React** : Claude génère du JSX complet (une seule fonction React auto-contenue). Risqué : sécurité (eval/sandbox), qualité variable, difficile à maintenir.
+- **Option B — Système de layout variable** : définir un schéma de thème JSON avec des paramètres structurels (forme de l'enveloppe, disposition du texte, ornements, animations) que l'IA remplit. Le moteur de rendu côté React interprète ce JSON. Plus sûr, plus cohérent.
+- **Option C — Beaucoup plus de thèmes de base** (50+) avec plus de diversité structurelle. L'IA choisit parmi eux. Moins ambitieux mais plus stable.
+- **Option D — Claude génère du CSS pur** (keyframes, layout, couleurs) appliqué sur un template HTML/JSX générique. L'IA contrôle le visuel sans risque d'injection de logique.
+
+**Recommandation** : Option B (layout JSON) ou Option D (CSS généré). À décider avec le user.
+
+### 2. Variables d'environnement à ajouter dans Vercel (prod)
+- `ANTHROPIC_API_KEY` — clé Claude API
+- `CHARGILY_API_KEY` — clé secrète Chargily **prod** (pas test)
+- `CHARGILY_WEBHOOK_SECRET` — même valeur
+- `ADMIN_EMAIL` — email admin pour `/themes/community`
+
+### 3. Chargily — tester le paiement en prod
+- Configurer webhook URL dans dashboard Chargily : `https://invytek.vercel.app/api/credits/webhook`
+- Tester avec une vraie carte CIB/Edahabia
 
 ---
 
@@ -115,28 +130,35 @@
 
 ```
 app/
-  auth/page.tsx               — Login/Signup + Google OAuth
-  create/page.tsx             — Wizard contextuel (12 thèmes) + preview iframe droite
-  pricing/page.tsx            — Page tarifs
+  auth/page.tsx
+  create/page.tsx             — 3 modes : themes / custom / ai
+  pricing/page.tsx
+  themes/community/page.tsx   — galerie thèmes IA
   dashboard/
-    page.tsx                  — Liste invitations + compteur vues
-    [id]/page.tsx             — Gérer invitation (responsive)
-    [id]/edit/page.tsx        — Modifier invitation
-  i/[slug]/
-    page.tsx                  — Invitation publique (12 thèmes) + enregistre InvitationView
-    g/[token]/page.tsx        — Invitation nominative + QR overlay
-  checkin/page.tsx            — Interface check-in vigile
+    page.tsx                  — crédits widget + invitations
+    [id]/page.tsx
+    [id]/edit/page.tsx
+  i/[slug]/page.tsx           — injection style customizations
+  i/[slug]/g/[token]/page.tsx
+  checkin/page.tsx
   api/
-    send-email/route.ts       — POST → Resend email HTML
+    ai-create/route.ts        — Claude Haiku → thème + palette + contenu
+    credits/
+      route.ts                — GET solde
+      checkout/route.ts       — POST → Chargily link
+      webhook/route.ts        — POST → HMAC → incrémente crédits
+    admin/promote-theme/route.ts
+    invitations/[id]/export/route.ts
+    rsvp/route.ts
+    guests/route.ts
+    checkin/route.ts
+    send-email/route.ts
 
 components/
-  EmailButton.tsx             — Resend API si email dispo, sinon mailto:
-  GuestQrCode.tsx             — Overlay QR code fixe (bottom-right)
-  QrCodeToggle.tsx            — Toggle showQrCode depuis dashboard
-  WhatsAppButton.tsx          — Lien wa.me pré-rempli
-  CopyLinkButton.tsx          — Copier dans le presse-papiers
-  DeleteInvitationButton.tsx  — Suppression avec confirmation
-  EditInvitationForm.tsx      — Formulaire édition invitation
+  Nav.tsx                     — CreditsWidget intégré
+  BuyCreditsButton.tsx
+  PublicRsvpForm.tsx
+  AddGuestForm.tsx / CopyLinkButton / WhatsApp / Email / QrCodeToggle / DeleteInvitation / EditInvitationForm
 
 themes/
   wedding/{gold-arch,bordeaux-oval,ivoire-minimal}/
@@ -144,31 +166,22 @@ themes/
   baby/baby-shower/
   business/{soiree-prestige,conference-tech,inauguration}/
   medical/{blouse-lys,congres-medical,sensibilisation}/
-  registry.ts                 — 12 thèmes enregistrés
 
-prisma/
-  schema.prisma               — User, Invitation, Theme, Guest, InvitationView
+prisma/schema.prisma — User(credits), Invitation, Guest, InvitationView, GeneratedTheme
 ```
 
-## Variables d'environnement (Vercel)
-- `DATABASE_URL` — Neon pooled (auto-injectée)
-- `DATABASE_URL_UNPOOLED` — Neon direct (migrations)
-- `AUTH_SECRET` — Secret JWT Auth.js ✅ (aussi dans `.env.local`)
-- `AUTH_URL` — `https://invytek.vercel.app` ✅
-- `AUTH_GOOGLE_ID` — OAuth Google Client ID ✅
-- `AUTH_GOOGLE_SECRET` — OAuth Google Client Secret ✅
-- `RESEND_API_KEY` — Clé API Resend (à ajouter pour emails serveur)
-- `RESEND_FROM_EMAIL` — Ex: `Invytek <hello@tondomaine.com>` (nécessite domaine vérifié sur resend.com)
+## Variables d'environnement
+- `DATABASE_URL` / `DATABASE_URL_UNPOOLED` — Neon (auto-injectées)
+- `AUTH_SECRET` ✅ · `AUTH_URL` ✅ · `AUTH_GOOGLE_ID` ✅ · `AUTH_GOOGLE_SECRET` ✅
+- `ANTHROPIC_API_KEY` — à ajouter Vercel prod
+- `CHARGILY_API_KEY` / `CHARGILY_WEBHOOK_SECRET` — à ajouter Vercel prod
+- `ADMIN_EMAIL` — à ajouter Vercel prod
+- `RESEND_API_KEY` / `RESEND_FROM_EMAIL` — emails HTML
 
 ## Commandes utiles
 ```bash
-npm run dev          # dev server :3000
-npm run build        # vérifier avant push
-npm run seed         # créer demo-mariage-2026
-npx prisma db push   # sync schema → Neon
-vercel env pull .env.local  # sync vars Vercel → local
+npm run dev
+npm run build
+npx prisma db push      # sync schema → Neon
+npx prisma generate     # regénérer client après schema change
 ```
-
-## Demo locale
-- `http://localhost:3000/i/demo-mariage-2026`
-- Nominatif : `/i/demo-mariage-2026/g/demo-tk-ahmed`
