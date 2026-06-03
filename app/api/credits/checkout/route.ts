@@ -28,24 +28,32 @@ export async function POST(req: Request) {
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000";
 
-  const res = await fetch("https://pay.chargily.net/api/v2/checkouts", {
+  // URL test si clé test, prod sinon
+  const isTest = apiKey.startsWith("test_");
+  const chargilyUrl = isTest
+    ? "https://pay.chargily.net/test/api/v2/checkouts"
+    : "https://pay.chargily.net/api/v2/checkouts";
+
+  const res = await fetch(chargilyUrl, {
     method: "POST",
-    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json", "Accept": "application/json" },
     body: JSON.stringify({
       amount: pack.amount,
       currency: "dzd",
+      payment_method: "edahabia",
       description: `${pack.label} — ${pack.credits} crédits Invytek`,
       success_url: `${baseUrl}/dashboard?credits=ok`,
       failure_url: `${baseUrl}/dashboard?credits=fail`,
       webhook_endpoint: `${baseUrl}/api/credits/webhook`,
-      metadata: { userId: dbUser.id, credits: pack.credits },
+      locale: "fr",
+      metadata: { userId: dbUser.id, credits: String(pack.credits) },
     }),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    console.error("Chargily error:", err);
-    return NextResponse.json({ error: "Erreur paiement" }, { status: 502 });
+    console.error("Chargily error:", res.status, err);
+    return NextResponse.json({ error: `Erreur paiement (${res.status})`, detail: err }, { status: 502 });
   }
 
   const data = await res.json() as { checkout_url?: string };
