@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { GuestQrCode } from "@/components/GuestQrCode";
 import GoldArchTheme from "@/themes/wedding/gold-arch/Theme";
 import BordeauxOvalTheme from "@/themes/wedding/bordeaux-oval/Theme";
 import IvoireMinimalTheme from "@/themes/wedding/ivoire-minimal/Theme";
@@ -35,18 +36,22 @@ export default async function GuestInvitationPage({ params }: Props) {
   const p = { content, options, invitationId: guest.invitation.id, guestName: guest.name, guestToken: token, alreadyResponded: guest.status !== "pending" };
   const id = guest.invitation.themeId;
 
-  if (id === "gold-arch")        return <GoldArchTheme {...p} />;
-  if (id === "bordeaux-oval")    return <BordeauxOvalTheme {...p} />;
-  if (id === "ivoire-minimal")   return <IvoireMinimalTheme {...p} />;
-  if (id === "confettis-or")     return <ConfettisOrTheme {...p} />;
-  if (id === "soiree-prestige")  return <SoireePrestigeTheme {...p} />;
-  if (id === "blouse-lys")       return <BlouseLysTheme {...p} />;
-  if (id === "anniv-neon")       return <AnnivNeonTheme {...p} />;
-  if (id === "baby-shower")      return <BabyShowerTheme {...p} />;
-  if (id === "conference-tech")  return <ConferenceTechTheme {...p} />;
-  if (id === "congres-medical")  return <CongresMedicalTheme {...p} />;
-  if (id === "inauguration")     return <InaugurationTheme {...p} />;
-  if (id === "sensibilisation")  return <SensibilisationTheme {...p} />;
+  const showQr = (p.options as { showQrCode?: boolean })?.showQrCode === true;
+  const lightThemes = new Set(["baby-shower", "congres-medical", "inauguration", "sensibilisation"]);
+  const qr = showQr ? <GuestQrCode dark={!lightThemes.has(id)} /> : null;
+
+  if (id === "gold-arch")        return <>{<GoldArchTheme {...p} />}{qr}</>;
+  if (id === "bordeaux-oval")    return <>{<BordeauxOvalTheme {...p} />}{qr}</>;
+  if (id === "ivoire-minimal")   return <>{<IvoireMinimalTheme {...p} />}{qr}</>;
+  if (id === "confettis-or")     return <>{<ConfettisOrTheme {...p} />}{qr}</>;
+  if (id === "soiree-prestige")  return <>{<SoireePrestigeTheme {...p} />}{qr}</>;
+  if (id === "blouse-lys")       return <>{<BlouseLysTheme {...p} />}{qr}</>;
+  if (id === "anniv-neon")       return <>{<AnnivNeonTheme {...p} />}{qr}</>;
+  if (id === "baby-shower")      return <>{<BabyShowerTheme {...p} />}{qr}</>;
+  if (id === "conference-tech")  return <>{<ConferenceTechTheme {...p} />}{qr}</>;
+  if (id === "congres-medical")  return <>{<CongresMedicalTheme {...p} />}{qr}</>;
+  if (id === "inauguration")     return <>{<InaugurationTheme {...p} />}{qr}</>;
+  if (id === "sensibilisation")  return <>{<SensibilisationTheme {...p} />}{qr}</>;
 
   notFound();
 }
