@@ -1,5 +1,6 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
@@ -22,6 +23,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   pages: { signIn: "/auth" },
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
     Credentials({
       credentials: {
         email: {}, password: {}, name: {}, action: {},
@@ -50,8 +56,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
-      if (user?.id) token.id = user.id;
+    async jwt({ token, user, account }) {
+      if (user?.id) {
+        token.id = user.id;
+      } else if (account?.provider === "google" && token.email) {
+        // Upsert user on first Google login
+        const dbUser = await prisma.user.upsert({
+          where: { email: token.email },
+          update: { name: token.name ?? undefined, image: token.picture as string ?? undefined },
+          create: { email: token.email, name: token.name ?? token.email.split("@")[0], image: token.picture as string ?? undefined },
+        });
+        token.id = dbUser.id;
+      }
       return token;
     },
     session({ session, token }) {
