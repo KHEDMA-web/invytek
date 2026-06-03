@@ -13,7 +13,18 @@ const createSchema = z.object({
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+
+  // Résoudre l'utilisateur par email — plus fiable que session.user.id après rotation de secret
+  const dbUser = await prisma.user.upsert({
+    where: { email: session.user.email },
+    update: {},
+    create: {
+      email: session.user.email,
+      name: session.user.name ?? session.user.email.split("@")[0],
+      image: session.user.image ?? undefined,
+    },
+  });
 
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Requête invalide" }, { status: 400 }); }
@@ -30,7 +41,7 @@ export async function POST(req: Request) {
   try {
     invitation = await prisma.invitation.create({
       data: {
-        userId: session.user.id,
+        userId: dbUser.id,
         slug,
         themeId,
         category: "wedding",
