@@ -30,6 +30,7 @@ model Invitation {
   publishedAt DateTime?
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   guests      Guest[]
+  views       InvitationView[]
 }
 
 model Theme {
@@ -53,5 +54,12 @@ model Guest {
   respondedAt  DateTime?
   checkedInAt  DateTime?
   token        String     @unique @default(cuid())
+  invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
+}
+
+model InvitationView {
+  id           String     @id @default(cuid())
+  invitationId String
+  viewedAt     DateTime   @default(now())
   invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
 }

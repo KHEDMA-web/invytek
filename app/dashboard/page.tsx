@@ -15,7 +15,10 @@ export default async function DashboardPage() {
   const invitations = await prisma.invitation.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
-    include: { guests: { select: { status: true, checkedInAt: true } } },
+    include: {
+      guests: { select: { status: true, checkedInAt: true } },
+      _count: { select: { views: true } },
+    },
   });
 
   const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
@@ -85,7 +88,17 @@ export default async function DashboardPage() {
                     <p style={{ fontSize: "0.85rem", color: "var(--text-faint)", marginTop: 4 }}>{content.venue}</p>
                   </div>
 
-                  {/* Stats */}
+                  {/* Stats vues */}
+                  <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.6rem 1.4rem", alignItems: "center", gap: 6 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-faint)", flexShrink: 0 }}>
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span style={{ fontFamily: "var(--font-title)", fontSize: "0.85rem", color: "var(--text-soft)" }}>
+                      {inv._count.views} vue{inv._count.views !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {/* Stats RSVP */}
                   {total > 0 && (
                     <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.8rem 1.4rem", gap: 0 }}>
                       {[

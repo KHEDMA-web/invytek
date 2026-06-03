@@ -36,6 +36,8 @@ export default async function InvitationPage({ params }: Props) {
   const theme = getTheme(invitation.themeId);
   if (!theme) notFound();
 
+  void prisma.invitationView.create({ data: { invitationId: invitation.id } });
+
   const content = JSON.parse(invitation.content) as WeddingContent;
   const options = JSON.parse(invitation.options) as Partial<WeddingOptions>;
 
