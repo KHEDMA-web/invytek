@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 type Category = "tous" | "mariage" | "business" | "medical" | "anniversaire";
 
@@ -250,7 +249,7 @@ export function ThemeGrid() {
 
       <div className="theme-grid" id="grid">
         {THEMES.map((t, i) => (
-          <Link
+          <a
             key={t.slug}
             href={t.href}
             className={`tcard reveal${i % 3 === 1 ? " d1" : i % 3 === 2 ? " d2" : ""}${!visible.has(t.slug) ? " hide" : ""}`}
@@ -268,7 +267,7 @@ export function ThemeGrid() {
               <h3>{t.name}</h3>
               <span className="btn btn-gold btn-sm use">Aperçu du thème</span>
             </div>
-          </Link>
+          </a>
         ))}
 
         {visible.size === 0 && (

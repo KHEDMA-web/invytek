@@ -475,3 +475,12 @@ header.hero {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Create wizard — action bars wrappent sur petit écran */
+@media (max-width: 420px) {
+  .wrap .btn-gold,
+  .wrap .btn-ghost {
+    flex: 1;
+    justify-content: center;
+  }
+}
