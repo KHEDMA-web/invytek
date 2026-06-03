@@ -100,13 +100,12 @@
 
 ## Ce qui reste à faire 🔧
 
-### Priorité 1 — Futur proche
-- [ ] Auth OAuth autres providers (GitHub, etc.)
-- [ ] Export CSV invités & RSVP
-- [ ] API webhooks RSVP
-- [ ] Page invité publique avec formulaire RSVP pour lien non-nominatif
+### Priorité 1 — Futur proche ✅ TOUT FAIT
+- [x] Export CSV invités — `GET /api/invitations/[id]/export` + bouton dashboard
+- [x] API webhooks RSVP — `POST /api/rsvp` notifie `options.webhookUrl`
+- [x] Page RSVP publique — `PublicRsvpForm` modale flottante sur `/i/[slug]`
 
-### Peut-être — À explorer plus tard
+### Priorité 2 — Prochaines grandes features
 - [ ] **Éditeur de personnalisation de thème** — Panneau live où le client modifie couleurs, polices, textes sur n'importe quel thème React. Nécessite migrer les thèmes vers CSS custom properties. Sauvegarder les customisations en JSON dans `Invitation.customizations`.
 - [ ] **Génération de thème par IA + Crédits (Chargily)** — L'user décrit son invitation en texte, Claude API génère la config complète (structured output Zod). Système de crédits : champ `credits` sur `User`, déduction par action IA. Recharge via Chargily Pay (CIB/Edahabia) — packs 2 000 / 5 000 / 10 000 DZD avec webhook de confirmation. Nécessite compte marchand Chargily + `CHARGILY_API_KEY` + `CHARGILY_WEBHOOK_SECRET`.
 

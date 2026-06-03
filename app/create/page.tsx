@@ -22,7 +22,8 @@ const THEMES = [
   { id: "sensibilisation",  name: "Sensibilisation",         cat: "Médical",       available: true },
 ];
 
-// Defaults & labels per category
+const CATS = ["Tous", "Mariage", "Anniversaire", "Bébé", "Business", "Médical"];
+
 const DEFAULTS: Record<string, { invLine: string; closing: string; name1Ph: string; name2Ph: string; hostsPh: string; notePh: string; name1Label: string; name2Label: string; hostsLabel: string; noteLabel: string; }> = {
   Mariage: {
     invLine: "ont l'immense plaisir de vous convier à la cérémonie de mariage de",
@@ -83,11 +84,15 @@ export default function CreatePage() {
   return <Suspense><CreateForm /></Suspense>;
 }
 
+type Mode = null | "themes";
+
 function CreateForm() {
   const router = useRouter();
   const params = useSearchParams();
 
+  const [mode, setMode] = useState<Mode>(params.get("theme") ? "themes" : null);
   const [step, setStep] = useState(1);
+  const [catFilter, setCatFilter] = useState("Tous");
   const [themeId, setThemeId] = useState(params.get("theme") || "gold-arch");
 
   const theme = THEMES.find(t => t.id === themeId)!;
@@ -96,7 +101,6 @@ function CreateForm() {
   const isWedding = cat === "Mariage" || cat === "Mariage · RTL";
   const isEvent = cat === "Business" || cat === "Médical";
 
-  // Content
   const [name1, setName1] = useState("");
   const [name2, setName2] = useState("");
   const [hosts, setHosts] = useState("");
@@ -113,16 +117,12 @@ function CreateForm() {
   const [showCountdown, setShowCountdown] = useState(true);
   const [showRsvp, setShowRsvp] = useState(true);
 
-  // Slug
   const [slug, setSlug] = useState("");
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [slugChecking, setSlugChecking] = useState(false);
-
-  // Submit
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reset defaults when category changes
   useEffect(() => {
     const nd = DEFAULTS[cat] || DEFAULTS["Mariage"];
     setInvLine(nd.invLine);
@@ -133,18 +133,16 @@ function CreateForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cat]);
 
-  // Auto-generate slug
   useEffect(() => {
     if (!name1) return;
     const year = date ? new Date(date).getFullYear() : new Date().getFullYear();
     if (isWedding && name2) {
       setSlug(slugify(`${name1}-${name2}-${year}`));
-    } else if (name1) {
+    } else {
       setSlug(slugify(`${name1}-${year}`));
     }
   }, [name1, name2, date, isWedding]);
 
-  // Debounced slug check
   useEffect(() => {
     if (!slug || slug.length < 3) { setSlugAvailable(null); return; }
     setSlugChecking(true);
@@ -165,36 +163,26 @@ function CreateForm() {
       const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
       const n2 = isWedding ? name2 : (name2 || "—");
       const content = {
-        hosts,
-        invitationLine: invLine,
+        hosts, invitationLine: invLine,
         names: [name1, n2] as [string, string],
         namesSeparator: isWedding ? "avec" : "·",
         bismillah: isWedding ? bismillah : false,
-        date,
-        time,
+        date, time,
         dayLabel: dayLabels[dateObj.getDay()] || dayLabel,
-        venue,
-        venueSub: venueSub || undefined,
-        note: note || undefined,
-        closing,
+        venue, venueSub: venueSub || undefined,
+        note: note || undefined, closing,
         initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
       };
-      const options = {
-        showCountdown,
-        showRsvp,
-        showArabic: isWedding ? showArabic : false,
-        showNote: !!note,
-      };
-
+      const options = { showCountdown, showRsvp, showArabic: isWedding ? showArabic : false, showNote: !!note };
       const res = await fetch("/api/invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ themeId, slug, content, options }),
       });
-      let data: { error?: string; ok?: boolean } = {};
-      try { data = await res.json(); } catch { /* réponse non-JSON */ }
-      if (!res.ok) { setError(data.error || `Erreur ${res.status} — réessayez.`); return; }
-      router.push(`/dashboard`);
+      let data: { error?: string } = {};
+      try { data = await res.json(); } catch { /* non-JSON */ }
+      if (!res.ok) { setError(data.error || `Erreur ${res.status}`); return; }
+      router.push("/dashboard");
     } catch (err) {
       setError("Erreur : " + (err instanceof Error ? err.message : String(err)));
     } finally {
@@ -203,13 +191,111 @@ function CreateForm() {
   }
 
   const canContinue = !!name1 && !!date && !!venue && !!hosts && (isWedding ? !!name2 : true);
+  const filteredThemes = catFilter === "Tous" ? THEMES : THEMES.filter(t => t.cat.startsWith(catFilter));
 
+  // ── Landing ──────────────────────────────────────────────────────────────
+  if (mode === null) {
+    return (
+      <div className="invytek-page" style={{ minHeight: "100dvh", paddingBottom: "4rem" }}>
+        <Nav />
+        <div className="wrap" style={{ paddingTop: 120, maxWidth: 820 }}>
+          <Link href="/dashboard" style={{ fontFamily: "var(--font-title)", fontSize: 12, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--text-faint)", textDecoration: "none" }}>
+            ← Tableau de bord
+          </Link>
+          <h1 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.8rem,5vw,2.8rem)", color: "var(--ivory)", fontWeight: 400, marginTop: "1.2rem", marginBottom: "0.6rem" }}>
+            Créer une invitation
+          </h1>
+          <p style={{ color: "var(--text-soft)", marginBottom: "3rem" }}>
+            Choisissez comment vous souhaitez créer votre invitation.
+          </p>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20 }}>
+
+            {/* Card 1 — Thèmes disponibles */}
+            <button
+              onClick={() => { setMode("themes"); setStep(1); }}
+              style={{
+                background: "linear-gradient(160deg, rgba(184,146,60,0.08), rgba(184,146,60,0.03))",
+                border: "1px solid rgba(184,146,60,0.4)",
+                borderRadius: 16, padding: "2rem", cursor: "pointer",
+                textAlign: "left", transition: "border-color 0.2s, background 0.2s",
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--gold)"; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(184,146,60,0.4)"; }}
+            >
+              <div style={{ fontSize: 32, marginBottom: "1rem" }}>🎨</div>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>
+                Gratuit
+              </div>
+              <h2 style={{ fontFamily: "var(--font-title)", fontSize: "1.35rem", color: "var(--ivory)", fontWeight: 400, marginBottom: "0.7rem" }}>
+                Thèmes disponibles
+              </h2>
+              <p style={{ color: "var(--text-soft)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+                Choisissez parmi 12 thèmes prêts à l&apos;emploi — mariage, anniversaire, business et médical.
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {["Mariage", "Anniversaire", "Bébé", "Business", "Médical"].map(c => (
+                  <span key={c} style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".12em", textTransform: "uppercase", color: "var(--text-faint)", background: "rgba(184,146,60,0.07)", borderRadius: 100, padding: "3px 10px", border: "1px solid var(--hair)" }}>
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </button>
+
+            {/* Card 2 — Thème personnalisé */}
+            <div style={{
+              background: "rgba(255,255,255,0.02)",
+              border: "1px solid var(--hair)",
+              borderRadius: 16, padding: "2rem",
+              opacity: 0.55, position: "relative",
+            }}>
+              <div style={{ fontSize: 32, marginBottom: "1rem" }}>✏️</div>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 8 }}>
+                Premium — Bientôt
+              </div>
+              <h2 style={{ fontFamily: "var(--font-title)", fontSize: "1.35rem", color: "var(--ivory)", fontWeight: 400, marginBottom: "0.7rem" }}>
+                Thème personnalisé
+              </h2>
+              <p style={{ color: "var(--text-soft)", fontSize: "0.9rem", lineHeight: 1.6 }}>
+                Modifiez couleurs, polices et textes en temps réel. Votre invitation, à votre image.
+              </p>
+            </div>
+
+            {/* Card 3 — Créer avec l'IA */}
+            <div style={{
+              background: "linear-gradient(160deg, rgba(110,80,200,0.08), rgba(184,146,60,0.04))",
+              border: "1px solid rgba(110,80,200,0.25)",
+              borderRadius: 16, padding: "2rem",
+              opacity: 0.6, position: "relative",
+            }}>
+              <div style={{ fontSize: 32, marginBottom: "1rem" }}>✨</div>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "#a080e0", marginBottom: 8 }}>
+                Crédits — Bientôt
+              </div>
+              <h2 style={{ fontFamily: "var(--font-title)", fontSize: "1.35rem", color: "var(--ivory)", fontWeight: 400, marginBottom: "0.7rem" }}>
+                Créer avec l&apos;IA
+              </h2>
+              <p style={{ color: "var(--text-soft)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "1.2rem" }}>
+                Décrivez votre événement en quelques mots — notre IA génère l&apos;invitation complète en secondes.
+              </p>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "#a080e0" }}>
+                500 crédits / invitation
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Themes wizard ─────────────────────────────────────────────────────────
   return (
     <div className="invytek-page" style={{ minHeight: "100dvh", paddingBottom: "4rem" }}>
       <Nav />
       <div className="wrap" style={{ paddingTop: 120, maxWidth: step === 1 ? 1080 : 720 }}>
 
-        {/* Steps */}
+        {/* Step indicator */}
         <div style={{ display: "flex", gap: 8, marginBottom: "2.5rem", alignItems: "center" }}>
           {[1, 2, 3].map(s => (
             <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -235,16 +321,32 @@ function CreateForm() {
         {step === 1 && (
           <div style={{ display: "flex", gap: 32, alignItems: "start", flexWrap: "wrap" }}>
 
-            {/* Left — sélection */}
-            <div style={{ flex: "0 1 360px", minWidth: 260 }}>
+            <div style={{ flex: "0 1 380px", minWidth: 260 }}>
               <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
                 Choisissez votre thème
               </h2>
               <p style={{ color: "var(--text-soft)", marginBottom: "1.5rem" }}>
                 Sélectionnez le thème qui correspond à votre événement.
               </p>
+
+              {/* Category filter */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: "1.2rem" }}>
+                {CATS.map(c => (
+                  <button key={c} onClick={() => setCatFilter(c)} style={{
+                    padding: "5px 14px", borderRadius: 100, cursor: "pointer",
+                    fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase",
+                    background: catFilter === c ? "linear-gradient(135deg, var(--gold-vivid), var(--accent))" : "rgba(184,146,60,0.07)",
+                    color: catFilter === c ? "#2a2008" : "var(--text-soft)",
+                    border: catFilter === c ? "none" : "1px solid var(--hair)",
+                  }}>
+                    {c}
+                  </button>
+                ))}
+              </div>
+
+              {/* Theme grid */}
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: "1.5rem" }}>
-                {THEMES.map(t => (
+                {filteredThemes.map(t => (
                   <button key={t.id} onClick={() => t.available && setThemeId(t.id)} style={{
                     padding: "1rem", borderRadius: 10,
                     border: themeId === t.id ? "2px solid var(--gold)" : "1px solid var(--hair)",
@@ -259,10 +361,14 @@ function CreateForm() {
                   </button>
                 ))}
               </div>
-              <button onClick={() => setStep(2)} className="btn btn-gold">Continuer →</button>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setMode(null)} className="btn btn-ghost">← Retour</button>
+                <button onClick={() => setStep(2)} className="btn btn-gold">Continuer →</button>
+              </div>
             </div>
 
-            {/* Right — aperçu */}
+            {/* Preview */}
             <div className="create-preview" style={{ flex: "1 1 340px", position: "sticky", top: 100 }}>
               <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 12 }}>
                 Aperçu — {theme.name}
@@ -276,7 +382,6 @@ function CreateForm() {
                 />
               </div>
             </div>
-
           </div>
         )}
 
@@ -291,7 +396,6 @@ function CreateForm() {
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "1.4rem" }}>
 
-              {/* name1 */}
               <Row label={d.name1Label}>
                 {isWedding ? (
                   <div className="form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -303,7 +407,6 @@ function CreateForm() {
                 )}
               </Row>
 
-              {/* name2 pour non-mariage */}
               {!isWedding && (
                 <Row label={d.name2Label}>
                   <input value={name2} onChange={e => setName2(e.target.value)} placeholder={d.name2Ph} style={inp} />
@@ -382,7 +485,7 @@ function CreateForm() {
               <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 8 }}>
                 Votre lien
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 0, background: "rgba(0,0,0,0.2)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--hair)" }}>
+              <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.2)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--hair)" }}>
                 <span style={{ padding: "0.7rem 0.8rem", color: "var(--text-faint)", fontFamily: "var(--font-title)", fontSize: 13, whiteSpace: "nowrap" }}>
                   invytek.app/i/
                 </span>
@@ -399,7 +502,6 @@ function CreateForm() {
               {slugAvailable === true && <p style={{ color: "var(--gold)", fontSize: 13, marginTop: 6, fontFamily: "var(--font-title)" }}>Disponible ✓</p>}
             </div>
 
-            {/* Récap */}
             <div style={{ background: "rgba(184,146,60,0.04)", border: "1px solid var(--hair)", borderRadius: 10, padding: "1.2rem", marginBottom: "2rem" }}>
               <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 12 }}>Récapitulatif</div>
               <div style={{ display: "grid", gap: 6 }}>
@@ -422,11 +524,7 @@ function CreateForm() {
 
             <div style={{ display: "flex", gap: 12 }}>
               <button onClick={() => setStep(2)} className="btn btn-ghost">← Retour</button>
-              <button
-                onClick={publish}
-                disabled={loading || !slug || slugAvailable === false || slugChecking}
-                className="btn btn-gold"
-              >
+              <button onClick={publish} disabled={loading || !slug || slugAvailable === false || slugChecking} className="btn btn-gold">
                 {loading ? "Publication…" : "Publier mon invitation →"}
               </button>
             </div>
