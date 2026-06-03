@@ -64,3 +64,14 @@ model InvitationView {
   viewedAt     DateTime   @default(now())
   invitation   Invitation @relation(fields: [invitationId], references: [id], onDelete: Cascade)
 }
+
+model GeneratedTheme {
+  id             String   @id @default(cuid())
+  baseThemeId    String
+  customizations String   // JSON Record<string, string>
+  category       String
+  label          String   // ex: "Mariage Bordeaux & Lune"
+  isPublic       Boolean  @default(true)
+  isPromoted     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}

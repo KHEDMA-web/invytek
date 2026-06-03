@@ -161,6 +161,7 @@ export function Nav() {
         </Link>
         <div className="nav-links">
           <Link href="/themes" className={pathname === "/themes" ? "active" : ""}>Thèmes</Link>
+          <Link href="/themes/community" className={pathname === "/themes/community" ? "active" : ""}>Galerie IA</Link>
           <Link href="/#how">Comment ça marche</Link>
           <Link href="/#proof">Pourquoi nous</Link>
           <Link href="/pricing" className={pathname === "/pricing" ? "active" : ""}>Tarifs</Link>

@@ -97,14 +97,18 @@ function CreateForm() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const [mode, setMode] = useState<Mode>(params.get("theme") ? "themes" : null);
-  const [step, setStep] = useState(1);
+  // Si on arrive depuis la galerie avec ?theme=X&custom={...}
+  const customParam = params.get("custom");
+  const initialCustom = customParam ? (JSON.parse(decodeURIComponent(customParam)) as Record<string, string>) : null;
+
+  const [mode, setMode] = useState<Mode>(params.get("theme") ? (initialCustom ? "custom" : "themes") : null);
+  const [step, setStep] = useState(initialCustom ? 2 : 1);
   const [catFilter, setCatFilter] = useState("Tous");
   const [themeId, setThemeId] = useState(params.get("theme") || "gold-arch");
 
   // Custom mode — color customizations
   const [customColors, setCustomColors] = useState<Record<string, string>>(
-    () => Object.fromEntries(CUSTOM_VARS.map(v => [v.key, v.default]))
+    () => initialCustom ?? Object.fromEntries(CUSTOM_VARS.map(v => [v.key, v.default]))
   );
 
   // AI mode
@@ -192,7 +196,7 @@ function CreateForm() {
         note: note || undefined, closing,
         initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
       };
-      const hasCustom = mode === "custom" && CUSTOM_VARS.some(v => customColors[v.key] !== v.default);
+      const hasCustom = (mode === "custom" || mode === "ai") && Object.keys(customColors).length > 0;
       const options = {
         showCountdown, showRsvp, showArabic: isWedding ? showArabic : false, showNote: !!note,
         ...(hasCustom ? { customizations: customColors } : {}),
@@ -435,10 +439,11 @@ function CreateForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ description: aiDesc }),
         });
-        const d = await res.json() as { themeId?: string; content?: Record<string, unknown>; credits?: number; error?: string };
+        const d = await res.json() as { themeId?: string; customizations?: Record<string, string>; content?: Record<string, unknown>; credits?: number; error?: string };
         if (!res.ok) { setAiError(d.error || "Erreur IA"); return; }
         if (d.credits !== undefined) setUserCredits(d.credits);
         if (d.themeId) setThemeId(d.themeId);
+        if (d.customizations) setCustomColors(d.customizations as Record<string, string>);
         const c = d.content as { names?: [string,string]; hosts?: string; invitationLine?: string; date?: string; time?: string; dayLabel?: string; venue?: string; venueSub?: string; closing?: string; note?: string; bismillah?: boolean } | undefined;
         if (c) {
           if (c.names?.[0]) setName1(c.names[0]);
