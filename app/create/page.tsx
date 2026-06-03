@@ -425,146 +425,188 @@ function CreateForm() {
 
   // ── AI wizard ─────────────────────────────────────────────────────────────
   if (mode === "ai") {
+    const aiTheme = THEMES.find(t => t.id === themeId) ?? THEMES[0];
+
+    async function generateAi() {
+      setAiLoading(true); setAiError(null);
+      try {
+        const res = await fetch("/api/ai-create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: aiDesc }),
+        });
+        const d = await res.json() as { themeId?: string; content?: Record<string, unknown>; credits?: number; error?: string };
+        if (!res.ok) { setAiError(d.error || "Erreur IA"); return; }
+        if (d.credits !== undefined) setUserCredits(d.credits);
+        if (d.themeId) setThemeId(d.themeId);
+        const c = d.content as { names?: [string,string]; hosts?: string; invitationLine?: string; date?: string; time?: string; dayLabel?: string; venue?: string; venueSub?: string; closing?: string; note?: string; bismillah?: boolean } | undefined;
+        if (c) {
+          if (c.names?.[0]) setName1(c.names[0]);
+          if (c.names?.[1]) setName2(c.names[1]);
+          if (c.hosts) setHosts(c.hosts);
+          if (c.invitationLine) setInvLine(c.invitationLine);
+          if (c.date) setDate(c.date);
+          if (c.time) setTime(c.time);
+          if (c.venue) setVenue(c.venue);
+          if (c.venueSub) setVenueSub(c.venueSub);
+          if (c.closing) setClosing(c.closing);
+          if (c.note) setNote(c.note);
+          if (c.bismillah !== undefined) setBismillah(c.bismillah);
+        }
+        setStep(2);
+      } catch { setAiError("Erreur réseau — réessayez."); }
+      finally { setAiLoading(false); }
+    }
+
     return (
       <div className="invytek-page" style={{ minHeight: "100dvh", paddingBottom: "4rem" }}>
         <Nav />
-        <div className="wrap" style={{ paddingTop: 120, maxWidth: step === 1 ? 720 : 720 }}>
+        <div className="wrap" style={{ paddingTop: 120, maxWidth: step === 1 ? 680 : 1080 }}>
 
-          {/* Step indicator */}
-          <div style={{ display: "flex", gap: 8, marginBottom: "2.5rem", alignItems: "center" }}>
-            {[1, 2, 3].map(s => (
-              <div key={s} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
-                  background: step >= s ? "linear-gradient(135deg, #a080e0, #7050c0)" : "rgba(110,80,200,0.1)",
-                  border: step >= s ? "none" : "1px solid rgba(110,80,200,0.3)",
-                  fontFamily: "var(--font-title)", fontSize: 13,
-                  color: step >= s ? "#fff" : "var(--text-faint)",
-                  cursor: step > s ? "pointer" : "default",
-                }} onClick={() => step > s && setStep(s)}>{s}</div>
-                {s < 3 && <div style={{ width: 40, height: 1, background: step > s ? "#a080e0" : "var(--hair)" }} />}
-              </div>
-            ))}
-            <span style={{ marginLeft: 8, fontFamily: "var(--font-title)", fontSize: 12, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--text-soft)" }}>
-              {step === 1 ? "Description IA" : step === 2 ? "Révision & thème" : "Lien & publication"}
-            </span>
-          </div>
-
-          {/* Step 1 — Description + génération */}
+          {/* Step 1 — Description */}
           {step === 1 && (
-            <div style={{ maxWidth: 600 }}>
-              <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
-                Décrivez votre événement
-              </h2>
-              <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>
-                L&apos;IA génère le contenu complet de votre invitation. Soyez précis : noms, date, lieu, type d&apos;événement.
+            <div>
+              <button onClick={() => setMode(null)} style={{ fontFamily: "var(--font-title)", fontSize: 12, letterSpacing: ".16em", textTransform: "uppercase", color: "var(--text-faint)", background: "none", border: "none", cursor: "pointer", marginBottom: "1.5rem", padding: 0 }}>
+                ← Retour
+              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "0.6rem" }}>
+                <span style={{ fontSize: 24 }}>✨</span>
+                <h1 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "var(--ivory)", fontWeight: 400 }}>
+                  Créer avec l&apos;IA
+                </h1>
+              </div>
+              <p style={{ color: "var(--text-soft)", marginBottom: "2rem", maxWidth: 520 }}>
+                Décrivez votre événement en une ou deux phrases. L&apos;IA choisit le thème, rédige le contenu et génère votre invitation en quelques secondes.
               </p>
 
               {/* Crédits */}
-              {userCredits !== null && (
-                <div style={{ background: "rgba(110,80,200,0.08)", border: "1px solid rgba(110,80,200,0.25)", borderRadius: 10, padding: "1rem 1.2rem", marginBottom: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-                  <span style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>
-                    Crédits disponibles : <strong style={{ color: "#a080e0" }}>{userCredits}</strong>
-                  </span>
-                  {userCredits === 0 && (
-                    <button disabled={buyLoading} onClick={async () => {
-                      setBuyLoading(true);
-                      const res = await fetch("/api/credits/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack: 0 }) });
-                      const d = await res.json() as { url?: string };
-                      if (d.url) window.location.href = d.url;
-                      setBuyLoading(false);
-                    }} style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", background: "linear-gradient(135deg, #a080e0, #7050c0)", color: "#fff", border: "none", borderRadius: 100, padding: "6px 16px", cursor: "pointer" }}>
-                      {buyLoading ? "…" : "Acheter des crédits"}
-                    </button>
-                  )}
-                </div>
-              )}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(110,80,200,0.08)", border: "1px solid rgba(110,80,200,0.22)", borderRadius: 10, padding: "0.8rem 1.2rem", marginBottom: "1.5rem", flexWrap: "wrap", gap: 10 }}>
+                <span style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>
+                  ✨ <strong style={{ color: "#a080e0" }}>{userCredits ?? "…"}</strong> crédit{(userCredits ?? 0) !== 1 ? "s" : ""} disponible{(userCredits ?? 0) !== 1 ? "s" : ""}
+                </span>
+                {userCredits === 0 && (
+                  <button disabled={buyLoading} onClick={async () => {
+                    setBuyLoading(true);
+                    const res = await fetch("/api/credits/checkout", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pack: 0 }) });
+                    const d = await res.json() as { url?: string };
+                    if (d.url) window.location.href = d.url;
+                    setBuyLoading(false);
+                  }} style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", background: "linear-gradient(135deg, #a080e0, #7050c0)", color: "#fff", border: "none", borderRadius: 100, padding: "6px 16px", cursor: "pointer" }}>
+                    {buyLoading ? "…" : "Acheter"}
+                  </button>
+                )}
+              </div>
 
               <textarea
                 value={aiDesc}
                 onChange={e => setAiDesc(e.target.value)}
-                placeholder={"Exemple : Mariage de Karim Benali et Sara Morsli le 15 août 2026 à la salle El Djazair, Alger. Familles Benali et Morsli. Cérémonie à 18h."}
-                rows={6}
-                style={{ ...inp, height: "auto", resize: "vertical", marginBottom: "1.2rem", fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem" }}
+                onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && aiDesc.trim() && !aiLoading) generateAi(); }}
+                placeholder="Mariage de Karim Benali et Sara Morsli, le 15 août 2026 à 18h, Salle El Djazair, Alger. Familles Benali et Morsli."
+                rows={5}
+                style={{ ...inp, height: "auto", resize: "vertical", marginBottom: "0.6rem", fontSize: "1rem" }}
               />
+              <p style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", marginBottom: "1.4rem" }}>
+                Astuce : précisez noms, date, heure, lieu et type d&apos;événement. Ctrl+Entrée pour générer.
+              </p>
 
               {aiError && <p style={{ color: "#e07070", fontSize: "0.9rem", marginBottom: "1rem" }}>{aiError}</p>}
 
-              <div style={{ display: "flex", gap: 10 }}>
-                <button onClick={() => setMode(null)} className="btn btn-ghost">← Retour</button>
-                <button
-                  disabled={aiLoading || !aiDesc.trim()}
-                  onClick={async () => {
-                    setAiLoading(true); setAiError(null);
-                    try {
-                      const res = await fetch("/api/ai-create", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ description: aiDesc, themeId }),
-                      });
-                      const d = await res.json() as { content?: Record<string, unknown>; credits?: number; error?: string };
-                      if (!res.ok) { setAiError(d.error || "Erreur IA"); return; }
-                      if (d.credits !== undefined) setUserCredits(d.credits);
-                      const c = d.content as { names?: [string,string]; hosts?: string; invitationLine?: string; date?: string; time?: string; dayLabel?: string; venue?: string; venueSub?: string; closing?: string; note?: string } | undefined;
-                      if (c) {
-                        if (c.names?.[0]) setName1(c.names[0]);
-                        if (c.names?.[1]) setName2(c.names[1]);
-                        if (c.hosts) setHosts(c.hosts);
-                        if (c.invitationLine) setInvLine(c.invitationLine);
-                        if (c.date) setDate(c.date);
-                        if (c.time) setTime(c.time);
-                        if (c.venue) setVenue(c.venue);
-                        if (c.venueSub) setVenueSub(c.venueSub);
-                        if (c.closing) setClosing(c.closing);
-                        if (c.note) setNote(c.note);
-                      }
-                      setStep(2);
-                    } catch { setAiError("Erreur réseau"); }
-                    finally { setAiLoading(false); }
-                  }}
-                  style={{ background: aiLoading || !aiDesc.trim() ? "rgba(110,80,200,0.3)" : "linear-gradient(135deg, #a080e0, #7050c0)", border: "none", borderRadius: 100, padding: "0.9rem 2rem", color: "#fff", fontFamily: "var(--font-title)", fontSize: 13, letterSpacing: ".16em", textTransform: "uppercase", cursor: aiLoading || !aiDesc.trim() ? "not-allowed" : "pointer" }}
-                >
-                  {aiLoading ? "Génération…" : "✨ Générer →"}
-                </button>
-              </div>
+              <button
+                disabled={aiLoading || !aiDesc.trim() || userCredits === 0}
+                onClick={generateAi}
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 8,
+                  background: aiLoading || !aiDesc.trim() || userCredits === 0 ? "rgba(110,80,200,0.3)" : "linear-gradient(135deg, #a080e0, #7050c0)",
+                  border: "none", borderRadius: 100, padding: "0.95rem 2.2rem",
+                  color: "#fff", fontFamily: "var(--font-title)", fontSize: 13,
+                  letterSpacing: ".16em", textTransform: "uppercase",
+                  cursor: aiLoading || !aiDesc.trim() || userCredits === 0 ? "not-allowed" : "pointer",
+                  boxShadow: aiLoading || !aiDesc.trim() ? "none" : "0 8px 24px rgba(110,80,200,0.4)",
+                }}
+              >
+                {aiLoading ? (
+                  <>
+                    <span style={{ display: "inline-block", width: 14, height: 14, border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.7s linear infinite" }} />
+                    Génération en cours…
+                  </>
+                ) : "✨ Générer mon invitation →"}
+              </button>
+              <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
             </div>
           )}
 
-          {/* Step 2 — Révision + choix thème */}
+          {/* Step 2 — Aperçu + publication directe */}
           {step === 2 && (
-            <div>
-              <div style={{ background: "rgba(110,80,200,0.07)", border: "1px solid rgba(110,80,200,0.2)", borderRadius: 10, padding: "1rem 1.2rem", marginBottom: "2rem" }}>
-                <p style={{ fontFamily: "var(--font-title)", fontSize: 12, color: "#a080e0", margin: 0 }}>
-                  ✨ Contenu généré par l&apos;IA — vérifiez et ajustez si nécessaire.
-                </p>
-              </div>
-              {(() => {
-                const t = THEMES.find(t => t.id === themeId)!;
-                const d2 = DEFAULTS[t.cat] || DEFAULTS["Mariage"];
-                const iw = ["Mariage","Mariage · RTL"].includes(t.cat);
-                const ie = ["Business","Médical"].includes(t.cat);
-                return <ContentStep {...{ theme: t, d: d2, isWedding: iw, isEvent: ie, name1, setName1, name2, setName2, hosts, setHosts, invLine, setInvLine, date, setDate, time, setTime, venue, setVenue, venueSub, setVenueSub, closing, setClosing, note, setNote, bismillah, setBismillah, showArabic, setShowArabic, showCountdown, setShowCountdown, showRsvp, setShowRsvp, onBack: () => setStep(1), onNext: () => setStep(3), canContinue: !!name1 && !!date && !!venue && !!hosts, extraTop: (
-                  <div style={{ marginBottom: "1.5rem" }}>
-                    <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 8 }}>Thème</div>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px,1fr))", gap: 8 }}>
-                      {THEMES.map(t2 => (
-                        <button key={t2.id} onClick={() => setThemeId(t2.id)} style={{ padding: "0.6rem 0.8rem", borderRadius: 8, textAlign: "left", cursor: "pointer", border: themeId === t2.id ? "2px solid var(--gold)" : "1px solid var(--hair)", background: themeId === t2.id ? "rgba(184,146,60,0.1)" : "rgba(255,255,255,0.02)" }}>
-                          <div style={{ fontFamily: "var(--font-title)", fontSize: 9, color: "var(--gold)", marginBottom: 2 }}>{t2.cat}</div>
-                          <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--ivory)" }}>{t2.name}</div>
-                        </button>
-                      ))}
-                    </div>
+            <div style={{ display: "flex", gap: 40, alignItems: "start", flexWrap: "wrap" }}>
+
+              {/* Gauche — résumé + slug + publie */}
+              <div style={{ flex: "0 1 360px", minWidth: 280 }}>
+                <div style={{ background: "rgba(110,80,200,0.08)", border: "1px solid rgba(110,80,200,0.25)", borderRadius: 10, padding: "1rem 1.2rem", marginBottom: "1.8rem" }}>
+                  <p style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "#a080e0", letterSpacing: ".14em", textTransform: "uppercase" }}>
+                    ✨ Invitation générée par l&apos;IA
+                  </p>
+                </div>
+
+                {/* Résumé */}
+                <div style={{ background: "rgba(184,146,60,0.04)", border: "1px solid var(--hair)", borderRadius: 10, padding: "1.2rem", marginBottom: "1.5rem" }}>
+                  <div style={{ display: "grid", gap: 8 }}>
+                    {[
+                      ["Thème", aiTheme.name],
+                      [["Mariage","Mariage · RTL"].includes(aiTheme.cat) ? "Mariés" : "Événement",
+                        name2 ? `${name1} & ${name2}` : name1],
+                      ["Organisé par", hosts],
+                      ["Date", date ? new Date(date + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "—"],
+                      ["Lieu", `${venue}${venueSub ? `, ${venueSub}` : ""}`],
+                    ].map(([k, v]) => (
+                      <div key={k} style={{ display: "flex", gap: 10, fontSize: "0.9rem" }}>
+                        <span style={{ color: "var(--text-faint)", minWidth: 80, flexShrink: 0 }}>{k}</span>
+                        <span style={{ color: "var(--text-soft)" }}>{v}</span>
+                      </div>
+                    ))}
                   </div>
-                ) }} />;
-              })()}
+                </div>
+
+                {/* Slug */}
+                <div style={{ marginBottom: "1.5rem" }}>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 8 }}>Votre lien</div>
+                  <div style={{ display: "flex", alignItems: "center", background: "rgba(0,0,0,0.2)", borderRadius: 8, overflow: "hidden", border: "1px solid var(--hair)" }}>
+                    <span style={{ padding: "0.65rem 0.8rem", color: "var(--text-faint)", fontFamily: "var(--font-title)", fontSize: 12, whiteSpace: "nowrap" }}>invytek.app/i/</span>
+                    <input value={slug} onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                      style={{ flex: 1, background: "transparent", border: "none", outline: "none", color: "var(--ivory)", fontFamily: "var(--font-title)", fontSize: 12, padding: "0.65rem 0.6rem 0.65rem 0" }} />
+                    <span style={{ padding: "0.65rem 0.8rem", fontSize: 12 }}>
+                      {slugChecking ? "⏳" : slugAvailable === true ? "✓" : slugAvailable === false ? "✗" : ""}
+                    </span>
+                  </div>
+                  {slugAvailable === false && <p style={{ color: "#c05050", fontSize: 12, marginTop: 4, fontFamily: "var(--font-title)" }}>Ce lien est pris.</p>}
+                  {slugAvailable === true && <p style={{ color: "var(--gold)", fontSize: 12, marginTop: 4, fontFamily: "var(--font-title)" }}>Disponible ✓</p>}
+                </div>
+
+                {error && <p style={{ color: "#c05050", marginBottom: "1rem", fontSize: "0.9rem" }}>{error}</p>}
+
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button onClick={() => setStep(1)} style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--text-faint)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                    ← Régénérer
+                  </button>
+                  <button onClick={publish} disabled={loading || !slug || slugAvailable === false || slugChecking}
+                    style={{ flex: 1, background: loading ? "rgba(110,80,200,0.4)" : "linear-gradient(135deg, #a080e0, #7050c0)", border: "none", borderRadius: 100, padding: "0.9rem 1.5rem", color: "#fff", fontFamily: "var(--font-title)", fontSize: 13, letterSpacing: ".16em", textTransform: "uppercase", cursor: loading || !slug || slugAvailable === false || slugChecking ? "not-allowed" : "pointer", boxShadow: loading ? "none" : "0 8px 24px rgba(110,80,200,0.35)" }}>
+                    {loading ? "Publication…" : "Publier →"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Droite — aperçu thème */}
+              <div style={{ flex: "1 1 340px", position: "sticky", top: 100 }}>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "#a080e0", marginBottom: 12 }}>
+                  Thème sélectionné — {aiTheme.name}
+                </div>
+                <div style={{ width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(110,80,200,0.25)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+                  <iframe key={themeId} src={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
+                    style={{ width: 375, height: 850, border: "none", transform: `scale(${340 / 375})`, transformOrigin: "top left", pointerEvents: "none" }}
+                    title="Aperçu" />
+                </div>
+              </div>
             </div>
           )}
-
-          {step === 3 && (() => {
-            const t = THEMES.find(t => t.id === themeId)!;
-            const iw = ["Mariage","Mariage · RTL"].includes(t.cat);
-            return <SlugStep {...{ slug, setSlug, slugAvailable, slugChecking, isWedding: iw, name1, name2, hosts, date, venue, venueSub, themeName: t.name, error, loading, onBack: () => setStep(2), onPublish: publish }} />;
-          })()}
         </div>
       </div>
     );
