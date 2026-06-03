@@ -33,6 +33,7 @@ export function Nav() {
           <Link href="/themes" className={pathname === "/themes" ? "active" : ""}>Thèmes</Link>
           <Link href="/#how">Comment ça marche</Link>
           <Link href="/#proof">Pourquoi nous</Link>
+          <Link href="/pricing" className={pathname === "/pricing" ? "active" : ""}>Tarifs</Link>
         </div>
         <div className="nav-cta">
           {status !== "loading" && (

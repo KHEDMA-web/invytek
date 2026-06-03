@@ -188,6 +188,33 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── TARIFS RÉSUMÉ ── */}
+      <section className="ik-section" id="pricing">
+        <div className="wrap">
+          <div className="section-head reveal">
+            <span className="eyebrow center">Tarifs</span>
+            <h2>Gratuit pour commencer</h2>
+            <p>Passez au plan Pro quand vous en avez besoin.</p>
+          </div>
+          <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, maxWidth: 860, margin: "0 auto 2.5rem" }}>
+            {[
+              { name: "Gratuit", price: "0 DA", desc: "1 invitation · 10 invités · 3 thèmes", highlight: false },
+              { name: "Pro", price: "990 DA/mois", desc: "Illimité · Tous les thèmes · QR Code · Stats", highlight: true },
+              { name: "Business", price: "2 900 DA/mois", desc: "Multi-users · Marque perso · API · Support dédié", highlight: false },
+            ].map(p => (
+              <div key={p.name} style={{ border: p.highlight ? "1px solid rgba(184,146,60,0.6)" : "1px solid var(--hair)", borderRadius: 10, padding: "1.4rem", background: p.highlight ? "linear-gradient(160deg,#2a2010,#1e1808)" : "linear-gradient(160deg,var(--bg-raise),var(--bg))", textAlign: "center" }}>
+                <p style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>{p.name}</p>
+                <p style={{ fontFamily: "var(--font-title)", fontSize: "1.6rem", color: "var(--ivory)", lineHeight: 1, marginBottom: 8 }}>{p.price}</p>
+                <p style={{ color: "var(--text-soft)", fontSize: "0.85rem", lineHeight: 1.5 }}>{p.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="reveal" style={{ textAlign: "center" }}>
+            <Link href="/pricing" className="btn btn-ghost btn-sm">Voir les détails →</Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── CTA FINAL ── */}
       <section className="ik-section cta-band">
         <div className="glow" style={{ width: 480, height: 480, background: "var(--glow)", left: "50%", top: "30%", transform: "translateX(-50%)" }} />
