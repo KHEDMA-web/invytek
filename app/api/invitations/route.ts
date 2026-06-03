@@ -26,18 +26,25 @@ export async function POST(req: Request) {
   const exists = await prisma.invitation.findUnique({ where: { slug } });
   if (exists) return NextResponse.json({ error: "Ce lien est déjà utilisé." }, { status: 409 });
 
-  const invitation = await prisma.invitation.create({
-    data: {
-      userId: session.user.id,
-      slug,
-      themeId,
-      category: "wedding",
-      status: "published",
-      content: JSON.stringify(content),
-      options: JSON.stringify(options),
-      publishedAt: new Date(),
-    },
-  });
+  let invitation;
+  try {
+    invitation = await prisma.invitation.create({
+      data: {
+        userId: session.user.id,
+        slug,
+        themeId,
+        category: "wedding",
+        status: "published",
+        content: JSON.stringify(content),
+        options: JSON.stringify(options),
+        publishedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    console.error("Prisma create error:", err);
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 
   return NextResponse.json({ ok: true, slug: invitation.slug });
 }
