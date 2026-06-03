@@ -40,6 +40,7 @@ export function EditInvitationForm({ invitationId, content, options }: Props) {
   const [showCountdown, setShowCountdown] = useState(options.showCountdown ?? true);
   const [showRsvp, setShowRsvp] = useState(options.showRsvp ?? true);
   const [showArabic, setShowArabic] = useState(options.showArabic ?? true);
+  const [webhookUrl, setWebhookUrl] = useState(options.webhookUrl ?? "");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -63,7 +64,7 @@ export function EditInvitationForm({ invitationId, content, options }: Props) {
           note: note || undefined, closing,
           initials: [name1[0]?.toUpperCase() || "A", name2[0]?.toUpperCase() || "B"] as [string, string],
         },
-        options: { showCountdown, showRsvp, showArabic, showNote: !!note },
+        options: { showCountdown, showRsvp, showArabic, showNote: !!note, webhookUrl: webhookUrl || undefined },
       }),
     });
 
@@ -127,6 +128,18 @@ export function EditInvitationForm({ invitationId, content, options }: Props) {
               <span style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>{lbl}</span>
             </label>
           ))}
+        </div>
+
+        {/* Webhook */}
+        <div style={{ borderTop: "1px solid var(--hair)", paddingTop: "1.4rem" }}>
+          <p style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 12 }}>Intégrations</p>
+          <div>
+            <label style={label}>URL Webhook RSVP (optionnel)</label>
+            <input style={inp} value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)} placeholder="https://..." type="url" />
+            <p style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", marginTop: 6 }}>
+              Reçoit un POST JSON à chaque confirmation RSVP.
+            </p>
+          </div>
         </div>
 
         {error && <p style={{ color: "#e07070", fontFamily: "var(--font-title)", fontSize: "0.9rem" }}>{error}</p>}

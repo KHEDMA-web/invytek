@@ -94,6 +94,9 @@ export default async function ManagePage({ params }: Props) {
           <Link href="/checkin" className="btn btn-ghost btn-sm">
             Scanner les entrées →
           </Link>
+          <a href={`/api/invitations/${invitation.id}/export`} download className="btn btn-ghost btn-sm">
+            Export CSV
+          </a>
           <QrCodeToggle invitationId={invitation.id} currentOptions={options} />
         </div>
 

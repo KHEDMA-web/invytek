@@ -34,7 +34,6 @@ export async function POST(req: Request) {
   }
 
   if (token) {
-    // Nominatif : mise à jour de l'invité existant
     const guest = await prisma.guest.findUnique({ where: { token } });
     if (!guest || guest.invitationId !== invitationId) {
       return NextResponse.json({ error: "Lien invalide" }, { status: 404 });
@@ -44,7 +43,6 @@ export async function POST(req: Request) {
       data: { name, status, partySize: status === "attending" ? partySize : 1, message: message || null, respondedAt: new Date() },
     });
   } else {
-    // Lien public : création d'un nouvel invité
     await prisma.guest.create({
       data: {
         invitationId,
@@ -56,6 +54,18 @@ export async function POST(req: Request) {
       },
     });
   }
+
+  // Webhook RSVP
+  try {
+    const options = JSON.parse(invitation.options) as { webhookUrl?: string };
+    if (options.webhookUrl) {
+      void fetch(options.webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invitationId, name, status, partySize, message }),
+      });
+    }
+  } catch { /* ne pas bloquer si le webhook échoue */ }
 
   return NextResponse.json({ ok: true });
 }

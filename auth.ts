@@ -1,6 +1,7 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
@@ -26,6 +27,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      allowDangerousEmailAccountLinking: true,
+    }),
+    GitHub({
+      clientId: process.env.AUTH_GITHUB_ID,
+      clientSecret: process.env.AUTH_GITHUB_SECRET,
       allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
@@ -59,7 +65,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, account }) {
       if (user?.id) {
         token.id = user.id;
-      } else if (account?.provider === "google" && token.email) {
+      } else if ((account?.provider === "google" || account?.provider === "github") && token.email) {
         // Upsert user on first Google login
         const dbUser = await prisma.user.upsert({
           where: { email: token.email },
