@@ -7,19 +7,25 @@ import { Footer } from "@/components/Footer";
 import type { WeddingContent } from "@/lib/schemas/wedding";
 import { SignOutButton } from "@/components/SignOutButton";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { BuyCreditsButton } from "@/components/BuyCreditsButton";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth");
 
-  const invitations = await prisma.invitation.findMany({
-    where: { userId: session.user.id },
-    orderBy: { createdAt: "desc" },
-    include: {
-      guests: { select: { status: true, checkedInAt: true } },
-      _count: { select: { views: true } },
-    },
-  });
+  const [dbUser, invitations] = await Promise.all([
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { credits: true } }),
+    prisma.invitation.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        guests: { select: { status: true, checkedInAt: true } },
+        _count: { select: { views: true } },
+      },
+    }),
+  ]);
+
+  const credits = dbUser?.credits ?? 0;
 
   const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
@@ -33,7 +39,7 @@ export default async function DashboardPage() {
       <div className="wrap" style={{ paddingTop: 120, paddingBottom: "4rem" }}>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: "2.5rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: "2rem" }}>
           <div>
             <p style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".28em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>Tableau de bord</p>
             <h1 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "var(--ivory)", fontWeight: 400 }}>
@@ -44,6 +50,38 @@ export default async function DashboardPage() {
             <SignOutButton />
             <Link href="/create" className="btn btn-gold btn-sm">+ Nouvelle invitation</Link>
           </div>
+        </div>
+
+        {/* Crédits IA */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+          background: credits === 0
+            ? "rgba(200,60,60,0.07)"
+            : credits <= 2
+            ? "rgba(220,140,40,0.08)"
+            : "rgba(110,80,200,0.07)",
+          border: `1px solid ${credits === 0 ? "rgba(200,60,60,0.3)" : credits <= 2 ? "rgba(220,140,40,0.3)" : "rgba(110,80,200,0.2)"}`,
+          borderRadius: 12, padding: "1rem 1.4rem", marginBottom: "2rem",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <span style={{ fontSize: 20 }}>✨</span>
+            <div>
+              <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--ivory)" }}>
+                {credits} crédit{credits !== 1 ? "s" : ""} IA disponible{credits !== 1 ? "s" : ""}
+              </div>
+              {credits === 0 && (
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "#e07070", marginTop: 2 }}>
+                  Aucun crédit — rechargez pour utiliser la génération IA
+                </div>
+              )}
+              {credits > 0 && credits <= 2 && (
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "#e0a040", marginTop: 2 }}>
+                  Crédits faibles — pensez à recharger
+                </div>
+              )}
+            </div>
+          </div>
+          <BuyCreditsButton />
         </div>
 
         {/* Empty state */}
@@ -62,10 +100,10 @@ export default async function DashboardPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
             {invitations.map(inv => {
               const content = JSON.parse(inv.content) as WeddingContent;
-              const attending  = inv.guests.filter(g => g.status === "attending").length;
-              const declined   = inv.guests.filter(g => g.status === "declined").length;
-              const pending    = inv.guests.filter(g => g.status === "pending").length;
-              const checkedIn  = inv.guests.filter(g => g.checkedInAt !== null).length;
+              const attending = inv.guests.filter(g => g.status === "attending").length;
+              const declined  = inv.guests.filter(g => g.status === "declined").length;
+              const pending   = inv.guests.filter(g => g.status === "pending").length;
+              const checkedIn = inv.guests.filter(g => g.checkedInAt !== null).length;
               const total = inv.guests.length;
               const eventDate = new Date(content.date + "T12:00:00");
               const invUrl = `${baseUrl}/i/${inv.slug}`;
@@ -88,7 +126,7 @@ export default async function DashboardPage() {
                     <p style={{ fontSize: "0.85rem", color: "var(--text-faint)", marginTop: 4 }}>{content.venue}</p>
                   </div>
 
-                  {/* Stats vues */}
+                  {/* Vues */}
                   <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.6rem 1.4rem", alignItems: "center", gap: 6 }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-faint)", flexShrink: 0 }}>
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
@@ -98,14 +136,14 @@ export default async function DashboardPage() {
                     </span>
                   </div>
 
-                  {/* Stats RSVP */}
+                  {/* RSVP stats */}
                   {total > 0 && (
-                    <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.8rem 1.4rem", gap: 0 }}>
+                    <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.8rem 1.4rem" }}>
                       {[
-                        { n: attending,  label: "Présents",  color: "var(--gold)" },
-                        { n: declined,   label: "Absents",   color: "var(--text-faint)" },
-                        { n: pending,    label: "Attente",   color: "var(--text-soft)" },
-                        { n: checkedIn,  label: "Arrivés",   color: "#6ecf8a" },
+                        { n: attending, label: "Présents",  color: "var(--gold)" },
+                        { n: declined,  label: "Absents",   color: "var(--text-faint)" },
+                        { n: pending,   label: "Attente",   color: "var(--text-soft)" },
+                        { n: checkedIn, label: "Arrivés",   color: "#6ecf8a" },
                       ].map(s => (
                         <div key={s.label} style={{ flex: 1, textAlign: "center" }}>
                           <div style={{ fontFamily: "var(--font-title)", fontSize: "1.3rem", color: s.color }}>{s.n}</div>

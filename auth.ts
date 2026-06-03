@@ -42,7 +42,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (exists) throw new AuthError("email_exists");
           const hash = await bcrypt.hash(password, 12);
           const user = await prisma.user.create({
-            data: { email, name: name?.trim() || email.split("@")[0], password: hash },
+            data: { email, name: name?.trim() || email.split("@")[0], password: hash, credits: 3 },
           });
           return { id: user.id, email: user.email, name: user.name };
         }
@@ -64,7 +64,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const dbUser = await prisma.user.upsert({
           where: { email: token.email },
           update: { name: token.name ?? undefined, image: token.picture as string ?? undefined },
-          create: { email: token.email, name: token.name ?? token.email.split("@")[0], image: token.picture as string ?? undefined },
+          create: { email: token.email, name: token.name ?? token.email.split("@")[0], image: token.picture as string ?? undefined, credits: 3 },
         });
         token.id = dbUser.id;
       }
