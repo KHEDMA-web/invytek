@@ -191,11 +191,12 @@ function CreateForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ themeId, slug, content, options }),
       });
-      const data = await res.json();
-      if (!res.ok) { setError(data.error || "Erreur serveur"); return; }
+      let data: { error?: string; ok?: boolean } = {};
+      try { data = await res.json(); } catch { /* réponse non-JSON */ }
+      if (!res.ok) { setError(data.error || `Erreur ${res.status} — réessayez.`); return; }
       router.push(`/dashboard`);
-    } catch {
-      setError("Erreur réseau — réessayez.");
+    } catch (err) {
+      setError("Erreur : " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setLoading(false);
     }
