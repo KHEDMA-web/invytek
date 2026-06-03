@@ -102,25 +102,28 @@ Landing à 3 chemins :
 ## Ce qui reste à faire 🔧
 
 ### 1. Vraie génération de thème IA unique ⚠️ PRIORITÉ HAUTE
-**Problème actuel** : l'IA recolore un thème existant. Ce n'est pas un vrai thème unique.
+**Problème actuel** : l'IA choisit parmi les 12 thèmes existants et applique juste une palette de couleurs. Ce n'est pas un vrai thème unique généré — c'est un thème existant recoloré.
 
 **Ce qu'il faut** : que chaque invitation IA soit visuellement différente des autres, pas juste une variante colorée de `gold-arch`.
 
-**Pistes à explorer** :
-- **Option A — Génération de composant React** : Claude génère du JSX complet (une seule fonction React auto-contenue). Risqué : sécurité (eval/sandbox), qualité variable, difficile à maintenir.
-- **Option B — Système de layout variable** : définir un schéma de thème JSON avec des paramètres structurels (forme de l'enveloppe, disposition du texte, ornements, animations) que l'IA remplit. Le moteur de rendu côté React interprète ce JSON. Plus sûr, plus cohérent.
-- **Option C — Beaucoup plus de thèmes de base** (50+) avec plus de diversité structurelle. L'IA choisit parmi eux. Moins ambitieux mais plus stable.
+**4 pistes à explorer** :
+- **Option A — Claude génère du JSX complet** : une seule fonction React auto-contenue. Risqué : sécurité (eval/sandbox), qualité variable, difficile à maintenir.
+- **Option B — Schéma JSON de layout variable** : définir un JSON avec paramètres structurels (forme enveloppe, disposition texte, ornements, animations) que React interprète. Plus sûr, plus cohérent. *Recommandée.*
+- **Option C — Beaucoup plus de thèmes de base** (50+) avec diversité structurelle réelle. L'IA choisit parmi eux. Moins ambitieux mais plus stable.
 - **Option D — Claude génère du CSS pur** (keyframes, layout, couleurs) appliqué sur un template HTML/JSX générique. L'IA contrôle le visuel sans risque d'injection de logique.
 
-**Recommandation** : Option B (layout JSON) ou Option D (CSS généré). À décider avec le user.
+### 2. UX / Navigation — à améliorer ⚠️
+- **Pastille crédits** : actuellement dans le Nav en haut à droite — trouver un meilleur emplacement (trop serré avec les autres boutons, surtout sur mobile)
+- **Trop de boutons dans le Nav** : "Mon espace", "Créer mon invitation", la pastille crédits, et dans le dashboard "Nouvelle invitation", "Se déconnecter" — à consolider et simplifier. Réduire le nombre d'actions visibles simultanément.
+- **Boutons Retour** : manquent ou mal placés sur plusieurs pages (ex: depuis `/create` mode IA, depuis `/themes/community`). Rendre la navigation arrière cohérente sur toutes les pages.
 
-### 2. Variables d'environnement à ajouter dans Vercel (prod)
+### 3. Variables d'environnement à ajouter dans Vercel (prod)
 - `ANTHROPIC_API_KEY` — clé Claude API
 - `CHARGILY_API_KEY` — clé secrète Chargily **prod** (pas test)
 - `CHARGILY_WEBHOOK_SECRET` — même valeur
 - `ADMIN_EMAIL` — email admin pour `/themes/community`
 
-### 3. Chargily — tester le paiement en prod
+### 4. Chargily — tester le paiement en prod
 - Configurer webhook URL dans dashboard Chargily : `https://invytek.vercel.app/api/credits/webhook`
 - Tester avec une vraie carte CIB/Edahabia
 
