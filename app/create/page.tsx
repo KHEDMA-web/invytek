@@ -20,6 +20,58 @@ const THEMES = [
   { id: "sensibilisation",  name: "Sensibilisation",         cat: "Médical",       available: true },
 ];
 
+// Defaults & labels per category
+const DEFAULTS: Record<string, { invLine: string; closing: string; name1Ph: string; name2Ph: string; hostsPh: string; notePh: string; name1Label: string; name2Label: string; hostsLabel: string; noteLabel: string; }> = {
+  Mariage: {
+    invLine: "ont l'immense plaisir de vous convier à la cérémonie de mariage de",
+    closing: "Soyez les Bienvenus",
+    name1Label: "Prénom marié(e) 1", name1Ph: "Adam",
+    name2Label: "Prénom marié(e) 2", name2Ph: "Sara",
+    hostsLabel: "Familles (ex: M. & Mme Benali)", hostsPh: "M. & Mme Benali",
+    noteLabel: "Note (optionnel)", notePh: "Merci d'éviter les photos…",
+  },
+  "Mariage · RTL": {
+    invLine: "يسرّهم دعوتكم لحضور حفل زفاف",
+    closing: "أهلاً وسهلاً بكم",
+    name1Label: "Prénom marié(e) 1", name1Ph: "أمين",
+    name2Label: "Prénom marié(e) 2", name2Ph: "أميرة",
+    hostsLabel: "Familles", hostsPh: "عائلة بن علي",
+    noteLabel: "Note (optionnel)", notePh: "",
+  },
+  Anniversaire: {
+    invLine: "fête ses 30 ans",
+    closing: "Soyez les Bienvenus !",
+    name1Label: "Prénom", name1Ph: "Sami",
+    name2Label: "Texte fête (affiché sous le prénom)", name2Ph: "fête ses 30 ans",
+    hostsLabel: "Organisé par", hostsPh: "La famille de Sami",
+    noteLabel: "Note (optionnel)", notePh: "Merci d'apporter votre bonne humeur !",
+  },
+  Bébé: {
+    invLine: "est heureuse de vous inviter à fêter",
+    closing: "À très bientôt !",
+    name1Label: "Prénom / nom du bébé", name1Ph: "Bébé Selma",
+    name2Label: "Sous-titre (affiché sous le prénom)", name2Ph: "Bienvenue parmi nous !",
+    hostsLabel: "Parents", hostsPh: "M. & Mme Martin",
+    noteLabel: "Note (optionnel)", notePh: "Un petit cadeau suffit 🎀",
+  },
+  Business: {
+    invLine: "Vous êtes cordialement invité(e) à",
+    closing: "Nous vous attendons",
+    name1Label: "Titre de l'événement", name1Ph: "Gala Annuel",
+    name2Label: "Édition / Sous-titre", name2Ph: "Édition 2026",
+    hostsLabel: "Organisation / Entreprise", hostsPh: "Atlas Corporation",
+    noteLabel: "Code d'accès / Dress code (optionnel)", notePh: "Tenue de soirée requise",
+  },
+  Médical: {
+    invLine: "a l'honneur de vous convier à",
+    closing: "Nous comptons sur votre présence",
+    name1Label: "Type d'événement", name1Ph: "Inauguration",
+    name2Label: "Sous-titre / Service", name2Ph: "Pôle de Chirurgie Cardiaque",
+    hostsLabel: "Institution / Dr.", hostsPh: "Clinique El Nour",
+    noteLabel: "Tags / thèmes (séparés par virgule)", notePh: "Cardiologie, Chirurgie",
+  },
+};
+
 function slugify(s: string) {
   return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -36,17 +88,23 @@ function CreateForm() {
   const [step, setStep] = useState(1);
   const [themeId, setThemeId] = useState(params.get("theme") || "gold-arch");
 
+  const theme = THEMES.find(t => t.id === themeId)!;
+  const cat = theme?.cat || "Mariage";
+  const d = DEFAULTS[cat] || DEFAULTS["Mariage"];
+  const isWedding = cat === "Mariage" || cat === "Mariage · RTL";
+  const isEvent = cat === "Business" || cat === "Médical";
+
   // Content
   const [name1, setName1] = useState("");
   const [name2, setName2] = useState("");
   const [hosts, setHosts] = useState("");
-  const [invLine, setInvLine] = useState("ont l'immense plaisir de vous convier à la cérémonie de mariage de");
+  const [invLine, setInvLine] = useState(d.invLine);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("15:00");
   const [dayLabel, setDayLabel] = useState("Samedi");
   const [venue, setVenue] = useState("");
   const [venueSub, setVenueSub] = useState("");
-  const [closing, setClosing] = useState("Soyez les Bienvenus");
+  const [closing, setClosing] = useState(d.closing);
   const [note, setNote] = useState("");
   const [bismillah, setBismillah] = useState(true);
   const [showArabic, setShowArabic] = useState(true);
@@ -62,13 +120,27 @@ function CreateForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Auto-generate slug from names
+  // Reset defaults when category changes
   useEffect(() => {
-    if (name1 && name2) {
-      const year = date ? new Date(date).getFullYear() : new Date().getFullYear();
+    const nd = DEFAULTS[cat] || DEFAULTS["Mariage"];
+    setInvLine(nd.invLine);
+    setClosing(nd.closing);
+    setBismillah(isWedding);
+    setShowArabic(isWedding);
+    setName1(""); setName2(""); setHosts("");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cat]);
+
+  // Auto-generate slug
+  useEffect(() => {
+    if (!name1) return;
+    const year = date ? new Date(date).getFullYear() : new Date().getFullYear();
+    if (isWedding && name2) {
       setSlug(slugify(`${name1}-${name2}-${year}`));
+    } else if (name1) {
+      setSlug(slugify(`${name1}-${year}`));
     }
-  }, [name1, name2, date]);
+  }, [name1, name2, date, isWedding]);
 
   // Debounced slug check
   useEffect(() => {
@@ -88,12 +160,13 @@ function CreateForm() {
     setError(null);
     const dateObj = new Date(date + "T12:00:00");
     const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    const n2 = isWedding ? name2 : (name2 || "—");
     const content = {
       hosts,
       invitationLine: invLine,
-      names: [name1, name2] as [string, string],
-      namesSeparator: "avec",
-      bismillah,
+      names: [name1, n2] as [string, string],
+      namesSeparator: isWedding ? "avec" : "·",
+      bismillah: isWedding ? bismillah : false,
       date,
       time,
       dayLabel: dayLabels[dateObj.getDay()] || dayLabel,
@@ -101,9 +174,14 @@ function CreateForm() {
       venueSub: venueSub || undefined,
       note: note || undefined,
       closing,
-      initials: [name1[0]?.toUpperCase() || "A", name2[0]?.toUpperCase() || "B"] as [string, string],
+      initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
     };
-    const options = { showCountdown, showRsvp, showArabic, showNote: !!note };
+    const options = {
+      showCountdown,
+      showRsvp,
+      showArabic: isWedding ? showArabic : false,
+      showNote: !!note,
+    };
 
     const res = await fetch("/api/invitations", {
       method: "POST",
@@ -114,6 +192,8 @@ function CreateForm() {
     if (!res.ok) { setError(data.error || "Erreur"); setLoading(false); return; }
     router.push(`/dashboard`);
   }
+
+  const canContinue = !!name1 && !!date && !!venue && !!hosts && (isWedding ? !!name2 : true);
 
   return (
     <div className="invytek-page" style={{ minHeight: "100dvh", paddingBottom: "4rem" }}>
@@ -174,49 +254,78 @@ function CreateForm() {
         {/* Step 2 — Contenu */}
         {step === 2 && (
           <div>
-            <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "2rem" }}>
+            <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>
               Votre événement
             </h2>
+            <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>
+              Thème : <strong style={{ color: "var(--gold)" }}>{theme.name}</strong>
+            </p>
             <div style={{ display: "flex", flexDirection: "column", gap: "1.4rem" }}>
-              <Row label="Prénoms des mariés">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <input value={name1} onChange={e => setName1(e.target.value)} placeholder="Adam" style={inp} />
-                  <input value={name2} onChange={e => setName2(e.target.value)} placeholder="Sara" style={inp} />
-                </div>
+
+              {/* name1 */}
+              <Row label={d.name1Label}>
+                {isWedding ? (
+                  <div className="form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    <input value={name1} onChange={e => setName1(e.target.value)} placeholder={d.name1Ph} style={inp} />
+                    <input value={name2} onChange={e => setName2(e.target.value)} placeholder={d.name2Ph} style={inp} />
+                  </div>
+                ) : (
+                  <input value={name1} onChange={e => setName1(e.target.value)} placeholder={d.name1Ph} style={inp} />
+                )}
               </Row>
-              <Row label="Familles (ex: M. & Mme Benali)">
-                <input value={hosts} onChange={e => setHosts(e.target.value)} placeholder="M. & Mme Benali" style={inp} />
+
+              {/* name2 pour non-mariage */}
+              {!isWedding && (
+                <Row label={d.name2Label}>
+                  <input value={name2} onChange={e => setName2(e.target.value)} placeholder={d.name2Ph} style={inp} />
+                </Row>
+              )}
+
+              <Row label={d.hostsLabel}>
+                <input value={hosts} onChange={e => setHosts(e.target.value)} placeholder={d.hostsPh} style={inp} />
               </Row>
+
               <Row label="Phrase d'invitation">
                 <textarea value={invLine} onChange={e => setInvLine(e.target.value)} rows={2} style={{ ...inp, height: "auto", resize: "vertical" }} />
               </Row>
+
               <Row label="Date & heure">
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div className="form-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <input type="date" value={date} onChange={e => setDate(e.target.value)} style={inp} />
                   <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inp} />
                 </div>
               </Row>
+
               <Row label="Lieu">
-                <input value={venue} onChange={e => setVenue(e.target.value)} placeholder="Salle Al Baraka" style={inp} />
-                <input value={venueSub} onChange={e => setVenueSub(e.target.value)} placeholder="Quartier, Ville (optionnel)" style={{ ...inp, marginTop: 8 }} />
+                <input value={venue} onChange={e => setVenue(e.target.value)} placeholder={isEvent ? "Hôtel El Aurassi" : "Salle Al Baraka"} style={inp} />
+                <input value={venueSub} onChange={e => setVenueSub(e.target.value)} placeholder="Adresse, Ville (optionnel)" style={{ ...inp, marginTop: 8 }} />
               </Row>
+
               <Row label="Mot de clôture">
-                <input value={closing} onChange={e => setClosing(e.target.value)} placeholder="Soyez les Bienvenus" style={inp} />
+                <input value={closing} onChange={e => setClosing(e.target.value)} placeholder={d.closing} style={inp} />
               </Row>
-              <Row label="Note (optionnel)">
-                <input value={note} onChange={e => setNote(e.target.value)} placeholder="Merci d'éviter les photos…" style={inp} />
+
+              <Row label={d.noteLabel}>
+                <input value={note} onChange={e => setNote(e.target.value)} placeholder={d.notePh} style={inp} />
               </Row>
+
               <Row label="Options">
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-                  {[
+                  {isWedding && [
                     { label: "Bismillah", val: bismillah, set: setBismillah },
                     { label: "Texte arabe", val: showArabic, set: setShowArabic },
+                  ].map(o => (
+                    <label key={o.label} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-soft)", fontSize: "0.95rem" }}>
+                      <input type="checkbox" checked={o.val} onChange={e => o.set(e.target.checked)} style={{ accentColor: "var(--gold)", width: 15, height: 15 }} />
+                      {o.label}
+                    </label>
+                  ))}
+                  {[
                     { label: "Compte à rebours", val: showCountdown, set: setShowCountdown },
                     { label: "RSVP", val: showRsvp, set: setShowRsvp },
                   ].map(o => (
                     <label key={o.label} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: "var(--text-soft)", fontSize: "0.95rem" }}>
-                      <input type="checkbox" checked={o.val} onChange={e => o.set(e.target.checked)}
-                        style={{ accentColor: "var(--gold)", width: 15, height: 15 }} />
+                      <input type="checkbox" checked={o.val} onChange={e => o.set(e.target.checked)} style={{ accentColor: "var(--gold)", width: 15, height: 15 }} />
                       {o.label}
                     </label>
                   ))}
@@ -225,7 +334,7 @@ function CreateForm() {
             </div>
             <div style={{ display: "flex", gap: 12, marginTop: "2rem" }}>
               <button onClick={() => setStep(1)} className="btn btn-ghost">← Retour</button>
-              <button onClick={() => setStep(3)} disabled={!name1 || !name2 || !date || !venue || !hosts} className="btn btn-gold">Continuer →</button>
+              <button onClick={() => setStep(3)} disabled={!canContinue} className="btn btn-gold">Continuer →</button>
             </div>
           </div>
         )}
@@ -266,13 +375,14 @@ function CreateForm() {
               <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 12 }}>Récapitulatif</div>
               <div style={{ display: "grid", gap: 6 }}>
                 {[
-                  ["Mariés", `${name1} & ${name2}`],
+                  [isWedding ? "Mariés" : "Événement", isWedding ? `${name1} & ${name2}` : name2 ? `${name1} — ${name2}` : name1],
+                  ["Organisé par", hosts],
                   ["Date", date ? new Date(date + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) : "—"],
                   ["Lieu", `${venue}${venueSub ? `, ${venueSub}` : ""}`],
-                  ["Thème", THEMES.find(t => t.id === themeId)?.name || themeId],
+                  ["Thème", theme.name],
                 ].map(([k, v]) => (
                   <div key={k} style={{ display: "flex", gap: 12, fontSize: "0.95rem" }}>
-                    <span style={{ color: "var(--text-faint)", minWidth: 70 }}>{k}</span>
+                    <span style={{ color: "var(--text-faint)", minWidth: 90 }}>{k}</span>
                     <span style={{ color: "var(--text-soft)" }}>{v}</span>
                   </div>
                 ))}
