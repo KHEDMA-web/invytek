@@ -99,83 +99,100 @@ Landing à 3 chemins :
 
 ---
 
-## Ce qui reste à faire 🔧
+## Skills Claude à activer en priorité 🤖
 
-### 1. Vraie génération de thème IA unique ⚠️ PRIORITÉ HAUTE
-**Problème actuel** : l'IA choisit parmi les 12 thèmes existants et applique juste une palette de couleurs. Ce n'est pas un vrai thème unique généré — c'est un thème existant recoloré.
+> Invoquer via `/nom-du-skill` au début d'une session pour booster Claude sur ces tâches.
 
-**Ce qu'il faut** : que chaque invitation IA soit visuellement différente des autres, pas juste une variante colorée de `gold-arch`.
+| Skill | Commande | Utilité pour Invytek |
+|-------|----------|----------------------|
+| **claude-api** | `/claude-api` | Tout ce qui touche `@anthropic-ai/sdk` : génération IA, structured output, prompt caching, optimisation des coûts Haiku/Sonnet |
+| **frontend-design** | `/frontend-design` | Refonte UX/UI : Nav, dashboard, portail client final — composants polish premium |
+| **vercel:nextjs** | `/vercel:nextjs` | App Router, Server Components, cache, metadata — quand un comportement Next.js est inattendu |
+| **vercel:vercel-functions** | `/vercel:vercel-functions` | Optimisation des routes API (timeout, edge, streaming) — utile pour `/api/ai-create` |
+| **vercel:runtime-cache** | `/vercel:runtime-cache` | Mise en cache des pages invitation publiques `/i/[slug]` pour les performances |
+| **code-review** | `/code-review` | Avant chaque gros push — détecte les bugs, les failles sécu, les régressions |
+| **verify** | `/verify` | Tester qu'une feature marche vraiment dans le browser avant de la marquer done |
+| **simplify** | `/simplify` | Après une grosse session — nettoie le code, supprime les abstractions inutiles |
+| **vercel:shadcn** | `/vercel:shadcn` | Si on décide d'adopter shadcn/ui pour les composants dashboard et portail client |
 
-**4 pistes à explorer** :
-- **Option A — Claude génère du JSX complet** : une seule fonction React auto-contenue. Risqué : sécurité (eval/sandbox), qualité variable, difficile à maintenir.
-- **Option B — Schéma JSON de layout variable** : définir un JSON avec paramètres structurels (forme enveloppe, disposition texte, ornements, animations) que React interprète. Plus sûr, plus cohérent. *Recommandée.*
-- **Option C — Beaucoup plus de thèmes de base** (50+) avec diversité structurelle réelle. L'IA choisit parmi eux. Moins ambitieux mais plus stable.
-- **Option D — Claude génère du CSS pur** (keyframes, layout, couleurs) appliqué sur un template HTML/JSX générique. L'IA contrôle le visuel sans risque d'injection de logique.
-
-### 2. UX / Navigation — à améliorer ⚠️
-- **Pastille crédits** : actuellement dans le Nav en haut à droite — trouver un meilleur emplacement (trop serré avec les autres boutons, surtout sur mobile)
-- **Trop de boutons dans le Nav** : "Mon espace", "Créer mon invitation", la pastille crédits, et dans le dashboard "Nouvelle invitation", "Se déconnecter" — à consolider et simplifier. Réduire le nombre d'actions visibles simultanément.
-- **Boutons Retour** : manquent ou mal placés sur plusieurs pages (ex: depuis `/create` mode IA, depuis `/themes/community`). Rendre la navigation arrière cohérente sur toutes les pages.
-
-### 3. Variables d'environnement à ajouter dans Vercel (prod)
-- `ANTHROPIC_API_KEY` — clé Claude API
-- `CHARGILY_API_KEY` — clé secrète Chargily **prod** (pas test)
-- `CHARGILY_WEBHOOK_SECRET` — même valeur
-- `ADMIN_EMAIL` — email admin pour `/themes/community`
-
-### 4. Chargily — tester le paiement en prod
-- Configurer webhook URL dans dashboard Chargily : `https://invytek.vercel.app/api/credits/webhook`
-- Tester avec une vraie carte CIB/Edahabia
+**Workflow recommandé par type de session :**
+- Session feature UI → `/frontend-design` en premier
+- Session IA/Claude API → `/claude-api` en premier
+- Session API/routes → `/vercel:vercel-functions`
+- Fin de session → `/code-review` puis `/simplify`
 
 ---
 
-### 5. Modèle B2B — Espace Agence + Portail Client Final ⚠️ GRANDE FEATURE
+## Ce qui reste à faire 🔧
 
-**Vision** : Invytek vendu aux agences de communication / wedding planners. L'agence crée les invitations pour ses clients. Chaque client final a son propre espace simplifié.
+> **Légende effort Claude** : 🟢 < 25% contexte · 🟡 25–55% · 🔴 55–85% · 🔴🔴 >85% (plusieurs sessions)
 
-#### Deux rôles distincts
+### 1. Modèle B2B — Portail Client Final 🔴 ~65% · Priorité 1
+**Skills** : `/frontend-design` + `/vercel:nextjs`
 
-**Agence (compte actuel)** — dashboard complet :
-- Créer des invitations pour ses clients
-- Gérer tous les invités
-- Accéder aux stats, exports CSV, QR check-in
-- Accès à l'IA, thèmes personnalisés
-- Peut inviter le client final via un lien sécurisé
+**Vision** : Invytek vendu aux agences de com / wedding planners. L'agence crée les invitations pour ses clients. Chaque client final a son propre espace simplifié.
 
-**Client final** — portail simplifié `/client/[accessToken]` :
-- Voir sa carte d'invitation (aperçu de son thème)
-- Voir les stats RSVP (présents / absents / en attente)
-- Gérer sa liste d'invités (ajouter, copier liens, WhatsApp)
-- Pas de création, pas d'IA, pas d'accès au dashboard agence
+**Deux rôles :**
+- **Agence** — dashboard complet actuel (créer, IA, stats, export, check-in)
+- **Client final** — portail `/client/[accessToken]` : sa carte + stats RSVP + gestion invités. Sans login, sans accès agence.
 
-#### Architecture proposée
-
-**Prisma** — ajouter sur `Invitation` :
+**Prisma — ajouter sur `Invitation`** :
 ```prisma
 clientAccessToken  String   @unique @default(cuid())
-clientEmail        String?  // email du client final (optionnel)
-clientName         String?  // nom affiché dans son espace
+clientEmail        String?
+clientName         String?
 ```
 
-**Page client** : `/client/[accessToken]` — accessible sans login (token secret dans l'URL, comme Notion shared)
-- Affiche : aperçu invitation + stats RSVP + liste invités + actions (copier lien, WhatsApp)
-- Pas de suppression, pas d'édition du contenu, pas d'accès au dashboard agence
+**Ordre d'implémentation :**
+1. `prisma db push` + `prisma generate`
+2. `/client/[accessToken]/page.tsx` — aperçu invitation + RSVP stats + liste invités + WhatsApp/CopyLink
+3. Bouton "Partager avec le client" dans `/dashboard/[id]` → copie URL + optionnel email Resend
+4. L'agence peut régénérer le token (invalide l'ancien)
 
-**Dashboard agence** — ajouter sur `/dashboard/[id]` :
-- Bouton "Partager avec le client" → copie l'URL `/client/[accessToken]`
-- Champs optionnels : email client, nom client (pour personnaliser l'espace)
-- Optionnel : envoyer l'accès par email automatiquement via Resend
+---
 
-**Sécurité** :
-- Le `clientAccessToken` est un CUID aléatoire non devinable
-- La page `/client/[token]` n'expose pas les infos de l'agence
-- L'agence peut régénérer le token si besoin (invalider l'ancien accès)
+### 2. UX / Navigation — refonte Nav 🟡 ~30% · Priorité 2
+**Skills** : `/frontend-design`
 
-#### Ordre d'implémentation suggéré
-1. Ajouter `clientAccessToken`, `clientEmail`, `clientName` sur `Invitation` → `prisma db push`
-2. Créer `/client/[accessToken]/page.tsx` — portail lecture seule + gestion invités
-3. Ajouter bouton "Partager avec le client" dans `/dashboard/[id]`
-4. Optionnel : email automatique via Resend quand l'agence partage
+Problèmes actuels :
+- **Pastille crédits** dans le Nav trop serrée avec les autres boutons (mobile cassé)
+- **Trop de boutons** : "Mon espace" + "Créer mon invitation" + crédits + dans dashboard "Nouvelle invitation" + "Se déconnecter" — à consolider
+- **Boutons Retour** incohérents ou manquants selon les pages (`/create` IA, `/themes/community`)
+
+Pistes :
+- Nav connecté → juste logo + "Mon espace" (dropdown avec Créer / Dashboard / Crédits / Déconnexion)
+- Crédits dans le dropdown, pas un pill séparé
+- Bouton retour systématique en haut à gauche sur toutes les pages internes
+
+---
+
+### 3. Vraie génération de thème IA unique 🔴🔴 ~80% · Priorité 3
+**Skills** : `/claude-api` + `/frontend-design`
+
+**Problème actuel** : l'IA recolore un thème existant — pas un vrai thème unique.
+
+**4 pistes :**
+- **Option A — Claude génère du JSX complet** — risqué (eval/sandbox), qualité variable. ❌
+- **Option B — Schéma JSON de layout** — JSON de paramètres structurels (forme, disposition, ornements, animations) interprété par un moteur React. Plus sûr. ✅ *Recommandée*
+- **Option C — 50+ thèmes de base** — diversité structurelle réelle, l'IA choisit. Moins ambitieux mais stable. ✅
+- **Option D — Claude génère du CSS pur** — keyframes + layout sur template générique. L'IA contrôle le visuel sans logique. ✅
+
+---
+
+### 4. Variables d'environnement Vercel (prod) 🟢 ~5%
+- `ANTHROPIC_API_KEY`
+- `CHARGILY_API_KEY` (clé secrète prod, pas test)
+- `CHARGILY_WEBHOOK_SECRET` (même valeur)
+- `ADMIN_EMAIL`
+
+### 5. Chargily prod — tester paiement 🟢 ~10%
+- Webhook URL dans dashboard Chargily : `https://invytek.vercel.app/api/credits/webhook`
+- Tester carte CIB/Edahabia réelle
+
+### 6. Cache invitations publiques 🟡 ~25%
+**Skills** : `/vercel:runtime-cache`
+- Les pages `/i/[slug]` sont rendues à chaque requête — les mettre en cache ISR (revalidate on publish)
+- Gain de performance significatif en prod
 
 ---
 
