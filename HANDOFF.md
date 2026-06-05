@@ -76,12 +76,11 @@
 
 ---
 
-### Priorité 2 — Cache ISR pages invitation 🟡 ~25%
-**Skills** : `/vercel:runtime-cache`
+### ~~Priorité 2 — Cache ISR pages invitation~~ ✅ DONE (2026-06-05)
 
-Les pages `/i/[slug]` et `/i/[slug]/g/[token]` sont rendues à chaque requête (0 cache). Sur un événement avec 200 invités qui ouvrent le lien en même temps, chaque requête hit la DB Neon.
-
-**Fix** : `export const revalidate = 60` sur les pages d'invitation + revalidation manuelle sur update (`revalidatePath`/`revalidateTag` dans les routes API qui modifient le contenu).
+- `export const revalidate = 60` sur `/i/[slug]/page.tsx` et `/i/[slug]/g/[token]/page.tsx`
+- `revalidatePath('/i/${slug}')` dans `PATCH /api/invitations/[id]` et `PATCH /api/invitations/[id]/options`
+- `revalidatePath('/i/${slug}/g/${token}')` dans `POST /api/rsvp` (cas token nominatif)
 
 ---
 

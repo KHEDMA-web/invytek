@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+
+export const revalidate = 60;
 import { GuestQrCode } from "@/components/GuestQrCode";
 import GoldArchTheme from "@/themes/wedding/gold-arch/Theme";
 import BordeauxOvalTheme from "@/themes/wedding/bordeaux-oval/Theme";

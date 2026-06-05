@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { WeddingContentSchema, WeddingOptionsSchema } from "@/lib/schemas/wedding";
 import { z } from "zod";
 
@@ -31,6 +32,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   await prisma.invitation.update({ where: { id }, data: updateData });
+  revalidatePath(`/i/${invitation.slug}`);
   return NextResponse.json({ ok: true });
 }
 

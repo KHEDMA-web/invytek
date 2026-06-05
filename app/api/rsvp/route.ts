@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const MAX_GUESTS = 500;
@@ -64,6 +65,7 @@ export async function POST(req: Request) {
       where: { token },
       data: { name, status, partySize: status === "attending" ? partySize : 1, message: message || null, respondedAt: new Date() },
     });
+    revalidatePath(`/i/${invitation.slug}/g/${token}`);
   } else {
     const guestCount = await prisma.guest.count({ where: { invitationId } });
     if (guestCount >= MAX_GUESTS) {
