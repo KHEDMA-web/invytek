@@ -46,7 +46,7 @@ export async function POST(req: Request) {
       failure_url: `${baseUrl}/dashboard?credits=fail`,
       webhook_endpoint: `${baseUrl}/api/credits/webhook`,
       locale: "fr",
-      metadata: { userId: dbUser.id, credits: String(pack.credits) },
+      metadata: { userId: dbUser.id, credits: pack.credits },
     }),
   });
 

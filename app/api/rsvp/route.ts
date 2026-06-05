@@ -2,6 +2,28 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 
+const MAX_GUESTS = 500;
+
+// Block private/internal URLs to prevent SSRF
+function isSafeWebhookUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return false;
+    const h = u.hostname;
+    if (
+      h === "localhost" ||
+      h === "0.0.0.0" ||
+      /^127\./.test(h) ||
+      /^10\./.test(h) ||
+      /^192\.168\./.test(h) ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(h) ||
+      /^\[::1\]$/.test(h) ||
+      /^169\.254\./.test(h)
+    ) return false;
+    return true;
+  } catch { return false; }
+}
+
 const schema = z.object({
   invitationId: z.string().min(1),
   name: z.string().min(2).max(80),
@@ -43,6 +65,10 @@ export async function POST(req: Request) {
       data: { name, status, partySize: status === "attending" ? partySize : 1, message: message || null, respondedAt: new Date() },
     });
   } else {
+    const guestCount = await prisma.guest.count({ where: { invitationId } });
+    if (guestCount >= MAX_GUESTS) {
+      return NextResponse.json({ error: "Limite d'invités atteinte" }, { status: 429 });
+    }
     await prisma.guest.create({
       data: {
         invitationId,
@@ -55,10 +81,10 @@ export async function POST(req: Request) {
     });
   }
 
-  // Webhook RSVP
+  // Webhook RSVP — only fire for HTTPS, non-internal URLs
   try {
     const options = JSON.parse(invitation.options) as { webhookUrl?: string };
-    if (options.webhookUrl) {
+    if (options.webhookUrl && isSafeWebhookUrl(options.webhookUrl)) {
       void fetch(options.webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

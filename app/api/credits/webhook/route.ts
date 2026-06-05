@@ -10,7 +10,9 @@ export async function POST(req: Request) {
   const sig = req.headers.get("signature") ?? "";
 
   const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");
-  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
+  const sigOk = sig.length === expected.length &&
+    crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
+  if (!sigOk) {
     return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
   }
 

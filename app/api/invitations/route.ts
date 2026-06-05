@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
 import { WeddingContentSchema, WeddingOptionsSchema } from "@/lib/schemas/wedding";
+import { getTheme } from "@/themes/registry";
 
 const createSchema = z.object({
   themeId: z.string().min(1),
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
         userId: dbUser.id,
         slug,
         themeId,
-        category: "wedding",
+        category: getTheme(themeId)?.category ?? "wedding",
         status: "published",
         content: JSON.stringify(content),
         options: JSON.stringify(options),

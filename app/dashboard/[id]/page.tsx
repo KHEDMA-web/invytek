@@ -10,6 +10,7 @@ import { QrCodeToggle } from "@/components/QrCodeToggle";
 import { DeleteInvitationButton } from "@/components/DeleteInvitationButton";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
 import { EmailButton } from "@/components/EmailButton";
+import { ShareWithClientButton } from "@/components/ShareWithClientButton";
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -91,6 +92,14 @@ export default async function ManagePage({ params }: Props) {
           <Link href={`/dashboard/${invitation.id}/edit`} className="btn btn-ghost btn-sm">
             Modifier
           </Link>
+          <ShareWithClientButton
+            invitationId={invitation.id}
+            initialToken={invitation.clientAccessToken ?? null}
+            initialClientName={invitation.clientName ?? null}
+            initialClientEmail={invitation.clientEmail ?? null}
+            baseUrl={baseUrl}
+            eventTitle={`${content.names[0]} & ${content.names[1]}`}
+          />
           <Link href="/checkin" className="btn btn-ghost btn-sm">
             Scanner les entrées →
           </Link>

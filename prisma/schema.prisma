@@ -28,10 +28,13 @@ model Invitation {
   options     String   // JSON
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  publishedAt DateTime?
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  guests      Guest[]
-  views       InvitationView[]
+  publishedAt       DateTime?
+  clientAccessToken String?   @unique
+  clientEmail       String?
+  clientName        String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guests            Guest[]
+  views             InvitationView[]
 }
 
 model Theme {

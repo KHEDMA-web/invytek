@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import type { WeddingContent } from "@/lib/schemas/wedding";
-import { SignOutButton } from "@/components/SignOutButton";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { BuyCreditsButton } from "@/components/BuyCreditsButton";
 
@@ -46,10 +45,7 @@ export default async function DashboardPage() {
               Bonjour, {session.user.name?.split(" ")[0]} 👋
             </h1>
           </div>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <SignOutButton />
-            <Link href="/create" className="btn btn-gold btn-sm">+ Nouvelle invitation</Link>
-          </div>
+          <Link href="/create" className="btn btn-gold btn-sm">+ Nouvelle invitation</Link>
         </div>
 
         {/* Crédits IA */}
