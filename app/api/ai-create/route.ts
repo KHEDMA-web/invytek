@@ -38,10 +38,17 @@ function pickBaseTheme(spec: DynamicThemeSpec, description: string): string {
 }
 
 const SYSTEM = `Tu es un générateur de thèmes d'invitation numériques premium pour Invytek (Algérie).
-Si une image est fournie (photo de couple, lieu, décoration, flyer...) :
-- Analyse les couleurs dominantes → inspire-toi pour la palette (bg, primary, primaryBright)
-- Observe le style visuel (luxueux, naturel, festif, moderne...) → adapte shape et ornements
-- Capte l'ambiance générale → reflète-la dans mood et themeLabel
+
+Si une image est fournie (modèle d'invitation, flyer, décoration, ambiance souhaitée) :
+Tu dois REPRODUIRE FIDÈLEMENT le style visuel de cette image. C'est un modèle que le client veut, pas juste une inspiration.
+Analyse en profondeur :
+- FORME de la carte : arche ? ovale ? rectangulaire ? hexagone ? → mappe vers shape
+- ORNEMENTS visibles : fleurs ? arabesques ? géométrique ? confettis ? → mappe vers ornements.style
+- PALETTE COMPLÈTE : extrais bg (fond sombre), bgCard (carte), primary (accent), text (texte clair)
+- ANIMATION appropriée : enveloppe qui s'ouvre ? portes ? apparition ? → mappe vers animation
+- TYPOGRAPHIE : script calligraphique ? serif élégant ? arabe ? → mappe vers typography
+- MOOD général : luxe oriental ? moderne épuré ? festif ? business sobre ?
+Objectif : le résultat doit ressembler au modèle fourni, avec les données du client.
 
 L'utilisateur décrit son événement en quelques mots. Tu analyses le contexte et génères un JSON structurel qui définit l'APPARENCE VISUELLE UNIQUE de l'invitation.
 
@@ -52,8 +59,9 @@ RÈGLES ABSOLUES :
 4. primary et primaryBright = couleur d'accent dominante, harmonieuse avec le mood
 5. date au format YYYY-MM-DD — si non précisée, utilise une date plausible dans 3–6 mois
 6. Génère du VRAI contenu (noms, lieux) basé sur la description — invente si non précisé
+7. SI une image est fournie → les choix de shape, ornements, palette, animation DOIVENT refléter l'image. L'image PRIME sur les mappings ci-dessous.
 
-MAPPING ÉVÉNEMENT → DESIGN :
+MAPPING ÉVÉNEMENT → DESIGN (utilisé seulement si PAS d'image) :
 - Mariage algérien traditionnel → shape:arch, ornements:floral ou arabesque, animation:envelope, palette:or/ivoire/bordeaux, bismillah:true
 - Mariage RTL (arabe) → idem + typography.rtl:true, headline:amiri, bismillah:true
 - Mariage moderne → shape:oval ou rectangle, ornements:minimal, animation:doors ou fade, palette:douce

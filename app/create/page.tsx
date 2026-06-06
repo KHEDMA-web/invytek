@@ -539,10 +539,10 @@ function CreateForm() {
                   onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(110,80,200,0.7)")}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(110,80,200,0.35)")}>
                   <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }} style={{ display: "none" }} />
-                  <span style={{ fontSize: 22 }}>📷</span>
+                  <span style={{ fontSize: 22 }}>🎨</span>
                   <div>
-                    <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>Ajouter une photo</div>
-                    <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)" }}>Couple, lieu, flyer… l&apos;IA s&apos;en inspire pour le design — optionnel</div>
+                    <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>Ajouter un modèle de référence</div>
+                    <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)" }}>Invitation, flyer, décor… l&apos;IA reproduit ce style pour votre client — optionnel</div>
                   </div>
                 </label>
               ) : (
@@ -554,7 +554,7 @@ function CreateForm() {
                     ×
                   </button>
                   <div style={{ position: "absolute", bottom: 8, left: 10, fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "#a080e0", background: "rgba(0,0,0,0.55)", borderRadius: 100, padding: "3px 10px" }}>
-                    Photo ajoutée ✓
+                    Modèle ajouté ✓
                   </div>
                 </div>
               )}
