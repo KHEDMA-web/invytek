@@ -15,7 +15,9 @@ import ConferenceTechTheme from "@/themes/business/conference-tech/Theme";
 import CongresMedicalTheme from "@/themes/medical/congres-medical/Theme";
 import InaugurationTheme from "@/themes/business/inauguration/Theme";
 import SensibilisationTheme from "@/themes/medical/sensibilisation/Theme";
+import DynamicTheme from "@/themes/dynamic/DynamicTheme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 import { PublicRsvpForm } from "@/components/PublicRsvpForm";
 
 interface Props { params: Promise<{ slug: string }> }
@@ -41,9 +43,14 @@ export default async function InvitationPage({ params }: Props) {
 
   void prisma.invitationView.create({ data: { invitationId: invitation.id } });
 
-  const content = JSON.parse(invitation.content) as WeddingContent;
-  const options = JSON.parse(invitation.options) as Partial<WeddingOptions>;
+  const options = JSON.parse(invitation.options) as Partial<WeddingOptions> & { layoutSpec?: DynamicThemeSpec };
 
+  // Thème dynamique IA
+  if (invitation.themeId === "dynamic" && options.layoutSpec) {
+    return <DynamicTheme spec={options.layoutSpec} invitationId={invitation.id} />;
+  }
+
+  const content = JSON.parse(invitation.content) as WeddingContent;
   const props = { content, options, invitationId: invitation.id };
   const rsvp = options.showRsvp !== false && <PublicRsvpForm invitationId={invitation.id} />;
   const custom = options.customizations;

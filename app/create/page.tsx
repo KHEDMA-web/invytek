@@ -117,6 +117,7 @@ function CreateForm() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [buyLoading, setBuyLoading] = useState(false);
+  const [aiLayoutSpec, setAiLayoutSpec] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     if (mode !== "ai") return;
@@ -201,15 +202,18 @@ function CreateForm() {
         note: note || undefined, closing,
         initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
       };
-      const hasCustom = (mode === "custom" || mode === "ai") && Object.keys(customColors).length > 0;
+      const hasCustom = (mode === "custom") && Object.keys(customColors).length > 0;
+      const isDynamic = mode === "ai" && aiLayoutSpec !== null;
       const options = {
         showCountdown, showRsvp, showArabic: isWedding ? showArabic : false, showNote: !!note,
         ...(hasCustom ? { customizations: customColors } : {}),
+        ...(isDynamic ? { layoutSpec: aiLayoutSpec } : {}),
       };
+      const publishThemeId = isDynamic ? "dynamic" : themeId;
       const res = await fetch("/api/invitations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ themeId, slug, content, options }),
+        body: JSON.stringify({ themeId: publishThemeId, slug, content, options }),
       });
       let data: { error?: string } = {};
       try { data = await res.json(); } catch { /* non-JSON */ }
@@ -444,10 +448,11 @@ function CreateForm() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ description: aiDesc }),
         });
-        const d = await res.json() as { themeId?: string; customizations?: Record<string, string>; content?: Record<string, unknown>; credits?: number; error?: string };
+        const d = await res.json() as { themeId?: string; layoutSpec?: Record<string, unknown>; customizations?: Record<string, string>; content?: Record<string, unknown>; credits?: number; error?: string };
         if (!res.ok) { setAiError(d.error || "Erreur IA"); return; }
         if (d.credits !== undefined) setUserCredits(d.credits);
         if (d.themeId) setThemeId(d.themeId);
+        if (d.layoutSpec) setAiLayoutSpec(d.layoutSpec);
         if (d.customizations) setCustomColors(d.customizations as Record<string, string>);
         const c = d.content as { names?: [string,string]; hosts?: string; invitationLine?: string; date?: string; time?: string; dayLabel?: string; venue?: string; venueSub?: string; closing?: string; note?: string; bismillah?: boolean } | undefined;
         if (c) {

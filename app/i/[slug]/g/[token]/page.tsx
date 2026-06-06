@@ -15,7 +15,9 @@ import ConferenceTechTheme from "@/themes/business/conference-tech/Theme";
 import CongresMedicalTheme from "@/themes/medical/congres-medical/Theme";
 import InaugurationTheme from "@/themes/business/inauguration/Theme";
 import SensibilisationTheme from "@/themes/medical/sensibilisation/Theme";
+import DynamicTheme from "@/themes/dynamic/DynamicTheme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 
 interface Props { params: Promise<{ slug: string; token: string }> }
 
@@ -33,10 +35,16 @@ export default async function GuestInvitationPage({ params }: Props) {
 
   if (!guest || guest.invitation.slug !== slug || guest.invitation.status !== "published") notFound();
 
-  const content = JSON.parse(guest.invitation.content) as WeddingContent;
-  const options = JSON.parse(guest.invitation.options) as Partial<WeddingOptions>;
-  const p = { content, options, invitationId: guest.invitation.id, guestName: guest.name, guestToken: token, alreadyResponded: guest.status !== "pending" };
+  const options = JSON.parse(guest.invitation.options) as Partial<WeddingOptions> & { layoutSpec?: DynamicThemeSpec };
   const id = guest.invitation.themeId;
+
+  // Thème dynamique IA
+  if (id === "dynamic" && options.layoutSpec) {
+    return <DynamicTheme spec={options.layoutSpec} invitationId={guest.invitation.id} guestName={guest.name} guestToken={token} alreadyResponded={guest.status !== "pending"} />;
+  }
+
+  const content = JSON.parse(guest.invitation.content) as WeddingContent;
+  const p = { content, options, invitationId: guest.invitation.id, guestName: guest.name, guestToken: token, alreadyResponded: guest.status !== "pending" };
 
   const showQr = (p.options as { showQrCode?: boolean })?.showQrCode === true;
   const lightThemes = new Set(["baby-shower", "congres-medical", "inauguration", "sensibilisation"]);
