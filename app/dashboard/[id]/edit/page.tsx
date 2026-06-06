@@ -4,7 +4,10 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 import { EditInvitationForm } from "@/components/EditInvitationForm";
+import { DynamicThemeEditor } from "@/components/DynamicThemeEditor";
+import { EditTabs } from "@/components/EditTabs";
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -20,12 +23,13 @@ export default async function EditPage({ params }: Props) {
   if (!invitation) notFound();
 
   const content = JSON.parse(invitation.content) as WeddingContent;
-  const options = JSON.parse(invitation.options) as Partial<WeddingOptions>;
+  const options = JSON.parse(invitation.options) as Partial<WeddingOptions> & { layoutSpec?: DynamicThemeSpec };
+  const isDynamic = invitation.themeId === "dynamic" && !!options.layoutSpec;
 
   return (
     <div className="invytek-page" style={{ minHeight: "100dvh", background: "radial-gradient(120% 55% at 50% -10%, rgba(184,146,60,0.07), transparent 55%), var(--bg)" }}>
       <Nav />
-      <div className="dd-shell" style={{ paddingTop: 90, maxWidth: 760 }}>
+      <div className="dd-shell" style={{ paddingTop: 90, maxWidth: isDynamic ? 1100 : 760 }}>
 
         {/* Back */}
         <Link href={`/dashboard/${id}`} className="dd-back-lnk">
@@ -41,19 +45,35 @@ export default async function EditPage({ params }: Props) {
           <h1 style={{ fontFamily: "var(--font-script)", fontSize: "clamp(2rem,5vw,2.8rem)", color: "var(--ivory)", lineHeight: 1, fontWeight: 400 }}>
             {content.names[0]} &amp; {content.names[1]}
           </h1>
-          <p style={{ color: "var(--text-soft)", marginTop: 8, fontSize: "1rem" }}>
-            Modifiez le contenu de votre invitation — les changements sont visibles immédiatement.
-          </p>
+          {isDynamic && (
+            <p style={{ color: "var(--text-soft)", marginTop: 8, fontSize: "1rem" }}>
+              <span style={{ color: "#a080e0", fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".14em", textTransform: "uppercase" }}>✨ Thème IA</span>
+              {" "}— Modifiez le contenu ou le design sans dépenser de crédits.
+            </p>
+          )}
         </div>
 
-        {/* Form card */}
-        <div style={{
-          border: "1px solid var(--hair)", borderRadius: 16,
-          background: "linear-gradient(160deg, var(--bg-raise), var(--bg))",
-          padding: "clamp(1.4rem, 4vw, 2rem)",
-        }}>
-          <EditInvitationForm invitationId={id} content={content} options={options} />
-        </div>
+        {/* Tabs si thème IA, form simple sinon */}
+        {isDynamic ? (
+          <EditTabs
+            contentTab={
+              <div style={{ border: "1px solid var(--hair)", borderRadius: 16, background: "linear-gradient(160deg, var(--bg-raise), var(--bg))", padding: "clamp(1.4rem,4vw,2rem)" }}>
+                <EditInvitationForm invitationId={id} content={content} options={options} />
+              </div>
+            }
+            designTab={
+              <DynamicThemeEditor
+                invitationId={id}
+                slug={invitation.slug}
+                spec={options.layoutSpec!}
+              />
+            }
+          />
+        ) : (
+          <div style={{ border: "1px solid var(--hair)", borderRadius: 16, background: "linear-gradient(160deg, var(--bg-raise), var(--bg))", padding: "clamp(1.4rem,4vw,2rem)" }}>
+            <EditInvitationForm invitationId={id} content={content} options={options} />
+          </div>
+        )}
       </div>
     </div>
   );
