@@ -1,137 +1,203 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import Anthropic from "@anthropic-ai/sdk";
+import { getDbUser } from "@/lib/getDbUser";
+import { DynamicThemeSpecSchema, type DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 
 const CREDIT_COST = 1;
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const THEMES_LIST = [
-  { id: "gold-arch",       label: "Mariage doré (arche)" },
-  { id: "bordeaux-oval",   label: "Mariage bordeaux RTL (arabe)" },
-  { id: "ivoire-minimal",  label: "Mariage ivoire minimal" },
-  { id: "confettis-or",    label: "Anniversaire confettis dorés" },
-  { id: "anniv-neon",      label: "Anniversaire néon/fête" },
-  { id: "baby-shower",     label: "Baby shower / naissance" },
-  { id: "soiree-prestige", label: "Business gala / soirée prestige" },
-  { id: "conference-tech", label: "Business conférence tech" },
-  { id: "inauguration",    label: "Business inauguration" },
-  { id: "blouse-lys",      label: "Médical / santé élégant" },
-  { id: "congres-medical", label: "Congrès médical" },
-  { id: "sensibilisation", label: "Campagne sensibilisation" },
-];
+// Fallback vers un thème de base pour la compatibilité pendant la transition
+// (supprimé en Session 2 quand DynamicTheme.tsx sera prêt)
+const THEME_FALLBACK: Record<string, string> = {
+  "baby":       "baby-shower",
+  "bébé":       "baby-shower",
+  "naissance":  "baby-shower",
+  "anniversaire":"confettis-or",
+  "anniv":      "confettis-or",
+  "inaugur":    "inauguration",
+  "conférence": "conference-tech",
+  "conference": "conference-tech",
+  "tech":       "conference-tech",
+  "congres":    "congres-medical",
+  "médical":    "blouse-lys",
+  "gala":       "soiree-prestige",
+  "prestige":   "soiree-prestige",
+  "sensibil":   "sensibilisation",
+};
 
-const VALID_THEMES = THEMES_LIST.map(t => t.id);
-
-const SYSTEM = `Tu es un générateur d'invitations premium pour Invytek (Algérie).
-L'utilisateur décrit son événement. Tu génères un JSON complet avec 4 champs.
-
-Thèmes disponibles (choisis le plus adapté) :
-${THEMES_LIST.map(t => `- "${t.id}" : ${t.label}`).join("\n")}
-
-Retourne ce JSON exact (sans markdown) :
-{
-  "themeId": "slug-du-theme",
-  "themeLabel": "Nom poétique du thème unique en français (ex: Mariage Bordeaux & Lune, Gala Bleu Nuit Prestige)",
-  "customizations": {
-    "--gold": "#hex",
-    "--gold-bright": "#hex",
-    "--gold-deep": "#hex",
-    "--bg-1": "#hex",
-    "--bg-2": "#hex",
-    "--ivory": "#hex"
-  },
-  "content": {
-    "names": ["string", "string"],
-    "hosts": "string",
-    "invitationLine": "string",
-    "date": "YYYY-MM-DD",
-    "time": "HH:MM",
-    "dayLabel": "string",
-    "venue": "string",
-    "venueSub": "string ou omis",
-    "closing": "string",
-    "note": "string ou omis",
-    "initials": ["X", "Y"],
-    "bismillah": false,
-    "namesSeparator": "avec"
+function pickBaseTheme(spec: DynamicThemeSpec, description: string): string {
+  const d = description.toLowerCase();
+  for (const [key, theme] of Object.entries(THEME_FALLBACK)) {
+    if (d.includes(key)) return theme;
   }
+  if (spec.typography.rtl) return "bordeaux-oval";
+  if (spec.ornements.style === "minimal") return "ivoire-minimal";
+  if (spec.animation === "confetti") return "confettis-or";
+  return "gold-arch";
 }
 
-Règles palette :
-- Les couleurs doivent être harmonieuses et adaptées au type d'événement
-- Mariage : tons chaleureux (bordeaux, rose poudré, crème, or rose, violet...)
-- Business : tons sobres (bleu nuit, gris ardoise, vert forêt...)
-- Médical : tons frais (bleu azur, vert sauge, blanc cassé...)
-- Anniversaire / Bébé : tons festifs ou pastel
-- "--ivory" doit être clair (> #D0...) car c'est la couleur du texte
-- "--bg-1" et "--bg-2" doivent être sombres (< #30...) pour garder le contraste`;
+const SYSTEM = `Tu es un générateur de thèmes d'invitation numériques premium pour Invytek (Algérie).
+L'utilisateur décrit son événement en quelques mots. Tu analyses le contexte et génères un JSON structurel qui définit l'APPARENCE VISUELLE UNIQUE de l'invitation.
+
+RÈGLES ABSOLUES :
+1. Retourne UNIQUEMENT le JSON brut, sans markdown, sans texte avant/après
+2. bg et bgCard DOIVENT être sombres : luminosité < 30% (ex: #0a0806, #14100a, #0d1520, #0a1a0a)
+3. text DOIT être clair : luminosité > 70% (ex: #FCFAF5, #E8F0FF, #F0FAF0)
+4. primary et primaryBright = couleur d'accent dominante, harmonieuse avec le mood
+5. date au format YYYY-MM-DD — si non précisée, utilise une date plausible dans 3–6 mois
+6. Génère du VRAI contenu (noms, lieux) basé sur la description — invente si non précisé
+
+MAPPING ÉVÉNEMENT → DESIGN :
+- Mariage algérien traditionnel → shape:arch, ornements:floral ou arabesque, animation:envelope, palette:or/ivoire/bordeaux, bismillah:true
+- Mariage RTL (arabe) → idem + typography.rtl:true, headline:amiri, bismillah:true
+- Mariage moderne → shape:oval ou rectangle, ornements:minimal, animation:doors ou fade, palette:douce
+- Anniversaire festif → shape:rectangle, ornements:confetti, animation:confetti ou rise, palette:vive
+- Baby shower / naissance → shape:oval, ornements:minimal, animation:fade, palette:pastel (rose, bleu ciel, vert menthe)
+- Business gala / soirée prestige → shape:rectangle, ornements:geometric, animation:doors, palette:sombre élégante (bleu nuit, bordeaux profond, or froid)
+- Conférence / tech → shape:hexagon, ornements:geometric, animation:rise, palette:tech (bleu électrique, gris ardoise, cyan)
+- Inauguration → shape:diamond ou rectangle, ornements:geometric, animation:doors, palette:sobre (or, gris anthracite)
+- Médical / santé → shape:rectangle, ornements:medical, animation:fade, palette:propre (bleu azur, vert sauge, blanc cassé)
+- Sensibilisation / cause → shape:rectangle, ornements:minimal, animation:rise, palette:engagée (orange, rouge, vert vif)
+
+FORMES disponibles : arch | oval | rectangle | hexagon | diamond
+ORNEMENTS disponibles : floral | geometric | arabesque | minimal | confetti | medical
+ANIMATIONS disponibles : envelope | doors | fade | rise | confetti
+TYPOGRAPHIES headline : pinyon-script | marcellus | cormorant | amiri
+TYPOGRAPHIES body : cormorant | marcellus | amiri
+
+JSON À GÉNÉRER (respecte EXACTEMENT cette structure) :
+{
+  "themeLabel": "Nom poétique unique du thème en français (ex: Mariage Doré sous les Étoiles, Gala Bleu Nuit Prestige)",
+  "shape": "arch",
+  "palette": {
+    "bg": "#14100a",
+    "bgCard": "#1e1810",
+    "primary": "#B8923C",
+    "primaryBright": "#D4AF61",
+    "text": "#FCFAF5",
+    "textSoft": "#c8bfa8"
+  },
+  "typography": {
+    "headline": "pinyon-script",
+    "body": "cormorant",
+    "rtl": false
+  },
+  "ornements": {
+    "style": "floral",
+    "accent": "#B8923C"
+  },
+  "animation": "envelope",
+  "sections": {
+    "bismillah": true,
+    "arabicText": true,
+    "countdown": true,
+    "rsvp": true
+  },
+  "mood": "Élégance orientale dorée et romantique",
+  "content": {
+    "names": ["Prénom1", "Prénom2"],
+    "hosts": "Familles X & Y",
+    "invitationLine": "ont l'immense plaisir de vous convier à",
+    "date": "2026-09-12",
+    "time": "18:00",
+    "dayLabel": "Samedi",
+    "venue": "Salle El Baraka",
+    "venueSub": "Alger Centre",
+    "closing": "Soyez les Bienvenus",
+    "note": null,
+    "initials": ["A", "S"],
+    "bismillah": true,
+    "namesSeparator": "avec"
+  }
+}`;
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.email) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  const dbUser = await getDbUser();
+  if (!dbUser) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
   let body: { description?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
   if (!body.description?.trim()) return NextResponse.json({ error: "Description requise" }, { status: 400 });
 
-  const dbUser = await prisma.user.upsert({
-    where: { email: session.user.email },
-    update: {},
-    create: {
-      email: session.user.email,
-      name: session.user.name ?? session.user.email.split("@")[0],
-      image: session.user.image ?? undefined,
-    },
-  });
-  if (dbUser.credits < CREDIT_COST) return NextResponse.json({ error: "Crédits insuffisants", credits: dbUser.credits }, { status: 402 });
+  if (dbUser.credits < CREDIT_COST) {
+    return NextResponse.json({ error: "Crédits insuffisants", credits: dbUser.credits }, { status: 402 });
+  }
 
   const message = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 1200,
+    model: "claude-haiku-4-5",
+    max_tokens: 2000,
     system: SYSTEM,
     messages: [{ role: "user", content: body.description.trim() }],
   });
 
   const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "";
 
-  let parsed: {
-    themeId?: string;
-    themeLabel?: string;
-    customizations?: Record<string, string>;
-    content?: Record<string, unknown>;
-  };
+  // Extraire le JSON de la réponse (au cas où Haiku ajoute du texte parasite)
+  let rawObj: unknown;
   try {
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
-    parsed = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
+    rawObj = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
   } catch {
-    return NextResponse.json({ error: "L'IA n'a pas pu générer un contenu valide. Réessayez." }, { status: 500 });
+    return NextResponse.json({ error: "L'IA n'a pas pu générer un thème valide. Réessayez." }, { status: 500 });
   }
 
-  const themeId = VALID_THEMES.includes(parsed.themeId ?? "") ? parsed.themeId! : "gold-arch";
-  const themeLabel = parsed.themeLabel || "Invitation personnalisée";
-  const customizations = parsed.customizations ?? {};
-  const content = parsed.content ?? {};
-  const category = THEMES_LIST.find(t => t.id === themeId)?.label.split(" ")[0] ?? "Mariage";
+  // Validation Zod — coerce note:null → undefined
+  if (rawObj && typeof rawObj === "object" && "content" in rawObj) {
+    const c = (rawObj as Record<string, unknown>).content as Record<string, unknown>;
+    if (c.note === null) delete c.note;
+    if (c.venueSub === null) delete c.venueSub;
+  }
 
-  // Sauvegarder le thème généré
+  const parsed = DynamicThemeSpecSchema.safeParse(rawObj);
+  if (!parsed.success) {
+    console.error("DynamicTheme validation error:", parsed.error.issues);
+    return NextResponse.json({ error: "Thème généré invalide. Réessayez avec une description plus précise." }, { status: 500 });
+  }
+
+  const spec = parsed.data;
+  const baseThemeId = pickBaseTheme(spec, body.description);
+  const category = spec.typography.rtl ? "Mariage" :
+    spec.ornements.style === "medical" ? "Médical" :
+    spec.ornements.style === "confetti" ? "Anniversaire" :
+    spec.ornements.style === "geometric" ? "Business" : "Mariage";
+
+  // Persist le thème généré avec son spec complet
   const savedTheme = await prisma.generatedTheme.create({
     data: {
-      baseThemeId: themeId,
-      customizations: JSON.stringify(customizations),
+      baseThemeId,
+      customizations: JSON.stringify({
+        "--gold": spec.palette.primary,
+        "--gold-bright": spec.palette.primaryBright,
+        "--bg-1": spec.palette.bg,
+        "--ivory": spec.palette.text,
+      }),
+      layoutSpec: JSON.stringify(spec),
       category,
-      label: themeLabel,
+      label: spec.themeLabel,
     },
   });
 
-  await prisma.user.update({ where: { id: session.user.id }, data: { credits: { decrement: CREDIT_COST } } });
+  // Décrémenter les crédits
+  await prisma.user.update({
+    where: { id: dbUser.id },
+    data: { credits: { decrement: CREDIT_COST } },
+  });
 
   return NextResponse.json({
-    themeId,
-    themeLabel,
-    customizations,
-    content,
+    // Nouveau — spec complète pour DynamicTheme.tsx (Session 2)
+    layoutSpec: spec,
     generatedThemeId: savedTheme.id,
+    themeLabel: spec.themeLabel,
+    // Compatibilité backward — create page continue à fonctionner
+    themeId: baseThemeId,
+    customizations: {
+      "--gold": spec.palette.primary,
+      "--gold-bright": spec.palette.primaryBright,
+      "--bg-1": spec.palette.bg,
+      "--ivory": spec.palette.text,
+    },
+    content: spec.content,
     credits: dbUser.credits - CREDIT_COST,
   });
 }

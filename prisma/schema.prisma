@@ -72,6 +72,7 @@ model GeneratedTheme {
   id             String   @id @default(cuid())
   baseThemeId    String
   customizations String   // JSON Record<string, string>
+  layoutSpec     String?  // JSON DynamicThemeSpec — null for old entries
   category       String
   label          String   // ex: "Mariage Bordeaux & Lune"
   isPublic       Boolean  @default(true)
