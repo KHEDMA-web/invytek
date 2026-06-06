@@ -36,17 +36,17 @@ export default async function InvitationPage({ params }: Props) {
   const invitation = await prisma.invitation.findUnique({ where: { slug, status: "published" } });
   if (!invitation) notFound();
 
-  const theme = getTheme(invitation.themeId);
-  if (!theme) notFound();
-
   void prisma.invitationView.create({ data: { invitationId: invitation.id } });
 
   const options = JSON.parse(invitation.options) as Partial<WeddingOptions> & { layoutSpec?: DynamicThemeSpec };
 
-  // Thème dynamique IA
+  // Thème dynamique IA — vérifier avant getTheme (pas dans le registry)
   if (invitation.themeId === "dynamic" && options.layoutSpec) {
     return <DynamicTheme spec={options.layoutSpec} invitationId={invitation.id} />;
   }
+
+  const theme = getTheme(invitation.themeId);
+  if (!theme) notFound();
 
   const content = JSON.parse(invitation.content) as WeddingContent;
   const props = { content, options, invitationId: invitation.id };
