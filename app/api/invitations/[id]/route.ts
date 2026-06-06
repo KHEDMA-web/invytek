@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { WeddingContentSchema, WeddingOptionsSchema } from "@/lib/schemas/wedding";
+import { getDbUser } from "@/lib/getDbUser";
 import { z } from "zod";
 
 const patchSchema = z.object({
@@ -11,12 +12,12 @@ const patchSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const dbUser = await getDbUser();
+  if (!dbUser) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   const { id } = await params;
   const invitation = await prisma.invitation.findUnique({ where: { id } });
-  if (!invitation || invitation.userId !== session.user.id) {
+  if (!invitation || invitation.userId !== dbUser.id) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
 
@@ -37,12 +38,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+  const dbUser = await getDbUser();
+  if (!dbUser) return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
 
   const { id } = await params;
   const invitation = await prisma.invitation.findUnique({ where: { id } });
-  if (!invitation || invitation.userId !== session.user.id) {
+  if (!invitation || invitation.userId !== dbUser.id) {
     return NextResponse.json({ error: "Introuvable" }, { status: 404 });
   }
 

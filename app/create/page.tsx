@@ -118,6 +118,11 @@ function CreateForm() {
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [buyLoading, setBuyLoading] = useState(false);
 
+  useEffect(() => {
+    if (mode !== "ai") return;
+    fetch("/api/credits").then(r => r.json()).then((d: { credits: number }) => setUserCredits(d.credits));
+  }, [mode]);
+
   const theme = THEMES.find(t => t.id === themeId)!;
   const cat = theme?.cat || "Mariage";
   const d = DEFAULTS[cat] || DEFAULTS["Mariage"];

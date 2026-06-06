@@ -63,10 +63,13 @@ export async function POST(req: Request) {
 
 export async function GET() {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+
+  const dbUser = await prisma.user.findUnique({ where: { email: session.user.email } });
+  if (!dbUser) return NextResponse.json([], { status: 200 });
 
   const invitations = await prisma.invitation.findMany({
-    where: { userId: session.user.id },
+    where: { userId: dbUser.id },
     orderBy: { createdAt: "desc" },
     include: {
       guests: { select: { status: true } },

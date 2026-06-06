@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getDbUser } from "@/lib/getDbUser";
 import { z } from "zod";
 
 const schema = z.object({
@@ -10,8 +10,8 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  const dbUser = await getDbUser();
+  if (!dbUser) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Requête invalide" }, { status: 400 }); }
@@ -21,8 +21,7 @@ export async function POST(req: Request) {
 
   const { invitationId, name, contact } = parsed.data;
 
-  // Vérifier que l'invitation appartient à l'utilisateur connecté
-  const inv = await prisma.invitation.findUnique({ where: { id: invitationId, userId: session.user.id } });
+  const inv = await prisma.invitation.findUnique({ where: { id: invitationId, userId: dbUser.id } });
   if (!inv) return NextResponse.json({ error: "Invitation introuvable" }, { status: 404 });
 
   const guest = await prisma.guest.create({
