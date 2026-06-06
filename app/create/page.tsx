@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
+import DynamicTheme from "@/themes/dynamic/DynamicTheme";
+import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 
 const PREVIEW_MAP: Record<string, string> = { "gold-arch": "or-arche" };
 
@@ -656,16 +658,21 @@ function CreateForm() {
                 </div>
               </div>
 
-              {/* Droite — aperçu thème */}
+              {/* Droite — aperçu DynamicTheme réel */}
               <div style={{ flex: "1 1 340px", position: "sticky", top: 100 }}>
                 <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "#a080e0", marginBottom: 12 }}>
-                  Thème sélectionné — {aiTheme.name}
+                  ✨ {(aiLayoutSpec as DynamicThemeSpec | null)?.themeLabel ?? "Thème généré par l'IA"}
                 </div>
-                <div style={{ width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(110,80,200,0.25)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
-                  <iframe key={themeId} src={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
-                    style={{ width: 375, height: 850, border: "none", transform: `scale(${340 / 375})`, transformOrigin: "top left", pointerEvents: "none" }}
-                    title="Aperçu" />
+                <div style={{ width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid rgba(110,80,200,0.35)", background: "#0a0806", boxShadow: "0 24px 60px rgba(110,80,192,0.25)" }}>
+                  <div style={{ width: 375, height: 812, transform: `scale(${340 / 375})`, transformOrigin: "top left", pointerEvents: "none", overflow: "hidden" }}>
+                    {aiLayoutSpec && (
+                      <DynamicTheme spec={aiLayoutSpec as DynamicThemeSpec} invitationId="preview" />
+                    )}
+                  </div>
                 </div>
+                <p style={{ marginTop: 10, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", lineHeight: 1.6 }}>
+                  Aperçu exact de votre invitation finale
+                </p>
               </div>
             </div>
           )}
