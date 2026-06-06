@@ -264,3 +264,254 @@ Classes utilitaires : `.btn`, `.btn-gold`, `.btn-ghost`, `.btn-sm`, `.wrap`, `.i
 | 2026-06-05 | ISR cache 60s pages invitation |
 | 2026-06-06 | Fix lookup user par email (prod Neon) — **ne pas toucher `lib/getDbUser.ts`** |
 | 2026-06-06 | Génération IA complète : `DynamicTheme.tsx` + vision photo |
+
+---
+
+## Réponses aux 50 questions techniques
+
+### 🎨 Design system & global (1–6)
+
+**Q1 — Variables CSS exactes dans `app/invytek.css` :**
+```
+--gold: #B8923C           --gold-vivid: #D4AF61      --gold-light: #E8D8B0
+--gold-pale: #F3E9D2      --gold-deep: #6E5618
+--bg: #14100a             --bg-2: #1b1409            --bg-raise: #221a0e
+--ivory: #FCFAF5          --ivory-warm: #F7F1E6      --ink: #3A3220
+--text: rgba(243,233,210,0.92)
+--text-soft: rgba(243,233,210,0.62)
+--text-faint: rgba(243,233,210,0.40)
+--hair: rgba(184,146,60,0.20)
+--hair-strong: rgba(184,146,60,0.45)
+--font-script: 'Pinyon Script', cursive
+--font-title: 'Marcellus', serif
+--font-body: 'Cormorant Garamond', serif
+--font-ar: 'Amiri', serif
+--accent: var(--gold)     --accent-vivid: var(--gold-vivid)
+--glow: rgba(212,175,97,0.16)
+--shadow-soft: 0 30px 80px -30px rgba(0,0,0,0.7)
+--maxw: 1240px
+```
+⚠️ **`--bg-1` n'existe pas** → utiliser `--bg`. **`--bg-card` n'existe pas** → utiliser `--bg-raise`. **`--gold-bright` n'existe pas** → utiliser `--gold-vivid`. Ces aliases du brief n'existent pas dans le fichier réel.
+
+**Q2 — Classes utilitaires réelles (ne pas redéfinir) :**
+- Layout : `.wrap` `.invytek-page` `.ik-section` `.ik-section.alt` `.center` `.section-head`
+- Type : `.display` `.script` `.lede` `.eyebrow` `.eyebrow.center`
+- Boutons : `.btn` `.btn-gold` `.btn-ghost` `.btn-sm`
+- Badges : `.badge` `.badge.gold` `.badge.soon`
+- Ornements : `.ornament`
+- Reveal scroll : `.reveal` `.reveal.in` `.reveal.d1`→`.d4`
+- Theme grid : `.filters` `.chip` `.chip.active` `.theme-grid` `.tcard`
+- Nav : `.nav` `.nav.scrolled` `.brand` `.nav-links` `.nav-cta`
+- Dashboard : `.dash-stats` `.dash-manage-grid` `.form-2col` `.create-preview`
+
+**Q3 — Polices :** Chargées via `@import` Google Fonts dans `app/invytek.css`. Poids disponibles : Cormorant Garamond 400/500/600, Amiri 400/700, Marcellus 400, Pinyon Script 400, Caveat 600/700.
+
+**Q4 — Fichier CSS partagé :** Tout le CSS global est dans `app/invytek.css`. Les pages utilisent des inline-styles dans les `.tsx`. Pas de CSS Modules pour les pages applicatives (seulement pour les thèmes d'invitation dans `themes/*/Theme.module.css`).
+
+**Q5 — Composants UI réutilisables :** Non, pas de librairie UI. Chaque page utilise inline-styles. Seuls les boutons partagent `.btn*`. Composants client réutilisables disponibles : `CopyLinkButton`, `WhatsAppButton`, `EmailButton`, `DeleteInvitationButton`, `AddGuestForm`, `QrCodeToggle`.
+
+**Q6 — Format des styles à livrer :** Tailwind v4 est installé mais **non utilisé** dans dashboard/create/auth. Livrer du **inline-styles + classes utilitaires de `invytek.css`**. Pas de Tailwind, pas de CSS Modules sauf pour keyframes d'animations complexes.
+
+---
+
+### 🧩 /create (7–16)
+
+**Q7 — Fichiers `themes-preview` (12 fichiers) :**
+`or-arche.html`, `bordeaux-oval.html`, `ivoire-minimal.html`, `confettis-or.html`, `anniv-neon.html`, `baby-shower.html`, `soiree-prestige.html`, `conference-tech.html`, `inauguration.html`, `blouse-lys.html`, `congres-medical.html`, `sensibilisation.html`
+
+`PREVIEW_MAP` dans le code : `{ "gold-arch": "or-arche" }` uniquement. Pour tous les autres thèmes : `themeId === filename sans .html`.
+
+**Q8 — Miniatures sélecteur :** **Mini-mockups CSS maison** de préférence. 12 iframes simultanées seraient trop lentes. L'iframe grande reste pour l'aperçu unique à droite.
+
+**Q9 — Shape exacte de `content` :**
+```ts
+{
+  hosts: string,
+  invitationLine: string,
+  names: [string, string],
+  namesSeparator: string,     // "avec" | "·"
+  bismillah: boolean,
+  date: string,               // "YYYY-MM-DD"
+  time: string,               // "HH:MM"
+  dayLabel: string,           // "Samedi"
+  venue: string,
+  venueSub?: string,
+  note?: string,
+  closing: string,
+  initials: [string, string], // ["A", "S"]
+}
+```
+
+**Q10 — Shape exacte de `options` :**
+```ts
+{
+  showCountdown?: boolean,         // défaut: true
+  showRsvp?: boolean,              // défaut: true
+  showArabic?: boolean,            // défaut: true (mariage seulement)
+  showNote?: boolean,              // défaut: !!note
+  customizations?: Record<string, string>,  // clés: "--gold", "--gold-bright", "--bg-1", "--ivory"
+  layoutSpec?: DynamicThemeSpec,   // mode IA uniquement
+}
+```
+
+**Q11 — Mapping catégorie → DEFAULTS :** L'objet `DEFAULTS` dans `create/page.tsx` a les clés : `Mariage`, `Mariage · RTL`, `Anniversaire`, `Bébé`, `Business`, `Médical`. Chaque entrée contient : `invLine`, `closing`, `name1Label`, `name1Ph`, `name2Label`, `name2Ph`, `hostsLabel`, `hostsPh`, `noteLabel`, `notePh`.
+
+**Q12 — Réponse `POST /api/ai-create` :**
+```ts
+{
+  themeId: string,                 // baseThemeId backward compat
+  themeLabel: string,              // ex: "Mariage Doré sous les Étoiles"
+  layoutSpec: DynamicThemeSpec,    // spec structurelle complète et unique
+  customizations: Record<string, string>,
+  content: { names, hosts, invitationLine, date, time, dayLabel,
+             venue, venueSub?, closing, note?, initials, bismillah, namesSeparator },
+  generatedThemeId: string,
+  credits: number,                 // solde après débit
+  error?: string,
+}
+```
+Upload photo : `body.image` = string base64 JPEG (pas FormData). Encodé via Canvas côté client.
+
+**Q13 — `GET /api/credits` :** Renvoie `{ credits: number }` — confirmé. Refetch à l'entrée du mode IA uniquement (`useEffect` sur `mode === "ai"`).
+
+**Q14 — `check-slug` :** `GET /api/invitations/check-slug?slug=xxx` renvoie `{ available: boolean }` — confirmé. Debounce 400ms dans le code actuel.
+
+**Q15 — Mode custom / color-pickers :** 4 clés CSS : `--gold`, `--gold-bright`, `--bg-1`, `--ivory`. Passées dans `options.customizations`, appliquées via `<style>:root{ --gold: val !important; }</style>` dans la page invitation. Preview live = iframe statique (non dynamique). Garder exactement ces 4 clés.
+
+**Q16 — Après "Publier" :** Redirect vers `/dashboard` — garder. Pas d'écran succès intermédiaire.
+
+---
+
+### 📊 /dashboard (17–26)
+
+**Q17 — Données disponibles dans le dashboard :**
+Le dashboard est un **Server Component Prisma direct** (pas via `GET /api/invitations`). Données Prisma :
+```ts
+invitation: {
+  id, slug, themeId, status, createdAt,
+  content: string,  // JSON à parser → WeddingContent
+  guests: [{ status, checkedInAt }],
+  _count: { views: number }
+}
+```
+`attending`, `declined`, `pending`, `checkedIn` sont calculés en JS depuis `guests`.
+
+**Q18 — `content` pour titre :** Oui. `content.names[0]`, `content.names[1]`, `content.date`, `content.venue` sont toujours présents.
+
+**Q19 — `themeId` → catégorie/nom :** `getTheme(slug)` dans `themes/registry.ts` est importable directement dans un Server Component.
+
+**Q20 — Miniature cards dashboard :** Bandeau coloré par catégorie ou mini-mockup CSS — **pas d'iframe** dans le dashboard.
+
+**Q21 — `status` invitation :** `draft` | `published` | `archived`. Badge par statut souhaité.
+
+**Q22 — Compteurs RSVP :** Déjà calculés en JS depuis `guests`. Pas de champ agrégé dans Prisma.
+
+**Q23 — État vide :** Texte actuel : "Aucune invitation pour l'instant" + CTA "Créer mon invitation" → `/create`. Améliorer visuellement uniquement.
+
+**Q24 — Stats globales en en-tête :** Total invitations, total invités, total confirmés (attending). Optionnel : total vues.
+
+**Q25 — Tri/filtre :** Hors scope pour cette passe.
+
+**Q26 — Frontière server/client :** Page dashboard = **Server Component pur** (pas de `"use client"`, pas de `useEffect`). Sous-composants interactifs (`CopyLinkButton`, `BuyCreditsButton`…) sont `"use client"`. Respecter cette frontière absolument.
+
+---
+
+### 🗂️ /dashboard/[id] (27–36)
+
+**Q27 — Shape invitation détaillée + invités :**
+```ts
+invitation: {
+  id, slug, themeId, status,
+  content: string (JSON WeddingContent),
+  options: string (JSON WeddingOptions),
+  clientAccessToken: string | null,
+  clientName: string | null,
+  clientEmail: string | null,
+  guests: [{
+    id, name,
+    contact: string | null,
+    status: "attending" | "declined" | "pending",
+    partySize: number,
+    message: string | null,
+    respondedAt: Date | null,
+    checkedInAt: Date | null,
+    token: string   // UUID → lien /i/[slug]/g/[token]
+  }]
+}
+```
+
+**Q28 — `status` invité + checkedIn :** `attending` | `declined` | `pending`. Pas de valeur `checked_in` — l'arrivée = `checkedInAt !== null` (timestamp).
+
+**Q29 — Graphique RSVP :** Donut `conic-gradient` CSS ou barres — les deux OK. Couleurs : présents=`#B8923C`, absents=`rgba(243,233,210,0.40)`, attente=`rgba(243,233,210,0.62)`, arrivés=`#6ecf8a`.
+
+**Q30 — Actions barre + ordre actuel :** Voir invitation | Modifier (`/dashboard/[id]/edit`) | **Espace client** (ShareWithClientButton) | Scanner entrées (`/checkin`) | Export CSV | Toggle QR. WhatsApp + Email = par ligne dans le tableau invités, pas dans la barre globale.
+
+**Q31 — Export CSV :** `<a href="/api/invitations/[id]/export" download>` — lien direct, download natif. Aucun JS.
+
+**Q32 — ShareWithClientButton :** Clic → modal → `POST /api/invitations/[id]/client-token` → renvoie `{ clientAccessToken, clientName, clientEmail }` → affiche lien `/client/[token]` + option envoi email via `POST /api/send-email`.
+
+**Q33 — WhatsApp / Email :** Liens côté client : `wa.me/?text=...` et `mailto:...`. Envoi via `/api/send-email` uniquement dans `ShareWithClientButton` (pour le portail client).
+
+**Q34 — QR toggle :** `QrCodeToggle` fait `PATCH /api/invitations/[id]/options` avec `{ showQrCode: true/false }`. Le QR dans l'invitation publique est le lien vers l'invitation.
+
+**Q35 — Invités nominatifs :** Chaque invité a un `token` unique et un lien `/i/[slug]/g/[token]`. Boutons copier/WhatsApp/email par ligne — déjà en place.
+
+**Q36 — Bouton Éditer :** Présent → `/dashboard/[id]/edit`.
+
+---
+
+### 🔐 /auth (37–42)
+
+**Q37 — Redirect après auth :** `/dashboard` (ou `callbackUrl`). Pas d'email-verify.
+
+**Q38 — Champs :** Register : `name` + `email` + `password` (min 6). Login : `email` + `password`. Pas de "confirmer mot de passe".
+
+**Q39 — Codes erreur :** `email_exists`, `no_account`, `bad_password`, `invalid_input`, `CredentialsSignin`. Garder le mapping FR existant.
+
+**Q40 — Google OAuth :** Actif en prod — afficher le bouton.
+
+**Q41 — Glassmorphism :** OK sur fond dark.
+
+**Q42 — Mot de passe oublié :** Aucune route — ne pas afficher de lien.
+
+---
+
+### 📨 PublicRsvpForm (43–48)
+
+**Q43 — Payload `POST /api/rsvp` :**
+```ts
+{
+  invitationId: string,              // requis
+  name: string,                      // requis, min 2, max 80
+  status: "attending" | "declined",  // requis
+  partySize?: number,                // optionnel, défaut 1, min 1, max 20
+  message?: string,                  // optionnel, max 500
+  token?: string,                    // optionnel, invité nominatif uniquement
+}
+```
+
+**Q44 — Libellés status :** `attending` = "Je serai présent(e)" / `declined` = "Je ne pourrai pas".
+
+**Q45 — `partySize` :** Affiché seulement si `status === "attending"` — déjà dans le code actuel.
+
+**Q46 — Confirmation :** Modal reste ouverte, écran succès : "Merci [name] ! Votre présence a bien été confirmée." Bouton "Fermer". Déjà implémenté — améliorer l'animation uniquement.
+
+**Q47 — RTL :** Pas de prop `dir` sur le form. Garder neutre — le form ne s'adapte pas au thème. Fond sombre + bordures or fonctionne sur tous les thèmes dark.
+
+**Q48 — Identité form :** Fond semi-transparent dark + bordures or. Neutre sur tout thème dark. Ne pas coller à un thème précis.
+
+---
+
+### 🔗 Intégration & handoff (49–50)
+
+**Q49 — Format de livraison :** **Fichiers `.tsx` directement**, prêts à coller dans l'arbo Next. Styles : inline-styles + classes utilitaires de `invytek.css`. Pas de Tailwind. CSS Modules accepté uniquement pour des keyframes d'animations complexes (créer un fichier `.module.css` séparé si besoin).
+
+**Q50 — Fichiers intouchables (même en lecture/import pour modifier) :**
+- `app/page.tsx` (landing) — intouchable
+- `app/invytek.css` — ajouter à la fin OK, ne JAMAIS modifier l'existant
+- `themes/**` — tous les thèmes React
+- `themes/dynamic/DynamicTheme.tsx` + `.module.css`
+- `lib/getDbUser.ts`, `lib/schemas/**`
+- `app/api/**` — toutes les routes API
+- `prisma/**`, `auth.ts`
+- `components/Nav.tsx` — retouches CSS mineures OK, logique strictement intacte
