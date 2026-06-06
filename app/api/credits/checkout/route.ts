@@ -10,7 +10,7 @@ const PACKS = [
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
   let body: { pack?: number };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
@@ -21,8 +21,15 @@ export async function POST(req: Request) {
   const apiKey = process.env.CHARGILY_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "Paiement non configuré" }, { status: 503 });
 
-  const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!dbUser) return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 401 });
+  const dbUser = await prisma.user.upsert({
+    where: { email: session.user.email },
+    update: {},
+    create: {
+      email: session.user.email,
+      name: session.user.name ?? session.user.email.split("@")[0],
+      image: session.user.image ?? undefined,
+    },
+  });
 
   const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`

@@ -69,14 +69,21 @@ Règles palette :
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
+  if (!session?.user?.email) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
   let body: { description?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
   if (!body.description?.trim()) return NextResponse.json({ error: "Description requise" }, { status: 400 });
 
-  const dbUser = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!dbUser) return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 401 });
+  const dbUser = await prisma.user.upsert({
+    where: { email: session.user.email },
+    update: {},
+    create: {
+      email: session.user.email,
+      name: session.user.name ?? session.user.email.split("@")[0],
+      image: session.user.image ?? undefined,
+    },
+  });
   if (dbUser.credits < CREDIT_COST) return NextResponse.json({ error: "Crédits insuffisants", credits: dbUser.credits }, { status: 402 });
 
   const message = await client.messages.create({
