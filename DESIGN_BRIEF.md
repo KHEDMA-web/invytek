@@ -515,3 +515,17 @@ invitation: {
 - `app/api/**` — toutes les routes API
 - `prisma/**`, `auth.ts`
 - `components/Nav.tsx` — retouches CSS mineures OK, logique strictement intacte
+
+---
+
+## Réponses aux questions de plan /dashboard
+
+**Format bureau + mobile :** OUI — même format que `/create` (prototype HTML responsive avec vue bureau + mobile côte à côte).
+
+**Libellés badges statut :** OUI — `draft` → **Brouillon**, `published` → **Publié**, `archived` → **Archivé**.
+
+**Miniature cards :** **Mini-mockup CSS par catégorie** — plus premium qu'un bandeau plat, cohérent avec le mood dark luxury. Pas d'iframe.
+
+**Données démo :** Invente du plausible — ex: Adam & Sara (mariage, publié), Gala Atlas 2026 (business, brouillon), Dr. Amel Kari (médical, publié). Les vraies données viennent de la DB en prod.
+
+**GO pour le /dashboard** — valider le plan A tel que proposé.
