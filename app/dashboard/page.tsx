@@ -5,8 +5,174 @@ import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import type { WeddingContent } from "@/lib/schemas/wedding";
-import { CopyLinkButton } from "@/components/CopyLinkButton";
-import { BuyCreditsButton } from "@/components/BuyCreditsButton";
+
+const CAT_MAP: Record<string, string> = {
+  "gold-arch": "Mariage", "bordeaux-oval": "Mariage · RTL", "ivoire-minimal": "Mariage",
+  "confettis-or": "Anniversaire", "anniv-neon": "Anniversaire",
+  "baby-shower": "Bébé",
+  "soiree-prestige": "Business", "conference-tech": "Business", "inauguration": "Business",
+  "blouse-lys": "Médical", "congres-medical": "Médical", "sensibilisation": "Médical",
+  "dynamic": "IA",
+};
+
+const THEME_NAMES: Record<string, string> = {
+  "gold-arch": "Or & Arche", "bordeaux-oval": "Bordeaux & Ovale", "ivoire-minimal": "Ivoire Minimal",
+  "confettis-or": "Confettis d'Or", "anniv-neon": "Neon Burst",
+  "baby-shower": "Baby Shower",
+  "soiree-prestige": "Soirée Prestige", "conference-tech": "Conférence Tech", "inauguration": "Inauguration",
+  "blouse-lys": "Blouse & Lys", "congres-medical": "Congrès Médical", "sensibilisation": "Sensibilisation",
+  "dynamic": "Thème IA",
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  published: "Publié", draft: "Brouillon", archived: "Archivé",
+};
+
+function fmtDate(d: string) {
+  const mo = ["jan.","fév.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
+  const dt = new Date(d + "T12:00:00");
+  return `${dt.getDate()} ${mo[dt.getMonth()]} ${dt.getFullYear()}`;
+}
+
+function ThemeMini({ themeId, n1, n2, date }: { themeId: string; n1: string; n2: string; date: string }) {
+  const d = new Date(date + "T12:00:00");
+  const dt = `${String(d.getDate()).padStart(2,"0")} · ${String(d.getMonth()+1).padStart(2,"0")} · ${d.getFullYear()}`;
+
+  if (themeId === "gold-arch") return (
+    <div className="tm tm--gold-arch">
+      <div className="tm-eb">Vous êtes invités</div>
+      <div className="tm-arch">
+        <div className="nm">{n1.split(" ")[0]}</div>
+        <div className="amp">&amp;</div>
+        <div className="nm">{n2.split(" ")[0]}</div>
+        <div className="dt">{dt}</div>
+      </div>
+    </div>
+  );
+
+  if (themeId === "bordeaux-oval") return (
+    <div className="tm tm--bordeaux-oval">
+      <div className="tm-eb">دعوة زواج</div>
+      <div className="tm-oval">
+        <div className="bism">بسم الله</div>
+        <div className="ar">{n1.split(" ")[0]}</div>
+        <div className="flo">✿</div>
+        <div className="ar">{n2.split(" ")[0]}</div>
+      </div>
+    </div>
+  );
+
+  if (themeId === "ivoire-minimal") return (
+    <div className="tm tm--ivoire-minimal">
+      <div className="ln" />
+      <div className="mar">Mariage de</div>
+      <div className="nm">{n1.split(" ")[0]}</div>
+      <div className="et">et</div>
+      <div className="nm">{n2.split(" ")[0]}</div>
+      <div className="dia" />
+      <div className="dt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "confettis-or") return (
+    <div className="tm tm--confettis-or">
+      <div className="nm">{n1.split(" ")[0]}</div>
+      <div className="age">★</div>
+      <div className="ans">Anniversaire</div>
+    </div>
+  );
+
+  if (themeId === "anniv-neon") return (
+    <div className="tm tm--anniv-neon">
+      <div className="ring" />
+      <div className="age">✦</div>
+      <div className="nm">{n1.split(" ")[0]}</div>
+      <div className="ans">Fête</div>
+    </div>
+  );
+
+  if (themeId === "baby-shower") return (
+    <div className="tm tm--baby-shower">
+      <div className="cloud" />
+      <div className="nm">{n1}</div>
+      <div className="sub">Bienvenue !</div>
+      <div className="dots">
+        <span style={{ background: "#9fc6d8" }} />
+        <span style={{ background: "#e8b6c8" }} />
+        <span style={{ background: "#cfe1ea" }} />
+      </div>
+    </div>
+  );
+
+  if (themeId === "soiree-prestige") return (
+    <div className="tm tm--soiree-prestige">
+      <div className="sp-frame" />
+      <div className="beb">Vous êtes convié</div>
+      <div className="ttl">{n1}</div>
+      <div className="org">{n2}</div>
+      <div className="dia" />
+      <div className="sdt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "conference-tech") return (
+    <div className="tm tm--conference-tech">
+      <div className="ctag">conf://2026</div>
+      <div className="ttl">{n1}</div>
+      <div className="org">{n2}</div>
+      <div className="cdt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "inauguration") return (
+    <div className="tm tm--inauguration">
+      <div className="ribbon"><div className="band" /><div className="cut" /></div>
+      <div className="ieb">Inauguration</div>
+      <div className="ttl">{n1}</div>
+      <div className="org">{n2}</div>
+      <div className="idt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "blouse-lys") return (
+    <div className="tm tm--blouse-lys">
+      <div className="cross" />
+      <div className="lys">🌿</div>
+      <div className="beb">Invitation</div>
+      <div className="nm">{n1}</div>
+      <div className="spec">{n2}</div>
+      <div className="ldt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "congres-medical") return (
+    <div className="tm tm--congres-medical">
+      <div className="badge2"><div className="hole" /><div className="cx">✦</div></div>
+      <div className="meb">Congrès</div>
+      <div className="ttl">{n1}</div>
+      <div className="org">{n2}</div>
+      <div className="mdt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "sensibilisation") return (
+    <div className="tm tm--sensibilisation">
+      <div className="aw" />
+      <div className="seb">Campagne</div>
+      <div className="ttl">{n1}</div>
+      <div className="org">{n2}</div>
+      <div className="sdt">{dt}</div>
+    </div>
+  );
+
+  return (
+    <div className="tm tm--dynamic">
+      <div className="ai-glow">✨</div>
+      <div className="ai-lbl">Thème IA</div>
+      <div className="ai-nm">{n1}</div>
+    </div>
+  );
+}
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -26,142 +192,174 @@ export default async function DashboardPage() {
 
   const credits = dbUser?.credits ?? 0;
 
-  const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : "http://localhost:3000";
+  const totalGuests = invitations.reduce((s, i) => s + i.guests.length, 0);
+  const totalConfirmed = invitations.reduce((s, i) => s + i.guests.filter(g => g.status === "attending").length, 0);
 
   return (
-    <div className="invytek-page" style={{ minHeight: "100dvh" }}>
+    <div className="invytek-page" style={{ minHeight: "100dvh", background: "radial-gradient(120% 55% at 50% -10%, rgba(184,146,60,0.07), transparent 55%), var(--bg)" }}>
       <Nav />
-      <div className="wrap" style={{ paddingTop: 120, paddingBottom: "4rem" }}>
+      <div className="dash-shell" style={{ paddingTop: 90 }}>
 
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: "2rem" }}>
+        <div className="dash-head">
           <div>
-            <p style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".28em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>Tableau de bord</p>
-            <h1 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.8rem,4vw,2.8rem)", color: "var(--ivory)", fontWeight: 400 }}>
-              Bonjour, {session.user.name?.split(" ")[0]} 👋
-            </h1>
-          </div>
-          <Link href="/create" className="btn btn-gold btn-sm">+ Nouvelle invitation</Link>
-        </div>
-
-        {/* Crédits IA */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
-          background: credits === 0
-            ? "rgba(200,60,60,0.07)"
-            : credits <= 2
-            ? "rgba(220,140,40,0.08)"
-            : "rgba(110,80,200,0.07)",
-          border: `1px solid ${credits === 0 ? "rgba(200,60,60,0.3)" : credits <= 2 ? "rgba(220,140,40,0.3)" : "rgba(110,80,200,0.2)"}`,
-          borderRadius: 12, padding: "1rem 1.4rem", marginBottom: "2rem",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <span style={{ fontSize: 20 }}>✨</span>
-            <div>
-              <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--ivory)" }}>
-                {credits} crédit{credits !== 1 ? "s" : ""} IA disponible{credits !== 1 ? "s" : ""}
-              </div>
-              {credits === 0 && (
-                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "#e07070", marginTop: 2 }}>
-                  Aucun crédit — rechargez pour utiliser la génération IA
-                </div>
-              )}
-              {credits > 0 && credits <= 2 && (
-                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "#e0a040", marginTop: 2 }}>
-                  Crédits faibles — pensez à recharger
-                </div>
-              )}
-            </div>
-          </div>
-          <BuyCreditsButton />
-        </div>
-
-        {/* Empty state */}
-        {invitations.length === 0 && (
-          <div style={{ textAlign: "center", padding: "4rem 2rem", border: "1px dashed var(--hair)", borderRadius: 12 }}>
-            <p style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.2rem,3vw,1.8rem)", color: "var(--ivory)", marginBottom: "1rem" }}>
-              Aucune invitation pour l&apos;instant
+            <p style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".28em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>
+              Tableau de bord
             </p>
-            <p style={{ color: "var(--text-soft)", marginBottom: "2rem" }}>Créez votre première invitation en quelques minutes.</p>
-            <Link href="/create" className="btn btn-gold">Créer mon invitation</Link>
+            <h1>Mes invitations</h1>
+            <p>Créez, partagez et suivez vos invitations en temps réel.</p>
+          </div>
+          <Link href="/create" className="btn btn-gold btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            Créer une invitation
+          </Link>
+        </div>
+
+        {/* Stats */}
+        {invitations.length > 0 && (
+          <div className="dash-stats-row">
+            <div className="stat-card-d">
+              <div className="sc-k">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                Invitations
+              </div>
+              <div className="sc-v">{invitations.length}</div>
+            </div>
+            <div className="stat-card-d">
+              <div className="sc-k">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M3 20c0-3.3 3-5 6-5s6 1.7 6 5"/><path d="M16 5.2a3.4 3.4 0 0 1 0 6.6"/><path d="M18 15c2.3.5 4 2.2 4 5"/></svg>
+                Invités
+              </div>
+              <div className="sc-v">{totalGuests}</div>
+            </div>
+            <div className="stat-card-d violet">
+              <div className="sc-k">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                Confirmés
+              </div>
+              <div className="sc-v">{totalConfirmed}<small>/ {totalGuests}</small></div>
+            </div>
           </div>
         )}
 
-        {/* Grid */}
+        {/* Empty state */}
+        {invitations.length === 0 && (
+          <div className="dash-empty-v2">
+            <div className="ee-mark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v18M3 12h18M6 6l12 12M18 6L6 18"/></svg>
+            </div>
+            <h2>Votre première invitation vous attend</h2>
+            <p>Choisissez un thème, personnalisez le texte et partagez un lien — vos confirmations arrivent ici en temps réel.</p>
+            <Link href="/create" className="btn btn-gold btn-sm">
+              + Créer mon invitation
+            </Link>
+          </div>
+        )}
+
+        {/* Invitation grid */}
         {invitations.length > 0 && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 20 }}>
+          <div className="inv-grid">
             {invitations.map(inv => {
               const content = JSON.parse(inv.content) as WeddingContent;
               const attending = inv.guests.filter(g => g.status === "attending").length;
               const declined  = inv.guests.filter(g => g.status === "declined").length;
               const pending   = inv.guests.filter(g => g.status === "pending").length;
-              const checkedIn = inv.guests.filter(g => g.checkedInAt !== null).length;
               const total = inv.guests.length;
-              const eventDate = new Date(content.date + "T12:00:00");
-              const invUrl = `${baseUrl}/i/${inv.slug}`;
+              const cat = CAT_MAP[inv.themeId] ?? "Invitation";
+              const themeName = THEME_NAMES[inv.themeId] ?? inv.themeId;
+              const isWedding = cat === "Mariage" || cat === "Mariage · RTL";
+              const n1 = content.names[0] ?? "";
+              const n2 = content.names[1] ?? "";
+              const displayName = isWedding ? `${n1} & ${n2}` : (n2 && n2 !== "—" ? `${n1} — ${n2}` : n1);
+
+              const attPct = total > 0 ? (attending / total * 100).toFixed(1) + "%" : "0%";
+              const waitPct = total > 0 ? (pending / total * 100).toFixed(1) + "%" : "0%";
+              const noPct = total > 0 ? (declined / total * 100).toFixed(1) + "%" : "0%";
 
               return (
-                <div key={inv.id} style={{
-                  background: "linear-gradient(160deg, var(--bg-raise), var(--bg))",
-                  border: "1px solid var(--hair)", borderRadius: 12, overflow: "hidden",
-                }}>
-                  <div style={{ padding: "1.4rem 1.4rem 1rem" }}>
-                    <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 6 }}>
-                      {inv.themeId === "gold-arch" ? "Or & Arche" : inv.themeId === "bordeaux-oval" ? "Bordeaux Ovale" : inv.themeId}
-                    </div>
-                    <h3 style={{ fontFamily: "var(--font-script)", fontSize: "1.8rem", color: "var(--ivory)", lineHeight: 1, marginBottom: 6 }}>
-                      {content.names[0]} & {content.names[1]}
-                    </h3>
-                    <p style={{ fontSize: "0.9rem", color: "var(--text-soft)" }}>
-                      {eventDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                    </p>
-                    <p style={{ fontSize: "0.85rem", color: "var(--text-faint)", marginTop: 4 }}>{content.venue}</p>
-                  </div>
-
-                  {/* Vues */}
-                  <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.6rem 1.4rem", alignItems: "center", gap: 6 }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-faint)", flexShrink: 0 }}>
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                    </svg>
-                    <span style={{ fontFamily: "var(--font-title)", fontSize: "0.85rem", color: "var(--text-soft)" }}>
-                      {inv._count.views} vue{inv._count.views !== 1 ? "s" : ""}
+                <Link key={inv.id} href={`/dashboard/${inv.id}`} className={`inv-card${inv.status === "draft" ? " is-draft" : ""}`}>
+                  {/* Thumbnail */}
+                  <div className="inv-thumb">
+                    <ThemeMini themeId={inv.themeId} n1={n1} n2={isWedding ? n2 : content.hosts ?? ""} date={content.date} />
+                    <span className={`inv-status-badge ${inv.status}`}>
+                      {STATUS_LABELS[inv.status] ?? inv.status}
                     </span>
                   </div>
 
-                  {/* RSVP stats */}
-                  {total > 0 && (
-                    <div style={{ display: "flex", borderTop: "1px solid var(--hair)", padding: "0.8rem 1.4rem" }}>
-                      {[
-                        { n: attending, label: "Présents",  color: "var(--gold)" },
-                        { n: declined,  label: "Absents",   color: "var(--text-faint)" },
-                        { n: pending,   label: "Attente",   color: "var(--text-soft)" },
-                        { n: checkedIn, label: "Arrivés",   color: "#6ecf8a" },
-                      ].map(s => (
-                        <div key={s.label} style={{ flex: 1, textAlign: "center" }}>
-                          <div style={{ fontFamily: "var(--font-title)", fontSize: "1.3rem", color: s.color }}>{s.n}</div>
-                          <div style={{ fontFamily: "var(--font-title)", fontSize: 9, letterSpacing: ".14em", textTransform: "uppercase", color: "var(--text-faint)", marginTop: 2 }}>{s.label}</div>
-                        </div>
-                      ))}
+                  {/* Body */}
+                  <div className="inv-body">
+                    <div className="inv-cat">{cat} · {themeName}</div>
+                    <div className="inv-name">{displayName}</div>
+                    <div className="inv-meta-row">
+                      <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+                        {fmtDate(content.date)}
+                      </span>
+                      <span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s7-6.4 7-11a7 7 0 1 0-14 0c0 4.6 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                        {content.venue}
+                      </span>
                     </div>
-                  )}
 
-                  {/* Actions */}
-                  <div style={{ display: "flex", gap: 8, padding: "0.8rem 1.4rem 1.2rem", borderTop: "1px solid var(--hair)", flexWrap: "wrap" }}>
-                    <Link href={`/i/${inv.slug}`} target="_blank" className="btn btn-ghost btn-sm" style={{ flex: 1, justifyContent: "center" }}>
-                      Voir
-                    </Link>
-                    <CopyLinkButton url={invUrl} label="Copier" small />
-                    <Link href={`/dashboard/${inv.id}`} className="btn btn-gold btn-sm" style={{ flex: 1, justifyContent: "center" }}>
-                      Gérer
-                    </Link>
+                    {/* RSVP bar */}
+                    <div className="inv-rsvp-wrap">
+                      {total > 0 ? (
+                        <>
+                          <div className="inv-rsvp-bar">
+                            <i className="b-ok" style={{ width: attPct }} />
+                            <i className="b-wait" style={{ width: waitPct }} />
+                            <i className="b-no" style={{ width: noPct }} />
+                          </div>
+                          <div className="inv-rsvp-counts">
+                            <span><span className="rdot ok" /><b>{attending}</b> présents</span>
+                            <span><span className="rdot wait" /><b>{pending}</b> attente</span>
+                            <span><span className="rdot no" /><b>{declined}</b> absents</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="inv-rsvp-bar" />
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="inv-foot">
+                      <span className="inv-views-c">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                        {inv._count.views} vue{inv._count.views !== 1 ? "s" : ""}
+                      </span>
+                      <span className="inv-go-c">
+                        Gérer
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
+          </div>
+        )}
+
+        {/* Credits widget */}
+        {credits <= 2 && (
+          <div style={{
+            marginTop: 40,
+            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+            background: credits === 0 ? "rgba(200,60,60,0.07)" : "rgba(220,140,40,0.08)",
+            border: `1px solid ${credits === 0 ? "rgba(200,60,60,0.3)" : "rgba(220,140,40,0.3)"}`,
+            borderRadius: 12, padding: "1rem 1.4rem",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span>✨</span>
+              <div>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--ivory)" }}>
+                  {credits} crédit{credits !== 1 ? "s" : ""} IA
+                </div>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: credits === 0 ? "#e07070" : "#e0a040", marginTop: 2 }}>
+                  {credits === 0 ? "Rechargez pour utiliser la génération IA" : "Crédits faibles — pensez à recharger"}
+                </div>
+              </div>
+            </div>
+            <Link href="/pricing" className="btn btn-ghost btn-sm">Recharger</Link>
           </div>
         )}
       </div>

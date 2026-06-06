@@ -2,26 +2,43 @@
 
 import { useState } from "react";
 
+const SPARKS = Array.from({ length: 14 }, (_, i) => {
+  const angle = (i / 14) * Math.PI * 2;
+  const r = 60 + (i % 3) * 28;
+  return { sx: Math.round(Math.cos(angle) * r), sy: Math.round(Math.sin(angle) * r) };
+});
+
 interface Props {
   invitationId: string;
+  token?: string;
 }
 
-export function PublicRsvpForm({ invitationId }: Props) {
+export function PublicRsvpForm({ invitationId, token }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
-  const [status, setStatus] = useState<"attending" | "declined">("attending");
+  const [status, setStatus] = useState<"attending" | "declined" | null>(null);
   const [partySize, setPartySize] = useState(1);
   const [message, setMessage] = useState("");
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
 
+  function resetForm() {
+    setName(""); setStatus(null); setPartySize(1); setMessage(""); setState("idle");
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!status) return;
     setState("loading");
     try {
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invitationId, name, status, partySize, message: message || undefined }),
+        body: JSON.stringify({
+          invitationId, name, status,
+          partySize: status === "attending" ? partySize : undefined,
+          message: message || undefined,
+          ...(token ? { token } : {}),
+        }),
       });
       setState(res.ok ? "done" : "error");
     } catch {
@@ -29,24 +46,22 @@ export function PublicRsvpForm({ invitationId }: Props) {
     }
   }
 
-  const inp: React.CSSProperties = {
-    width: "100%", padding: "0.75rem 1rem",
-    background: "rgba(255,255,255,0.06)", border: "1px solid rgba(184,146,60,0.25)",
-    borderRadius: 8, outline: "none", color: "#FCFAF5",
-    fontFamily: "'Cormorant Garamond', serif", fontSize: "1rem", boxSizing: "border-box",
-  };
+  const firstName = name.split(" ")[0] || name;
+  const doneMsg = status === "attending"
+    ? `${firstName}, votre présence a bien été confirmée. À très bientôt !`
+    : `${firstName}, votre réponse a bien été enregistrée. Vous nous manquerez.`;
 
   return (
     <>
-      {/* Bouton flottant */}
+      {/* Floating CTA */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { resetForm(); setOpen(true); }}
         style={{
           position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
           zIndex: 900, padding: "14px 32px",
-          background: "linear-gradient(135deg, #D4AF61, #B8923C)",
+          background: "linear-gradient(135deg, var(--gold-vivid), var(--accent))",
           border: "none", borderRadius: 100, cursor: "pointer",
-          fontFamily: "'Marcellus', serif", fontSize: 13, letterSpacing: ".16em",
+          fontFamily: "var(--font-title)", fontSize: 13, letterSpacing: ".16em",
           textTransform: "uppercase", color: "#2a2008",
           boxShadow: "0 8px 32px rgba(184,146,60,0.5)",
           whiteSpace: "nowrap",
@@ -55,103 +70,133 @@ export function PublicRsvpForm({ invitationId }: Props) {
         Confirmer ma présence
       </button>
 
-      {/* Overlay + Modal */}
+      {/* Overlay */}
       {open && (
         <div
-          onClick={(e) => e.target === e.currentTarget && setOpen(false)}
+          onClick={e => e.target === e.currentTarget && setOpen(false)}
           style={{
             position: "fixed", inset: 0, zIndex: 1000,
             background: "rgba(10,8,4,0.85)", backdropFilter: "blur(6px)",
-            display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "1rem", overflowY: "auto",
           }}
         >
-          <div style={{
-            width: "100%", maxWidth: 440,
-            background: "linear-gradient(160deg, #1e1810, #14100a)",
-            border: "1px solid rgba(184,146,60,0.25)", borderRadius: 16,
-            padding: "2rem", boxShadow: "0 40px 80px rgba(0,0,0,0.6)",
-          }}>
+          <div style={{ width: "100%", maxWidth: 440 }}>
+            <div className="rsvp-card2">
 
-            {state === "done" ? (
-              <div style={{ textAlign: "center", padding: "1rem 0" }}>
-                <div style={{ fontSize: 48, marginBottom: "1rem" }}>✨</div>
-                <p style={{ fontFamily: "'Marcellus', serif", fontSize: "1.4rem", color: "#FCFAF5", marginBottom: "0.5rem" }}>
-                  Merci {name} !
-                </p>
-                <p style={{ color: "rgba(243,233,210,0.5)", fontSize: "0.95rem", marginBottom: "1.5rem" }}>
-                  {status === "attending" ? "Votre présence a bien été confirmée." : "Votre réponse a bien été enregistrée."}
-                </p>
-                <button onClick={() => setOpen(false)} className="btn btn-gold btn-sm">Fermer</button>
-              </div>
-            ) : (
-              <>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-                  <p style={{ fontFamily: "'Marcellus', serif", fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase", color: "#B8923C" }}>
-                    RSVP
-                  </p>
-                  <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", color: "rgba(243,233,210,0.4)", cursor: "pointer", fontSize: 20, lineHeight: 1 }}>×</button>
-                </div>
-
-                <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
-                  <div>
-                    <label style={{ display: "block", fontFamily: "'Marcellus', serif", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(243,233,210,0.5)", marginBottom: 8 }}>
-                      Votre nom
-                    </label>
-                    <input value={name} onChange={e => setName(e.target.value)} required minLength={2} placeholder="Prénom Nom" style={inp} />
+              {state === "done" ? (
+                /* ── Done state ── */
+                <div className="rsvp-done2">
+                  {/* Sparks */}
+                  {SPARKS.map((s, i) => (
+                    <span
+                      key={i}
+                      className="done-spark2"
+                      style={{
+                        background: i % 2 ? "var(--gold-vivid)" : "var(--gold-light)",
+                        "--sx": `${s.sx}px`,
+                        "--sy": `${s.sy}px`,
+                      } as React.CSSProperties}
+                    />
+                  ))}
+                  <div className="done-check2">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 13l4 4L19 7" />
+                    </svg>
                   </div>
-
-                  <div>
-                    <label style={{ display: "block", fontFamily: "'Marcellus', serif", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(243,233,210,0.5)", marginBottom: 10 }}>
-                      Votre réponse
-                    </label>
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {(["attending", "declined"] as const).map(s => (
-                        <button key={s} type="button" onClick={() => setStatus(s)} style={{
-                          flex: 1, padding: "0.75rem",
-                          borderRadius: 8, cursor: "pointer",
-                          fontFamily: "'Marcellus', serif", fontSize: 12, letterSpacing: ".12em", textTransform: "uppercase",
-                          background: status === s
-                            ? s === "attending" ? "linear-gradient(135deg, #D4AF61, #B8923C)" : "rgba(200,80,80,0.2)"
-                            : "rgba(255,255,255,0.04)",
-                          color: status === s
-                            ? s === "attending" ? "#2a2008" : "#e07070"
-                            : "rgba(243,233,210,0.5)",
-                          border: status === s
-                            ? s === "attending" ? "none" : "1px solid rgba(200,80,80,0.4)"
-                            : "1px solid rgba(184,146,60,0.15)",
-                        }}>
-                          {s === "attending" ? "Je serai présent(e)" : "Je ne pourrai pas"}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {status === "attending" && (
-                    <div>
-                      <label style={{ display: "block", fontFamily: "'Marcellus', serif", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(243,233,210,0.5)", marginBottom: 8 }}>
-                        Nombre de personnes
-                      </label>
-                      <input type="number" min={1} max={10} value={partySize} onChange={e => setPartySize(Number(e.target.value))} style={{ ...inp, width: 100 }} />
-                    </div>
-                  )}
-
-                  <div>
-                    <label style={{ display: "block", fontFamily: "'Marcellus', serif", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "rgba(243,233,210,0.5)", marginBottom: 8 }}>
-                      Message (optionnel)
-                    </label>
-                    <textarea value={message} onChange={e => setMessage(e.target.value)} rows={2} placeholder="Un mot pour les mariés…" style={{ ...inp, resize: "vertical" }} />
-                  </div>
-
-                  {state === "error" && (
-                    <p style={{ color: "#e07070", fontSize: "0.9rem", fontFamily: "'Marcellus', serif" }}>Une erreur est survenue — réessayez.</p>
-                  )}
-
-                  <button type="submit" disabled={state === "loading"} className="btn btn-gold" style={{ width: "100%" }}>
-                    {state === "loading" ? "Envoi…" : "Confirmer"}
+                  <h3>Merci !</h3>
+                  <p>{doneMsg}</p>
+                  <button className="btn btn-ghost btn-sm close2" onClick={() => setOpen(false)}>
+                    Fermer
                   </button>
-                </form>
-              </>
-            )}
+                </div>
+              ) : (
+                /* ── Form ── */
+                <>
+                  <div className="rsvp-eb2">RSVP</div>
+                  <div className="rsvp-title2">Confirmez votre présence</div>
+                  <div className="rsvp-sub2">Merci de nous faire part de votre réponse.</div>
+
+                  <form onSubmit={submit}>
+                    <div className="rsvp-fld">
+                      <label>Votre nom</label>
+                      <input
+                        className="rsvp-inp"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        required minLength={2} maxLength={80}
+                        placeholder="Prénom et nom"
+                      />
+                    </div>
+
+                    <div className="rsvp-fld">
+                      <label>Serez-vous présent·e ?</label>
+                      <div className="rsvp-choice2">
+                        <button
+                          type="button"
+                          onClick={() => setStatus("attending")}
+                          className={`rsvp-opt2 yes${status === "attending" ? " sel" : ""}`}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                          Je serai présent·e
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setStatus("declined")}
+                          className={`rsvp-opt2 no${status === "declined" ? " sel" : ""}`}
+                        >
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                          Je ne pourrai pas
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Party size — shown only when attending */}
+                    <div className={`rsvp-party2${status === "attending" ? " show" : ""}`}>
+                      <div className="stepper-row2">
+                        <span className="sl">Nombre d&apos;invités</span>
+                        <div className="stepper-ctl2">
+                          <button type="button" onClick={() => setPartySize(p => Math.max(1, p - 1))}>−</button>
+                          <span className="nb">{partySize}</span>
+                          <button type="button" onClick={() => setPartySize(p => Math.min(20, p + 1))}>+</button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rsvp-fld" style={{ marginTop: 16 }}>
+                      <label>Un mot (optionnel)</label>
+                      <textarea
+                        className="rsvp-ta2"
+                        value={message}
+                        onChange={e => setMessage(e.target.value)}
+                        maxLength={500}
+                        placeholder="Tous mes vœux de bonheur…"
+                      />
+                    </div>
+
+                    {state === "error" && (
+                      <p style={{ color: "#e07070", fontSize: ".9rem", fontFamily: "var(--font-title)", marginBottom: "0.5rem" }}>
+                        Une erreur est survenue — réessayez.
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={state === "loading" || !status}
+                      className={`btn btn-gold rsvp-sub-btn${state === "loading" ? " loading" : ""}`}
+                    >
+                      <span className="slbl">
+                        Envoyer ma réponse
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                      </span>
+                      <span className="sspin"><i /></span>
+                    </button>
+
+                    <div className="rsvp-foot2">Vos coordonnées restent privées</div>
+                  </form>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
