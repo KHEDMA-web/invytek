@@ -18,8 +18,6 @@ import SensibilisationTheme from "@/themes/medical/sensibilisation/Theme";
 import DynamicTheme from "@/themes/dynamic/DynamicTheme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
 import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
-import { PublicRsvpForm } from "@/components/PublicRsvpForm";
-
 interface Props { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props) {
@@ -52,24 +50,23 @@ export default async function InvitationPage({ params }: Props) {
 
   const content = JSON.parse(invitation.content) as WeddingContent;
   const props = { content, options, invitationId: invitation.id };
-  const rsvp = options.showRsvp !== false && <PublicRsvpForm invitationId={invitation.id} />;
   const custom = options.customizations;
   const styleTag = custom && Object.keys(custom).length > 0
     ? <style>{`:root{${Object.entries(custom).map(([k, v]) => `${k}:${v}!important`).join(';')}}`}</style>
     : null;
 
-  if (theme.slug === "gold-arch")        return <>{styleTag}{<GoldArchTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "bordeaux-oval")    return <>{styleTag}{<BordeauxOvalTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "ivoire-minimal")   return <>{styleTag}{<IvoireMinimalTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "confettis-or")     return <>{styleTag}{<ConfettisOrTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "soiree-prestige")  return <>{styleTag}{<SoireePrestigeTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "blouse-lys")       return <>{styleTag}{<BlouseLysTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "anniv-neon")       return <>{styleTag}{<AnnivNeonTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "baby-shower")      return <>{styleTag}{<BabyShowerTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "conference-tech")  return <>{styleTag}{<ConferenceTechTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "congres-medical")  return <>{styleTag}{<CongresMedicalTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "inauguration")     return <>{styleTag}{<InaugurationTheme {...props} />}{rsvp}</>;
-  if (theme.slug === "sensibilisation")  return <>{styleTag}{<SensibilisationTheme {...props} />}{rsvp}</>;
+  if (theme.slug === "gold-arch")        return <>{styleTag}<GoldArchTheme {...props} /></>;
+  if (theme.slug === "bordeaux-oval")    return <>{styleTag}<BordeauxOvalTheme {...props} /></>;
+  if (theme.slug === "ivoire-minimal")   return <>{styleTag}<IvoireMinimalTheme {...props} /></>;
+  if (theme.slug === "confettis-or")     return <>{styleTag}<ConfettisOrTheme {...props} /></>;
+  if (theme.slug === "soiree-prestige")  return <>{styleTag}<SoireePrestigeTheme {...props} /></>;
+  if (theme.slug === "blouse-lys")       return <>{styleTag}<BlouseLysTheme {...props} /></>;
+  if (theme.slug === "anniv-neon")       return <>{styleTag}<AnnivNeonTheme {...props} /></>;
+  if (theme.slug === "baby-shower")      return <>{styleTag}<BabyShowerTheme {...props} /></>;
+  if (theme.slug === "conference-tech")  return <>{styleTag}<ConferenceTechTheme {...props} /></>;
+  if (theme.slug === "congres-medical")  return <>{styleTag}<CongresMedicalTheme {...props} /></>;
+  if (theme.slug === "inauguration")     return <>{styleTag}<InaugurationTheme {...props} /></>;
+  if (theme.slug === "sensibilisation")  return <>{styleTag}<SensibilisationTheme {...props} /></>;
 
   notFound();
 }
