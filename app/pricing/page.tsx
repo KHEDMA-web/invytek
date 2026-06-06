@@ -1,20 +1,17 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Tarifs — Invytek",
-  description: "Créez des invitations digitales premium pour vos événements. Gratuit pour commencer.",
-};
 
 const PLANS = [
   {
     name: "Gratuit",
     price: "0",
     period: "pour toujours",
-    description: "Parfait pour découvrir Invytek.",
-    highlight: false,
+    desc: "Parfait pour découvrir Invytek.",
+    pop: false,
     cta: "Commencer gratuitement",
     ctaHref: "/auth",
     features: [
@@ -32,11 +29,11 @@ const PLANS = [
     name: "Pro",
     price: "990",
     period: "DA / mois",
-    description: "Pour des événements mémorables, sans limite.",
-    highlight: true,
+    desc: "Pour des événements mémorables, sans limite.",
+    pop: true,
+    badge: "Populaire",
     cta: "Choisir Pro",
     ctaHref: "/auth",
-    badge: "Populaire",
     features: [
       { text: "Invitations illimitées", ok: true },
       { text: "Tous les thèmes (12+)", ok: true },
@@ -52,8 +49,8 @@ const PLANS = [
     name: "Business",
     price: "2 900",
     period: "DA / mois",
-    description: "Entreprises, cliniques, organisateurs d'événements.",
-    highlight: false,
+    desc: "Entreprises, cliniques, organisateurs d'événements.",
+    pop: false,
     cta: "Contacter l'équipe",
     ctaHref: "mailto:contact@invytek.app",
     features: [
@@ -69,116 +66,173 @@ const PLANS = [
   },
 ];
 
+const PACKS = [
+  { credits: 5,  label: "Pack Starter", price: "500 DA",   unit: "100 DA / crédit",  pop: false },
+  { credits: 15, label: "Pack Pro",     price: "1 500 DA", unit: "100 DA / crédit",  pop: true,  badge: "Meilleur prix" },
+  { credits: 40, label: "Pack Studio",  price: "3 500 DA", unit: "≈ 88 DA / crédit", pop: false },
+];
+
 const FAQ = [
   { q: "Puis-je changer de plan à tout moment ?", a: "Oui. Vous pouvez upgrader ou downgrader votre abonnement à tout moment depuis votre tableau de bord." },
-  { q: "Comment fonctionne le plan Gratuit ?", a: "Le plan Gratuit est permanent. Vous pouvez créer une invitation et jusqu'à 10 invités nominatifs sans jamais payer." },
-  { q: "Quels modes de paiement acceptez-vous ?", a: "CIB, Dahabia, virement bancaire. Le paiement par carte internationale (Visa/Mastercard) arrive prochainement." },
+  { q: "Quelle différence entre abonnement et crédits ?", a: "L'abonnement débloque les thèmes et fonctionnalités (publication illimitée, check-in, stats). Les crédits servent uniquement à la génération par l'IA — utiles ponctuellement, même sur le plan Gratuit." },
+  { q: "Quels modes de paiement acceptez-vous ?", a: "CIB, Edahabia (Dahabia) et virement bancaire. Le paiement par carte internationale (Visa/Mastercard) arrive prochainement." },
+  { q: "Les crédits IA expirent-ils ?", a: "Non. Vos crédits restent disponibles sans limite de durée et se cumulent avec les 3 crédits offerts à l'inscription." },
   { q: "Mes invitations restent-elles actives si j'arrête mon abonnement ?", a: "Vos invitations passées restent visibles. Vous perdez l'accès aux fonctionnalités Pro mais vos données sont conservées." },
 ];
 
+const IC_OK = (
+  <svg viewBox="0 0 16 16" fill="none">
+    <circle cx="8" cy="8" r="7" stroke="var(--gold)" strokeWidth="1.2"/>
+    <path d="M5 8l2 2 4-4" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+const IC_NO = (
+  <svg viewBox="0 0 16 16" fill="none">
+    <circle cx="8" cy="8" r="7" stroke="rgba(184,146,60,0.2)" strokeWidth="1.2"/>
+    <path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="rgba(184,146,60,0.25)" strokeWidth="1.2" strokeLinecap="round"/>
+  </svg>
+);
+
 export default function PricingPage() {
+  const [pane, setPane] = useState<"abos" | "credits">("abos");
+
   return (
     <div className="invytek-page">
       <Nav />
 
       {/* Hero */}
-      <section className="ik-section center" style={{ paddingTop: "clamp(100px,16vw,160px)", paddingBottom: "clamp(60px,10vw,100px)" }}>
+      <section className="ik-section center" style={{ paddingTop: "clamp(100px,16vw,160px)", paddingBottom: 30 }}>
         <div className="wrap">
-          <span className="eyebrow center">Tarifs</span>
+          <div className="ornament" style={{ justifyContent: "center" }}>
+            <span className="line" />
+            <span className="dot" />
+            <span className="line r" />
+          </div>
+          <span className="eyebrow center" style={{ marginTop: 18 }}>Tarifs</span>
           <h1 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(2.4rem,6vw,4rem)", color: "var(--ivory)", marginTop: 24, fontWeight: 400 }}>
             Simple, transparent,<br />sans surprise
           </h1>
-          <p className="lede center" style={{ margin: "20px auto 0", maxWidth: "42ch" }}>
-            Commencez gratuitement. Passez au plan Pro quand vous en avez besoin.
+          <p className="lede center" style={{ margin: "20px auto 0", maxWidth: "48ch" }}>
+            Un abonnement pour publier sans limite, des crédits IA à la demande. Payez en Dinars, sans engagement.
           </p>
+
+          {/* Toggle */}
+          <div style={{ marginTop: 40, display: "flex", justifyContent: "center" }}>
+            <div className="price-toggle">
+              <button
+                className={pane === "abos" ? "active" : ""}
+                onClick={() => setPane("abos")}
+              >
+                Abonnements
+              </button>
+              <button
+                className={pane === "credits" ? "active violet" : ""}
+                onClick={() => setPane("credits")}
+              >
+                Crédits IA
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Plans */}
-      <section className="ik-section" style={{ paddingTop: 0, paddingBottom: "clamp(80px,12vw,140px)" }}>
+      {/* Panes */}
+      <section className="ik-section" style={{ paddingTop: 30, paddingBottom: "clamp(80px,12vw,140px)" }}>
         <div className="wrap">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 24, maxWidth: 1000, margin: "0 auto" }}>
-            {PLANS.map(plan => (
-              <div key={plan.name} style={{
-                position: "relative",
-                background: plan.highlight
-                  ? "linear-gradient(160deg, #2a2010, #1e1808)"
-                  : "linear-gradient(160deg, var(--bg-raise), var(--bg))",
-                border: plan.highlight ? "1px solid rgba(184,146,60,0.6)" : "1px solid var(--hair)",
-                borderRadius: 12,
-                padding: "2rem",
-                boxShadow: plan.highlight ? "0 30px 80px -30px rgba(184,146,60,0.25)" : "none",
-              }}>
-                {plan.badge && (
-                  <span style={{ position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)", background: "linear-gradient(135deg, var(--gold-vivid), var(--accent))", color: "#2a2008", fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", padding: "4px 14px", borderRadius: 100 }}>
-                    {plan.badge}
-                  </span>
-                )}
 
-                {/* Header */}
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <p style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>{plan.name}</p>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                    <span style={{ fontFamily: "var(--font-title)", fontSize: "clamp(2.2rem,5vw,2.8rem)", color: "var(--ivory)", lineHeight: 1 }}>{plan.price}</span>
-                    <span style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-faint)" }}>{plan.period}</span>
+          {/* Abonnements */}
+          <div className={`price-pane${pane === "abos" ? " show" : ""}`}>
+            <div className="plans">
+              {PLANS.map(plan => (
+                <div key={plan.name} className={`plan${plan.pop ? " pop" : ""}`}>
+                  {plan.badge && <span className="badge-pop">{plan.badge}</span>}
+                  <div className="p-name">{plan.name}</div>
+                  <div className="p-price">
+                    <span className="v">{plan.price}</span>
+                    <span className="per">{plan.period}</span>
                   </div>
-                  <p style={{ color: "var(--text-soft)", fontSize: "0.95rem", marginTop: 8, lineHeight: 1.5 }}>{plan.description}</p>
+                  <p className="p-desc">{plan.desc}</p>
+                  <Link
+                    href={plan.ctaHref}
+                    className={`btn ${plan.pop ? "btn-gold" : "btn-ghost"} btn-sm p-cta`}
+                  >
+                    {plan.cta}
+                  </Link>
+                  <div className="p-sep" />
+                  <ul className="feats">
+                    {plan.features.map(f => (
+                      <li key={f.text} className={`feat${f.ok ? "" : " no"}`}>
+                        {f.ok ? IC_OK : IC_NO}
+                        {f.text}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                {/* CTA */}
-                <Link
-                  href={plan.ctaHref}
-                  className={`btn ${plan.highlight ? "btn-gold" : "btn-ghost"} btn-sm`}
-                  style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem" }}
-                >
-                  {plan.cta}
-                </Link>
-
-                {/* Separator */}
-                <div style={{ height: 1, background: "var(--hair)", marginBottom: "1.4rem" }} />
-
-                {/* Features */}
-                <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-                  {plan.features.map(f => (
-                    <li key={f.text} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: "0.9rem", color: f.ok ? "var(--text-soft)" : "var(--text-faint)", opacity: f.ok ? 1 : 0.5 }}>
-                      {f.ok ? (
-                        <svg viewBox="0 0 16 16" fill="none" width={16} height={16} style={{ flexShrink: 0 }}>
-                          <circle cx="8" cy="8" r="7" stroke="var(--gold)" strokeWidth="1.2"/>
-                          <path d="M5 8l2 2 4-4" stroke="var(--gold)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      ) : (
-                        <svg viewBox="0 0 16 16" fill="none" width={16} height={16} style={{ flexShrink: 0 }}>
-                          <circle cx="8" cy="8" r="7" stroke="rgba(184,146,60,0.2)" strokeWidth="1.2"/>
-                          <path d="M5.5 10.5l5-5M10.5 10.5l-5-5" stroke="rgba(184,146,60,0.25)" strokeWidth="1.2" strokeLinecap="round"/>
-                        </svg>
-                      )}
-                      {f.text}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
+
+          {/* Crédits IA */}
+          <div className={`price-pane${pane === "credits" ? " show" : ""}`}>
+            <div className="credits-band">
+              <div className="credits-head">
+                <div className="ci">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2l2.2 5.8L20 10l-5.8 2.2L12 18l-2.2-5.8L4 10l5.8-2.2z"/>
+                    <path d="M19 14l.9 2.4L22 17l-2.1.6L19 20l-.9-2.4L16 17l2.1-.6z"/>
+                  </svg>
+                </div>
+                <div style={{ textAlign: "left" }}>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--violet)" }}>Crédits IA</div>
+                  <div style={{ fontFamily: "var(--font-title)", color: "var(--ivory)", fontSize: "1.25rem" }}>1 crédit = 1 invitation générée par l&apos;IA</div>
+                </div>
+              </div>
+              <p style={{ color: "var(--text-soft)", maxWidth: "48ch", margin: "0 auto" }}>
+                Sans abonnement. Les crédits ne périment pas — utilisez-les quand vous voulez. Paiement par Edahabia / CIB.
+              </p>
+
+              <div className="packs">
+                {PACKS.map(pack => (
+                  <div key={pack.label} className={`pack${pack.pop ? " pop" : ""}`}>
+                    {pack.badge && <span className="badge-pop">{pack.badge}</span>}
+                    <div className="pk-credits">
+                      {pack.credits}
+                      <small>crédits</small>
+                    </div>
+                    <div className="pk-label">{pack.label}</div>
+                    <div className="pk-price">{pack.price}</div>
+                    <div className="pk-unit">{pack.unit}</div>
+                    <Link href="/auth" className={`btn ${pack.pop ? "btn-violet" : "btn-ghost"} btn-sm pk-cta`}>
+                      Acheter
+                    </Link>
+                  </div>
+                ))}
+              </div>
+
+              <p className="tarifs-note">
+                Inclus gratuitement : <span className="v">3 crédits offerts</span> à l&apos;inscription.
+              </p>
+            </div>
+          </div>
+
         </div>
       </section>
 
       {/* FAQ */}
       <section className="ik-section alt">
-        <div className="wrap" style={{ maxWidth: 720 }}>
+        <div className="wrap" style={{ maxWidth: 760 }}>
           <div className="section-head">
             <span className="eyebrow center">FAQ</span>
             <h2>Questions fréquentes</h2>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div className="faq">
             {FAQ.map(({ q, a }) => (
-              <div key={q} style={{ border: "1px solid var(--hair)", borderRadius: 10, padding: "1.2rem 1.4rem", background: "rgba(184,146,60,0.03)" }}>
-                <p style={{ fontFamily: "var(--font-title)", fontSize: "1rem", color: "var(--ivory)", marginBottom: 8 }}>{q}</p>
-                <p style={{ color: "var(--text-soft)", fontSize: "0.9rem", lineHeight: 1.7, margin: 0 }}>{a}</p>
+              <div key={q} className="faq-item">
+                <p className="q">{q}</p>
+                <p className="a">{a}</p>
               </div>
             ))}
           </div>
-
-          {/* CTA final */}
           <div style={{ textAlign: "center", marginTop: "3rem" }}>
             <p style={{ color: "var(--text-soft)", marginBottom: "1.2rem" }}>Une question ? Une demande spécifique ?</p>
             <a href="mailto:contact@invytek.app" className="btn btn-ghost btn-sm">Contactez-nous</a>
