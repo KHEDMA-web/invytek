@@ -38,6 +38,11 @@ function pickBaseTheme(spec: DynamicThemeSpec, description: string): string {
 }
 
 const SYSTEM = `Tu es un générateur de thèmes d'invitation numériques premium pour Invytek (Algérie).
+Si une image est fournie (photo de couple, lieu, décoration, flyer...) :
+- Analyse les couleurs dominantes → inspire-toi pour la palette (bg, primary, primaryBright)
+- Observe le style visuel (luxueux, naturel, festif, moderne...) → adapte shape et ornements
+- Capte l'ambiance générale → reflète-la dans mood et themeLabel
+
 L'utilisateur décrit son événement en quelques mots. Tu analyses le contexte et génères un JSON structurel qui définit l'APPARENCE VISUELLE UNIQUE de l'invitation.
 
 RÈGLES ABSOLUES :
@@ -116,7 +121,7 @@ export async function POST(req: Request) {
   const dbUser = await getDbUser();
   if (!dbUser) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
-  let body: { description?: string };
+  let body: { description?: string; image?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
   if (!body.description?.trim()) return NextResponse.json({ error: "Description requise" }, { status: 400 });
 
@@ -124,11 +129,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Crédits insuffisants", credits: dbUser.credits }, { status: 402 });
   }
 
+  // Construire le contenu du message (texte seul ou vision texte+image)
+  type ContentBlock =
+    | { type: "image"; source: { type: "base64"; media_type: "image/jpeg"; data: string } }
+    | { type: "text"; text: string };
+
+  const userContent: string | ContentBlock[] = body.image
+    ? [
+        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: body.image } },
+        { type: "text", text: body.description.trim() },
+      ]
+    : body.description.trim();
+
   const message = await client.messages.create({
     model: "claude-haiku-4-5",
     max_tokens: 2000,
     system: SYSTEM,
-    messages: [{ role: "user", content: body.description.trim() }],
+    messages: [{ role: "user", content: userContent }],
   });
 
   const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "";

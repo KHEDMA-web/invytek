@@ -118,11 +118,32 @@ function CreateForm() {
   const [userCredits, setUserCredits] = useState<number | null>(null);
   const [buyLoading, setBuyLoading] = useState(false);
   const [aiLayoutSpec, setAiLayoutSpec] = useState<Record<string, unknown> | null>(null);
+  const [aiImage, setAiImage] = useState<string | null>(null);
+  const [aiImagePreview, setAiImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (mode !== "ai") return;
     fetch("/api/credits").then(r => r.json()).then((d: { credits: number }) => setUserCredits(d.credits));
   }, [mode]);
+
+  async function handleImageFile(file: File) {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    await new Promise<void>((res, rej) => { img.onload = () => res(); img.onerror = rej; img.src = url; });
+    URL.revokeObjectURL(url);
+    const maxDim = 800;
+    let { width, height } = img;
+    if (width > maxDim || height > maxDim) {
+      if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+      else { width = Math.round(width * maxDim / height); height = maxDim; }
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = width; canvas.height = height;
+    canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+    setAiImagePreview(dataUrl);
+    setAiImage(dataUrl.split(",")[1]);
+  }
 
   const theme = THEMES.find(t => t.id === themeId)!;
   const cat = theme?.cat || "Mariage";
@@ -446,7 +467,7 @@ function CreateForm() {
         const res = await fetch("/api/ai-create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ description: aiDesc }),
+          body: JSON.stringify({ description: aiDesc, ...(aiImage ? { image: aiImage } : {}) }),
         });
         const d = await res.json() as { themeId?: string; layoutSpec?: Record<string, unknown>; customizations?: Record<string, string>; content?: Record<string, unknown>; credits?: number; error?: string };
         if (!res.ok) { setAiError(d.error || "Erreur IA"); return; }
@@ -512,12 +533,38 @@ function CreateForm() {
                 )}
               </div>
 
+              {/* Image upload */}
+              {!aiImagePreview ? (
+                <label style={{ display: "flex", alignItems: "center", gap: 12, border: "1px dashed rgba(110,80,200,0.35)", borderRadius: 10, padding: "0.9rem 1.2rem", cursor: "pointer", marginBottom: "1.2rem", background: "rgba(110,80,200,0.04)", transition: "border-color 0.2s" }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = "rgba(110,80,200,0.7)")}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = "rgba(110,80,200,0.35)")}>
+                  <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f); }} style={{ display: "none" }} />
+                  <span style={{ fontSize: 22 }}>📷</span>
+                  <div>
+                    <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>Ajouter une photo</div>
+                    <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)" }}>Couple, lieu, flyer… l&apos;IA s&apos;en inspire pour le design — optionnel</div>
+                  </div>
+                </label>
+              ) : (
+                <div style={{ position: "relative", marginBottom: "1.2rem" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={aiImagePreview} alt="Aperçu" style={{ width: "100%", maxHeight: 180, objectFit: "cover", borderRadius: 10, border: "1px solid rgba(110,80,200,0.3)" }} />
+                  <button onClick={() => { setAiImage(null); setAiImagePreview(null); }}
+                    style={{ position: "absolute", top: 8, right: 8, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.65)", border: "none", color: "#fff", fontSize: 18, lineHeight: 1, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    ×
+                  </button>
+                  <div style={{ position: "absolute", bottom: 8, left: 10, fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", color: "#a080e0", background: "rgba(0,0,0,0.55)", borderRadius: 100, padding: "3px 10px" }}>
+                    Photo ajoutée ✓
+                  </div>
+                </div>
+              )}
+
               <textarea
                 value={aiDesc}
                 onChange={e => setAiDesc(e.target.value)}
                 onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey) && aiDesc.trim() && !aiLoading) generateAi(); }}
                 placeholder="Mariage de Karim Benali et Sara Morsli, le 15 août 2026 à 18h, Salle El Djazair, Alger. Familles Benali et Morsli."
-                rows={5}
+                rows={4}
                 style={{ ...inp, height: "auto", resize: "vertical", marginBottom: "0.6rem", fontSize: "1rem" }}
               />
               <p style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", marginBottom: "1.4rem" }}>
