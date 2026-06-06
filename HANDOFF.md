@@ -33,11 +33,24 @@
 | **RSVP & invités** | `POST /api/rsvp` · add guest · export CSV · webhook |
 | **QR check-in** | `/checkin` · `POST /api/checkin` (idempotent) |
 | **Crédits IA** | Chargily Pay · webhook HMAC · widget dans Nav |
-| **Génération IA** | Claude Haiku → palette + contenu sur thème existant (INCOMPLET — voir Priorité 1) |
+| **Génération IA** | Claude Haiku vision → `DynamicThemeSpec` JSON unique → `DynamicTheme.tsx` ✅ |
+| **Vision IA** | Upload photo (couple, lieu, flyer) → Claude analyse couleurs/ambiance → design cohérent ✅ |
 | **Galerie IA** | `/themes/community` — swatches générés + admin promote |
 | **Email** | Resend HTML · template invitation + template portail client |
 | **Nav refonte** | Dropdown utilisateur · hamburger mobile · plus de pill séparé |
 | **7 bugs critiques** | Voir tableau ci-dessous — tous corrigés ✅ |
+
+### Bugs corrigés (session 2026-06-06)
+
+| Sévérité | Fichier | Bug → Fix |
+|----------|---------|-----------|
+| 🔴 Critique | Tous les routes API | `session.user.id` stale après reset DB → lookup par `email` via `lib/getDbUser.ts` |
+| 🔴 Haute | `credits/checkout` | "Utilisateur introuvable" → `upsert` par email au lieu de `findUnique` par ID |
+| 🔴 Haute | `credits/route` | Crédits toujours 0 → `findUnique` par email |
+| 🔴 Haute | `ai-create` | Même bug ID → `upsert` par email + fix `prisma.user.update` (utilisait `session.user.id`) |
+| 🟡 Moyenne | `create/page.tsx` | Crédits IA restaient à 0 → `useEffect` manquant pour fetcher crédits à l'ouverture mode IA |
+| 🟡 Moyenne | `package.json` | `prisma db push --skip-generate` invalide en Prisma 7 → supprimé |
+| 🟡 Moyenne | `package.json` | Contrainte UNIQUE nullable bloque le build → `--accept-data-loss` |
 
 ### Bugs corrigés (session 2026-06-05)
 
@@ -59,20 +72,17 @@
 
 ---
 
-### Priorité 1 — Vraie génération IA unique 🔴🔴 ~80%
-**Skills à invoquer** : `/claude-api` puis `/frontend-design`
+### ~~Priorité 1 — Vraie génération IA unique~~ ✅ DONE (2026-06-06)
 
-**Problème** : `POST /api/ai-create` recolore un thème existant — pas un vrai thème unique. Chaque invitation "IA" ressemble aux 12 thèmes de base.
+**Moteur JSON de layout implémenté :**
+- `lib/schemas/dynamicTheme.ts` — Zod schema `DynamicThemeSpec` (shape, palette, typography, ornements, animation, sections, content)
+- `app/api/ai-create/route.ts` — Claude Haiku génère un JSON structurel unique, validé Zod, stocké dans `GeneratedTheme.layoutSpec`
+- `themes/dynamic/DynamicTheme.tsx` — renderer React : 5 shapes, 6 ornements SVG, 5 animations CSS, RTL, countdown, RSVP
+- `themes/dynamic/DynamicTheme.module.css` — keyframes 60fps pour toutes les animations
+- `/i/[slug]` et `/i/[slug]/g/[token]` — gèrent `themeId="dynamic"` → render DynamicTheme
+- Vision IA : upload photo (Canvas resize 800px), image base64 passée à Claude Haiku vision
 
-**Option retenue : B — Moteur JSON de layout** ✅ (recommandée)
-- Claude génère un JSON structurel : `{ shape, palette, ornements, sections, animations }`
-- Un composant React `DynamicTheme.tsx` interprète ce JSON et rend le thème
-- Avantages : sûr (pas d'eval), extensible, contrôlé
-
-**Fichiers clés** :
-- `app/api/ai-create/route.ts` — à refactoriser : prompt + schema JSON
-- `themes/dynamic/DynamicTheme.tsx` — à créer : moteur de rendu
-- `app/themes/community/page.tsx` — galerie à connecter au nouveau format
+**Coût par génération :** ~0.27 DA (texte) / ~0.44 DA (avec image) — marge ~99.6% sur 100 DA/crédit
 
 ---
 
@@ -84,21 +94,24 @@
 
 ---
 
-### Priorité 3 — Variables d'environnement prod 🟢 ~5%
-Aller dans **Dashboard Vercel > Settings > Environment Variables** et ajouter :
-- `ANTHROPIC_API_KEY` — clé Anthropic
-- `CHARGILY_API_KEY` — clé prod (pas test_sk)
-- `CHARGILY_WEBHOOK_SECRET` — même valeur que dans dashboard Chargily
-- `ADMIN_EMAIL` — `aniskhelifiusthb@gmail.com`
+### ~~Priorité 3 — Variables d'environnement prod~~ ✅ DONE (2026-06-06)
+Toutes les env vars sont configurées sur Vercel. `ADMIN_EMAIL` a un fallback hardcodé dans le code.
 
-Puis dans **Dashboard Chargily** : webhook URL → `https://invytek.vercel.app/api/credits/webhook`
+### ~~Priorité 4 — Tester paiement Chargily prod~~ ✅ DONE (2026-06-06)
+Paiement CIB/Edahabia testé et fonctionnel. 5 crédits reçus après achat Pack Starter.
 
 ---
 
-### Priorité 4 — Tester paiement Chargily prod 🟢 ~10%
-Après ajout des env vars : tester un achat carte CIB/Edahabia réelle. Le bug `String→Int` sur les crédits est corrigé (session 2026-06-05).
+### Priorité 5 — Refonte UI/UX 🔴🔴 (Claude Design)
+Voir `DESIGN_BRIEF.md` à la racine du repo — brief complet pour Claude Design.
+Priorité maximale : page `/create` (sélection thèmes moche, pas de miniatures).
+**À faire faire par Claude Design, pas Claude Code.**
 
 ---
+
+### (Futur) Connecter galerie `/themes/community` au nouveau format DynamicTheme
+- La galerie affiche encore les anciens `GeneratedTheme` (baseThemeId + customizations)
+- Les nouveaux ont un `layoutSpec` — prévoir un rendu miniature du DynamicTheme dans la galerie
 
 ### (Futur) Auth.js — dashboard /dashboard pour l'agence
 - Formulaire `/create` déjà en place
