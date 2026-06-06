@@ -28,6 +28,7 @@ export const WeddingOptionsSchema = z.object({
   showQrCode: z.boolean().default(false),
   webhookUrl: z.string().url().optional(),
   customizations: z.record(z.string(), z.string()).optional(),
-});
+  layoutSpec: z.unknown().optional(),
+}).passthrough();
 
 export type WeddingOptions = z.infer<typeof WeddingOptionsSchema>;

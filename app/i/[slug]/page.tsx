@@ -41,8 +41,9 @@ export default async function InvitationPage({ params }: Props) {
   const options = JSON.parse(invitation.options) as Partial<WeddingOptions> & { layoutSpec?: DynamicThemeSpec };
 
   // Thème dynamique IA — vérifier avant getTheme (pas dans le registry)
-  if (invitation.themeId === "dynamic" && options.layoutSpec) {
-    return <DynamicTheme spec={options.layoutSpec} invitationId={invitation.id} />;
+  if (invitation.themeId === "dynamic") {
+    if (!options.layoutSpec) notFound();
+    return <DynamicTheme spec={options.layoutSpec as DynamicThemeSpec} invitationId={invitation.id} />;
   }
 
   const theme = getTheme(invitation.themeId);
