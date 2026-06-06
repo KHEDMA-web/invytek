@@ -10,10 +10,13 @@ interface Props { params: Promise<{ id: string }> }
 
 export default async function EditPage({ params }: Props) {
   const session = await auth();
-  if (!session?.user?.id) redirect("/auth");
+  if (!session?.user?.email) redirect("/auth");
+
+  const dbUser = await prisma.user.findUnique({ where: { email: session.user.email }, select: { id: true } });
+  if (!dbUser) redirect("/auth");
 
   const { id } = await params;
-  const invitation = await prisma.invitation.findUnique({ where: { id, userId: session.user.id } });
+  const invitation = await prisma.invitation.findUnique({ where: { id, userId: dbUser.id } });
   if (!invitation) notFound();
 
   const content = JSON.parse(invitation.content) as WeddingContent;

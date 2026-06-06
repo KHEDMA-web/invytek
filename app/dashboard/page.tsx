@@ -176,21 +176,24 @@ function ThemeMini({ themeId, n1, n2, date }: { themeId: string; n1: string; n2:
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect("/auth");
+  if (!session?.user?.email) redirect("/auth");
 
-  const [dbUser, invitations] = await Promise.all([
-    prisma.user.findUnique({ where: { id: session.user.id }, select: { credits: true } }),
-    prisma.invitation.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        guests: { select: { status: true, checkedInAt: true } },
-        _count: { select: { views: true } },
-      },
-    }),
-  ]);
+  const dbUser = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { id: true, credits: true },
+  });
+  if (!dbUser) redirect("/auth");
 
-  const credits = dbUser?.credits ?? 0;
+  const invitations = await prisma.invitation.findMany({
+    where: { userId: dbUser.id },
+    orderBy: { createdAt: "desc" },
+    include: {
+      guests: { select: { status: true, checkedInAt: true } },
+      _count: { select: { views: true } },
+    },
+  });
+
+  const credits = dbUser.credits;
 
   const totalGuests = invitations.reduce((s, i) => s + i.guests.length, 0);
   const totalConfirmed = invitations.reduce((s, i) => s + i.guests.filter(g => g.status === "attending").length, 0);
