@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
+const ADMIN_EMAIL = "aniskhelifiusthb@gmail.com";
+
 const PACKS = [
   { credits: 5,  amount: 500,  label: "Pack Starter" },
   { credits: 15, amount: 1500, label: "Pack Pro" },
@@ -34,6 +36,11 @@ export async function POST(req: Request) {
   const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000";
+
+  if (dbUser.email === ADMIN_EMAIL) {
+    await prisma.user.update({ where: { id: dbUser.id }, data: { credits: { increment: pack.credits } } });
+    return NextResponse.json({ url: `${baseUrl}/dashboard?credits=ok` });
+  }
 
   // URL test si clé test, prod sinon
   const isTest = apiKey.startsWith("test_");

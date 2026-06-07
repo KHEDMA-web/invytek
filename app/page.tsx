@@ -199,7 +199,6 @@ export default function HomePage() {
           </div>
           <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, maxWidth: 860, margin: "0 auto 2.5rem" }}>
             {[
-              { name: "Gratuit", price: "0 DA", desc: "1 invitation · 10 invités · 3 thèmes", highlight: false },
               { name: "Pro", price: "3 000 DA/mois", desc: "Illimité · Tous les thèmes · QR Code · Stats", highlight: true },
               { name: "Business", price: "5 000 DA/mois", desc: "Multi-users · Marque perso · Domaine · Support dédié", highlight: false },
             ].map(p => (

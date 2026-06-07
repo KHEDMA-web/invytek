@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { getDbUser } from "@/lib/getDbUser";
+import { prisma } from "@/lib/db";
+
+const ADMIN_EMAIL = "aniskhelifiusthb@gmail.com";
 
 const PLANS = {
   simple:   { label: "Plan Simple",   amount: 1000, months: 1 },
@@ -16,6 +19,14 @@ export async function POST(req: Request) {
 
   const plan = body.plan as keyof typeof PLANS;
   if (!PLANS[plan]) return NextResponse.json({ error: "Plan invalide" }, { status: 400 });
+
+  if (dbUser.email === ADMIN_EMAIL) {
+    const planExpiresAt = new Date();
+    planExpiresAt.setFullYear(planExpiresAt.getFullYear() + 10);
+    await prisma.user.update({ where: { id: dbUser.id }, data: { plan, planExpiresAt } });
+    const base = process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000";
+    return NextResponse.json({ url: `${base}/dashboard?plan=ok` });
+  }
 
   const apiKey = process.env.CHARGILY_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "Paiement non configuré" }, { status: 503 });
