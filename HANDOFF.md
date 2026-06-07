@@ -80,13 +80,32 @@
 
 ---
 
+### Fait (session 2026-06-07 — session 4, soir)
+
+| Quoi | Détail |
+|------|--------|
+| **Chargily live** | Clés test → live (`live_sk_mh243F…`) · mises à jour en `.env.local` + Vercel prod via CLI |
+| **Bypass admin** | `aniskhelifiusthb@gmail.com` active plan/crédits sans paiement (10 ans pour plans, immédiat pour crédits) · dans `subscriptions/checkout` + `credits/checkout` |
+| **Plan Gratuit supprimé** | Retiré de la section tarifs landing + titre `<h2>` mis à jour |
+| **Prix de lancement** | Badge violet "Prix de lancement" ajouté sur chaque carte `/pricing` + section tarifs landing |
+| **Plan Simple landing** | Carte Simple 1 000 DA/mois ré-ajoutée sur la landing (3 plans visibles) |
+| **Fix hero landing** | Espace manquant dans "Vos invitations méritent" (span block) |
+| **CRON_SECRET sécurisé** | Bug critique corrigé : condition `secret &&` → `!secret \|\|` (endpoint ouvert si var absente) |
+| **Race condition crédits IA** | Décrement atomique via `updateMany` avant appel Claude + remboursement si échec |
+| **Meta title thèmes non-mariage** | `names[1]` vide → titre `"Event & "` corrigé |
+| **Dead code** | `notFound()` après `return` supprimé dans `i/[slug]/page.tsx` |
+| **Dashboard plan Simple** | Affiché "Pro ✓" → corrigé en "Simple ✓" |
+| **Comptage thèmes** | "12 thèmes" → "18 thèmes" (email bienvenue + page pricing) |
+
+---
+
 ## 🔧 Ce qui reste — par priorité
 
-### Priorité 1 — Tester le paiement abonnement en prod ⚠️ NON TESTÉ
-Le webhook Chargily pour les abonnements (`/api/subscriptions/webhook`) n'a pas été testé en prod. Les crédits IA fonctionnent ✅, les plans non encore confirmés. **À tester manuellement.**
+### Priorité 1 — Tester le paiement Chargily avec un compte non-admin ⚠️
+Le bypass admin fait que les paiements semblent fonctionner sur le compte `aniskhelifiusthb@gmail.com` — c'est normal. Pour valider le vrai flux Chargily (Edahabia/CIB), créer un compte test avec un autre email et acheter un plan/crédit.
 
 ### Priorité 2 — Ajouter CRON_SECRET en prod ⚠️
-Secret généré : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66`  
+Secret : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66`  
 Ajouter dans Vercel → Settings → Environment Variables → `CRON_SECRET` → Production.
 
 ### (Futur) Tests automatisés + Monitoring
@@ -211,7 +230,8 @@ public/themes-preview/                    — 18 fichiers HTML statiques (previe
 
 ## 🐞 Bugs connus / points d'attention
 
-- **Webhook abonnements Chargily** non testé en prod — tester manuellement avant de vendre des plans
-- **Logo overlay** : affiché en `position:fixed` au-dessus de l'invitation — convient mieux aux logos petits/transparents ; pour les gros logos, envisager une intégration dans chaque thème
-- **Preview iframe** : le HTML statique charge encore `editor.js` (panneau Personnaliser) mais `.ivk-back` et `.ivk-panel` sont cachés via CSS injecté `onLoad`
-- **mapsUrl** : auto-généré seulement lors de la création — les invitations existantes avant ce fix n'ont pas de mapsUrl
+- **Webhook abonnements Chargily** : non testé en prod avec un vrai paiement — tester avec un compte non-admin avant de vendre des plans
+- **Bypass admin** : le compte `aniskhelifiusthb@gmail.com` active tout sans paiement — comportement voulu, pas un bug
+- **Logo overlay** : affiché en `position:fixed` — convient aux logos petits/transparents ; pour les gros logos, envisager une intégration par thème
+- **Preview iframe** : `.ivk-back` et `.ivk-panel` cachés via CSS injecté `onLoad`
+- **mapsUrl** : auto-généré seulement à la création — invitations existantes avant ce fix n'ont pas de mapsUrl
