@@ -11,6 +11,8 @@
 
 **Modèle B2B** : l'agence crée les invitations pour ses clients. Chaque client a son propre portail simplifié (`/client/[token]`) sans login.
 
+**Modèle tarifaire** : Simple 1000 DA · Pro 3000 DA · Business 5000 DA (pas de free). Crédits IA 100 DA/crédit permettent création sans abonnement (max 3 invitations).
+
 **Stack** : Next.js 16.2.6 App Router · TypeScript · Prisma 7 + Neon PostgreSQL · Auth.js v5 JWT · Tailwind CSS v4 · `@anthropic-ai/sdk` (Haiku) · Chargily Pay (paiement DZ) · Resend (emails)
 
 **Repo** : `github.com/KHEDMA-web/invytek` — branche `main`  
@@ -26,96 +28,56 @@
 | Feature | Détail |
 |---------|--------|
 | **12 thèmes React** | wedding/anniversary/baby/business/medical — voir tableau bas |
-| **Auth complète** | Email+bcrypt + Google OAuth · 3 crédits à l'inscription |
+| **Auth complète** | Email+bcrypt + Google OAuth · 3 crédits à l'inscription · email bienvenue |
 | **Création invitation** | `/create` — 3 modes : thèmes / personnalisé / IA |
 | **Dashboard agence** | `/dashboard` + `[id]` gérer + `[id]/edit` modifier |
-| **Portail client B2B** | `/client/[accessToken]` — stats RSVP + invités, sans login ✅ |
-| **RSVP & invités** | `POST /api/rsvp` · add guest · export CSV · webhook |
-| **QR check-in** | `/checkin` · `POST /api/checkin` (idempotent) |
-| **Crédits IA** | Chargily Pay · webhook HMAC · widget dans Nav |
+| **Éditeur design IA** | `/dashboard/[id]/edit` tab "Design IA" → palette, forme, ornements, animation sans crédits |
+| **Portail client B2B** | `/client/[accessToken]` — donut RSVP + tableau invités, sans login ✅ |
+| **RSVP & invités** | `POST /api/rsvp` · add guest · export CSV · webhook · rate limit 5/IP/10min |
+| **QR check-in** | `/checkin` premium · `POST /api/checkin` (idempotent) · historique en mémoire |
+| **Crédits IA** | Chargily Pay · webhook HMAC · widget dans Nav · création sans abo jusqu'à 3 invitations |
 | **Génération IA** | Claude Haiku vision → `DynamicThemeSpec` JSON unique → `DynamicTheme.tsx` ✅ |
-| **Vision IA** | Upload photo (couple, lieu, flyer) → Claude analyse couleurs/ambiance → design cohérent ✅ |
-| **Galerie IA** | `/themes/community` — swatches générés + admin promote |
-| **Email** | Resend HTML · template invitation + template portail client |
-| **Nav refonte** | Dropdown utilisateur · hamburger mobile · plus de pill séparé |
-| **7 bugs critiques** | Voir tableau ci-dessous — tous corrigés ✅ |
+| **Vision IA** | Upload modèle de référence → Claude reproduit fidèlement le style + contenu |
+| **Galerie IA** | `/themes/community` — aperçus DynamicTheme réels + admin promote |
+| **Abonnements** | Simple/Pro/Business via Chargily · webhook plan · email confirmation · enforcement |
+| **Emails** | Resend : bienvenue · confirmation paiement · expiry reminder · portail client |
+| **SEO & PWA** | metadata complète · favicon SVG · manifest PWA · lang=fr · og:image |
+| **Page légale** | `/legal` — CGU + mentions légales (droit algérien) |
+| **UI/UX complète** | Dashboard · Auth glassmorphism · Pricing · RSVP form · Check-in · Client portal |
+| **Post-login** | `/post-login` — check plan → `/dashboard` ou `/pricing` (credentials + Google) |
+| **Rate limiting** | `/api/rsvp` : 5 req/IP/10min |
+| **Footer** | Liens légaux · Galerie IA · Tarifs · Contact |
 
-### Bugs corrigés (session 2026-06-06)
-
-| Sévérité | Fichier | Bug → Fix |
-|----------|---------|-----------|
-| 🔴 Critique | Tous les routes API | `session.user.id` stale après reset DB → lookup par `email` via `lib/getDbUser.ts` |
-| 🔴 Haute | `credits/checkout` | "Utilisateur introuvable" → `upsert` par email au lieu de `findUnique` par ID |
-| 🔴 Haute | `credits/route` | Crédits toujours 0 → `findUnique` par email |
-| 🔴 Haute | `ai-create` | Même bug ID → `upsert` par email + fix `prisma.user.update` (utilisait `session.user.id`) |
-| 🟡 Moyenne | `create/page.tsx` | Crédits IA restaient à 0 → `useEffect` manquant pour fetcher crédits à l'ouverture mode IA |
-| 🟡 Moyenne | `package.json` | `prisma db push --skip-generate` invalide en Prisma 7 → supprimé |
-| 🟡 Moyenne | `package.json` | Contrainte UNIQUE nullable bloque le build → `--accept-data-loss` |
-
-### Bugs corrigés (session 2026-06-05)
+### Bugs corrigés (session 2026-06-06/07)
 
 | Sévérité | Fichier | Bug → Fix |
 |----------|---------|-----------|
-| 🔴 Critique | `credits/checkout` | `String(credits)` → `credits` (Int) — paiement qui ne créditait rien |
-| 🔴 Haute | `send-email` | XSS : interpolation raw dans HTML → `esc()` + `safeHref()` |
-| 🔴 Haute | `rsvp` | RSVP spam illimité → cap 500 invités par invitation |
-| 🟡 Moyenne | `rsvp` | SSRF via `webhookUrl` → `isSafeWebhookUrl()` (HTTPS + blocage IP privées) |
-| 🟡 Moyenne | `credits/webhook` | `timingSafeEqual` crash sur header vide → check longueur avant |
-| 🟡 Moyenne | `checkin` | Double scan écrase `checkedInAt` → idempotence |
-| 🟢 Faible | `client/[token]` | `JSON.parse` sans try/catch → try/catch + notFound() |
+| 🔴 Critique | Tous les routes API | `session.user.id` stale → lookup par `email` via `lib/getDbUser.ts` |
+| 🔴 Haute | `dashboard/page.tsx` | Invitations invisibles → email lookup au lieu de `session.user.id` |
+| 🔴 Haute | `lib/schemas/wedding.ts` | `layoutSpec` strippé par Zod → `.passthrough()` + champ ajouté |
+| 🔴 Haute | `app/i/[slug]/page.tsx` | Invitations IA → 404 : `getTheme("dynamic")` null avant check DynamicTheme |
+| 🔴 Haute | `app/i/[slug]/page.tsx` | Triple bouton RSVP → `PublicRsvpForm` flottant retiré (thèmes ont leur propre RSVP) |
+| 🟡 Moyenne | `themes/community/page.tsx` | `onMouseEnter`/`onMouseLeave` dans Server Component → CSS `.gallery-card:hover` |
+| 🟡 Moyenne | 2 invitations dynamic | `layoutSpec` manquant (créées avant fix Zod) → patchées depuis `GeneratedTheme` en DB |
 
 ---
 
 ## 🔧 Ce qui reste — par priorité
 
-> **Légende** : 🟢 < 25% contexte · 🟡 25–50% · 🔴 50–85% · 🔴🔴 > 85% (plusieurs sessions)
+### Priorité 1 — Tester le paiement abonnement en prod
+Le webhook Chargily pour les abonnements (`/api/subscriptions/webhook`) n'a pas été testé en prod. Les crédits IA fonctionnent ✅, les plans non encore confirmés.
 
----
+### Priorité 2 — og:image
+`/public/og.png` n'existe pas encore. Créer une image 1200×630 pour le partage social.
 
-### ~~Priorité 1 — Vraie génération IA unique~~ ✅ DONE (2026-06-06)
+### Priorité 3 — Email rappel expiration plan
+`sendPlanExpiryReminderEmail` existe dans `lib/emails.ts` mais n'est pas appelée automatiquement. Il faudrait un cron job Vercel ou un webhook schedulé.
 
-**Moteur JSON de layout implémenté :**
-- `lib/schemas/dynamicTheme.ts` — Zod schema `DynamicThemeSpec` (shape, palette, typography, ornements, animation, sections, content)
-- `app/api/ai-create/route.ts` — Claude Haiku génère un JSON structurel unique, validé Zod, stocké dans `GeneratedTheme.layoutSpec`
-- `themes/dynamic/DynamicTheme.tsx` — renderer React : 5 shapes, 6 ornements SVG, 5 animations CSS, RTL, countdown, RSVP
-- `themes/dynamic/DynamicTheme.module.css` — keyframes 60fps pour toutes les animations
-- `/i/[slug]` et `/i/[slug]/g/[token]` — gèrent `themeId="dynamic"` → render DynamicTheme
-- Vision IA : upload photo (Canvas resize 800px), image base64 passée à Claude Haiku vision
+### (Futur) Tests automatisés
+Zéro test automatisé — les bugs sont découverts en prod.
 
-**Coût par génération :** ~0.27 DA (texte) / ~0.44 DA (avec image) — marge ~99.6% sur 100 DA/crédit
-
----
-
-### ~~Priorité 2 — Cache ISR pages invitation~~ ✅ DONE (2026-06-05)
-
-- `export const revalidate = 60` sur `/i/[slug]/page.tsx` et `/i/[slug]/g/[token]/page.tsx`
-- `revalidatePath('/i/${slug}')` dans `PATCH /api/invitations/[id]` et `PATCH /api/invitations/[id]/options`
-- `revalidatePath('/i/${slug}/g/${token}')` dans `POST /api/rsvp` (cas token nominatif)
-
----
-
-### ~~Priorité 3 — Variables d'environnement prod~~ ✅ DONE (2026-06-06)
-Toutes les env vars sont configurées sur Vercel. `ADMIN_EMAIL` a un fallback hardcodé dans le code.
-
-### ~~Priorité 4 — Tester paiement Chargily prod~~ ✅ DONE (2026-06-06)
-Paiement CIB/Edahabia testé et fonctionnel. 5 crédits reçus après achat Pack Starter.
-
----
-
-### Priorité 5 — Refonte UI/UX 🔴🔴 (Claude Design)
-Voir `DESIGN_BRIEF.md` à la racine du repo — brief complet pour Claude Design.
-Priorité maximale : page `/create` (sélection thèmes moche, pas de miniatures).
-**À faire faire par Claude Design, pas Claude Code.**
-
----
-
-### (Futur) Connecter galerie `/themes/community` au nouveau format DynamicTheme
-- La galerie affiche encore les anciens `GeneratedTheme` (baseThemeId + customizations)
-- Les nouveaux ont un `layoutSpec` — prévoir un rendu miniature du DynamicTheme dans la galerie
-
-### (Futur) Auth.js — dashboard /dashboard pour l'agence
-- Formulaire `/create` déjà en place
-- Manque : pages admin agence si modèle multi-tenant évolue
+### (Futur) Monitoring
+Pas de Sentry ni Vercel Analytics configuré.
 
 ---
 
@@ -123,61 +85,61 @@ Priorité maximale : page `/create` (sélection thèmes moche, pas de miniatures
 
 ```
 app/
-  layout.tsx / globals.css / invytek.css    — design system dark luxury
-  page.tsx                                  — landing /
-  auth/page.tsx                             — login/signup
-  create/page.tsx                           — 3 modes création
-  pricing/page.tsx
+  layout.tsx                              — SEO, favicon, PWA manifest, lang=fr
+  page.tsx                                — Landing /
+  auth/page.tsx                           — login/signup glassmorphism
+  create/page.tsx                         — 3 modes création
+  pricing/page.tsx                        — Simple/Pro/Business + crédits IA
+  legal/page.tsx                          — CGU + mentions légales
+  post-login/route.ts                     — check plan → /dashboard ou /pricing
   themes/
-    page.tsx                                — vitrine 12 thèmes
-    community/page.tsx                      — galerie IA
-  client/[accessToken]/page.tsx             — portail client B2B ✅
+    page.tsx                              — vitrine 12 thèmes
+    community/page.tsx                    — galerie IA avec aperçus DynamicTheme
+  client/[accessToken]/page.tsx           — portail client B2B ✅
+  checkin/page.tsx                        — check-in QR premium
   dashboard/
-    page.tsx
-    [id]/page.tsx                           — gérer + "Espace client →"
-    [id]/edit/page.tsx
-  i/[slug]/page.tsx                         — invitation publique
-  i/[slug]/g/[token]/page.tsx               — invitation nominative
-  checkin/page.tsx
+    page.tsx                              — avec badge plan et widget crédits
+    [id]/page.tsx                         — donut RSVP + tableau invités
+    [id]/edit/page.tsx                    — tabs Contenu / Design IA
+  i/[slug]/page.tsx                       — invitation publique
+  i/[slug]/g/[token]/page.tsx             — invitation nominative
   api/
-    ai-create/route.ts                      — Claude Haiku → thème + palette
+    ai-create/route.ts                    — Claude Haiku → spec unique + vision
     invitations/
-      route.ts                              — POST créer · GET lister
+      route.ts                            — POST créer (enforcement plan) · GET lister
+      [id]/route.ts                       — PATCH · DELETE
+      [id]/options/route.ts               — PATCH (layoutSpec, showRsvp…)
       check-slug/route.ts
-      [id]/route.ts                         — PATCH · DELETE
-      [id]/export/route.ts                  — CSV
-      [id]/options/route.ts
-      [id]/client-token/route.ts            — POST générer · PATCH màj ✅
     credits/
-      route.ts                              — GET solde
-      checkout/route.ts                     — POST → lien Chargily
-      webhook/route.ts                      — HMAC vérifié → increment
-    rsvp/route.ts                           — cap 500 · SSRF fix ✅
-    guests/route.ts
-    checkin/route.ts                        — idempotent ✅
-    send-email/route.ts                     — XSS fix · template client ✅
-    admin/promote-theme/route.ts
-    publish-preview/route.ts
+      route.ts                            — GET solde + plan
+      checkout/route.ts                   — POST → lien Chargily
+      webhook/route.ts                    — HMAC vérifié → increment crédits
+    subscriptions/
+      checkout/route.ts                   — POST → lien Chargily plan
+      webhook/route.ts                    — HMAC vérifié → set plan + email confirmation
+    rsvp/route.ts                         — rate limit 5/IP/10min ✅
+    send-email/route.ts                   — XSS fix · template invitation + portail
 
 components/
-  Nav.tsx                                   — dropdown user · hamburger ✅
-  ShareWithClientButton.tsx                 — modal "Espace client" ✅
-  PublicRsvpForm.tsx / AddGuestForm.tsx
-  CopyLinkButton / WhatsApp / Email
-  QrCodeToggle / DeleteInvitation / EditInvitationForm
-  BuyCreditsButton / SignOutButton (inutilisé, peut être supprimé)
+  Nav.tsx                                 — dropdown user · hamburger · credits
+  DynamicThemeEditor.tsx                  — éditeur palette/forme/ornements sans crédits
+  DynamicThemePreview.tsx                 — aperçu DynamicTheme scalé (galerie IA)
+  EditTabs.tsx                            — switcher Contenu / Design IA
+  PublicRsvpForm.tsx                      — RSVP form flottante (modal)
+
+lib/
+  emails.ts                               — sendWelcomeEmail · sendPlanActivatedEmail · sendPlanExpiryReminderEmail
+  db.ts                                   — singleton PrismaClient (Neon adapter)
+  getDbUser.ts                            — lookup user par email (anti stale-ID)
 
 themes/
+  dynamic/DynamicTheme.tsx + .module.css  — renderer IA unique (hors scope)
   registry.ts + types.ts
-  wedding/{gold-arch, bordeaux-oval, ivoire-minimal}/
-  anniversary/{confettis-or, anniv-neon}/
+  wedding/gold-arch · bordeaux-oval · ivoire-minimal/
+  anniversary/confettis-or · anniv-neon/
   baby/baby-shower/
-  business/{soiree-prestige, conference-tech, inauguration}/
-  medical/{blouse-lys, congres-medical, sensibilisation}/
-
-prisma/
-  schema.prisma   — User(credits) · Invitation(clientAccessToken?) · Guest · InvitationView · GeneratedTheme
-  seed.ts         — demo-mariage-2026
+  business/soiree-prestige · conference-tech · inauguration/
+  medical/blouse-lys · congres-medical · sensibilisation/
 ```
 
 ---
@@ -199,7 +161,17 @@ prisma/
 | `congres-medical` | Médical |
 | `sensibilisation` | Médical |
 
-`PREVIEW_MAP` dans `/create` : `gold-arch` → `or-arche.html`, autres slug = filename HTML
+---
+
+## 💰 Plans & enforcement
+
+| Plan | Prix | Limite |
+|------|------|--------|
+| free (sans abo) | 0 | 0 invitation si 0 crédits · 3 invitations max avec crédits |
+| Simple | 1 000 DA/mois | 5 invitations |
+| Pro | 3 000 DA/mois | Illimité + QR + stats + support |
+| Business | 5 000 DA/mois | Tout Pro + marque perso + domaine |
+| Crédits IA | 100 DA/crédit | 1 crédit = 1 invitation IA (sans abo : max 3) |
 
 ---
 
@@ -212,10 +184,10 @@ prisma/
 | `AUTH_SECRET` | Vercel | ✅ |
 | `AUTH_URL` | Vercel | ✅ |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Vercel | ✅ |
-| `ANTHROPIC_API_KEY` | Vercel prod | ⚠️ à ajouter |
-| `CHARGILY_API_KEY` | Vercel prod | ⚠️ prod (pas test_sk) |
-| `CHARGILY_WEBHOOK_SECRET` | Vercel prod | ⚠️ à ajouter |
-| `ADMIN_EMAIL` | Vercel prod | ⚠️ à ajouter |
+| `ANTHROPIC_API_KEY` | Vercel prod | ✅ |
+| `CHARGILY_API_KEY` | Vercel prod | ✅ (testé crédits) |
+| `CHARGILY_WEBHOOK_SECRET` | Vercel prod | ✅ |
+| `ADMIN_EMAIL` | Code (fallback hardcodé) | ✅ |
 | `RESEND_API_KEY` / `RESEND_FROM_EMAIL` | Vercel | ✅ |
 
 ---
@@ -223,7 +195,7 @@ prisma/
 ## 💻 Commandes utiles
 
 ```bash
-npm run dev                        # dev :3000
+npm run dev                        # dev :3000 (ou :3001 si occupé)
 npm run build                      # build prod (prisma db push + next build)
 npm run seed                       # peupler dev.db demo
 npx prisma generate                # regénérer client après schema change
