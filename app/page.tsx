@@ -29,7 +29,7 @@ export default function HomePage() {
             <div className="hero-copy">
               <span className="eyebrow reveal">L&apos;invitation numérique · version haute couture</span>
               <h1 className="display reveal d1">
-                <span className="lead">Vos invitations</span> méritent mieux qu&apos;un fichier PDF.
+                <span className="lead">Vos invitations </span>méritent mieux qu&apos;un fichier PDF.
               </h1>
               <p className="lede reveal d2">
                 Créez des invitations interactives et animées, partagez un simple lien, et recevez les confirmations en temps réel.
@@ -197,12 +197,14 @@ export default function HomePage() {
             <h2>Des tarifs simples et transparents</h2>
             <p>Passez au plan Pro quand vous en avez besoin.</p>
           </div>
-          <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, maxWidth: 860, margin: "0 auto 2.5rem" }}>
+          <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))", gap: 20, maxWidth: 960, margin: "0 auto 2.5rem" }}>
             {[
+              { name: "Simple", price: "1 000 DA/mois", desc: "5 invitations · Tous les thèmes · RSVP", highlight: false },
               { name: "Pro", price: "3 000 DA/mois", desc: "Illimité · Tous les thèmes · QR Code · Stats", highlight: true },
               { name: "Business", price: "5 000 DA/mois", desc: "Multi-users · Marque perso · Domaine · Support dédié", highlight: false },
             ].map(p => (
               <div key={p.name} style={{ border: p.highlight ? "1px solid rgba(184,146,60,0.6)" : "1px solid var(--hair)", borderRadius: 10, padding: "1.4rem", background: p.highlight ? "linear-gradient(160deg,#2a2010,#1e1808)" : "linear-gradient(160deg,var(--bg-raise),var(--bg))", textAlign: "center" }}>
+                <p style={{ fontFamily: "var(--font-title)", fontSize: 9, letterSpacing: ".18em", textTransform: "uppercase", color: "#a080e0", marginBottom: 4 }}>Prix de lancement</p>
                 <p style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>{p.name}</p>
                 <p style={{ fontFamily: "var(--font-title)", fontSize: "1.6rem", color: "var(--ivory)", lineHeight: 1, marginBottom: 8 }}>{p.price}</p>
                 <p style={{ color: "var(--text-soft)", fontSize: "0.85rem", lineHeight: 1.5 }}>{p.desc}</p>

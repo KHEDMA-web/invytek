@@ -176,6 +176,7 @@ export default function PricingPage() {
                 <div key={plan.name} className={`plan${plan.pop ? " pop" : ""}`}>
                   {plan.badge && <span className="badge-pop">{plan.badge}</span>}
                   <div className="p-name">{plan.name}</div>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 9, letterSpacing: ".18em", textTransform: "uppercase", color: "#a080e0", marginBottom: 6 }}>Prix de lancement</div>
                   <div className="p-price">
                     <span className="v">{plan.price}</span>
                     <span className="per">{plan.period}</span>
