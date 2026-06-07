@@ -194,7 +194,7 @@ export default function HomePage() {
         <div className="wrap">
           <div className="section-head reveal">
             <span className="eyebrow center">Tarifs</span>
-            <h2>Gratuit pour commencer</h2>
+            <h2>Des tarifs simples et transparents</h2>
             <p>Passez au plan Pro quand vous en avez besoin.</p>
           </div>
           <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, maxWidth: 860, margin: "0 auto 2.5rem" }}>
