@@ -27,7 +27,7 @@
 
 | Feature | Détail |
 |---------|--------|
-| **12 thèmes React** | wedding/anniversary/baby/business/medical — voir tableau bas |
+| **18 thèmes React** | wedding/anniversary/baby/business/medical + 6 nouveaux — voir tableau bas |
 | **Auth complète** | Email+bcrypt + Google OAuth · 3 crédits à l'inscription · email bienvenue |
 | **Création invitation** | `/create` — 3 modes : thèmes / personnalisé / IA |
 | **Dashboard agence** | `/dashboard` + `[id]` gérer + `[id]/edit` modifier |
@@ -41,12 +41,24 @@
 | **Galerie IA** | `/themes/community` — aperçus DynamicTheme réels + admin promote |
 | **Abonnements** | Simple/Pro/Business via Chargily · webhook plan · email confirmation · enforcement |
 | **Emails** | Resend : bienvenue · confirmation paiement · expiry reminder · portail client |
-| **SEO & PWA** | metadata complète · favicon SVG · manifest PWA · lang=fr · og:image |
+| **SEO & PWA** | metadata complète · favicon SVG · manifest PWA · lang=fr · og:image dynamique (`app/opengraph-image.tsx`) |
 | **Page légale** | `/legal` — CGU + mentions légales (droit algérien) |
 | **UI/UX complète** | Dashboard · Auth glassmorphism · Pricing · RSVP form · Check-in · Client portal |
 | **Post-login** | `/post-login` — check plan → `/dashboard` ou `/pricing` (credentials + Google) |
 | **Rate limiting** | `/api/rsvp` : 5 req/IP/10min |
 | **Footer** | Liens légaux · Galerie IA · Tarifs · Contact |
+
+### Fait (session 2026-06-07 — dernière session)
+
+| Quoi | Détail |
+|------|--------|
+| **6 nouveaux thèmes React** | Couronne Royale · Glycine Bleue · Rose Poudré · Bordeaux Impérial · Ivoire Embossé · Sceau de Rose |
+| **og:image dynamique** | `app/opengraph-image.tsx` → Next.js ImageResponse 1200×630 brand Invytek. `layout.tsx` mis à jour. |
+| **Cron job expiry reminder** | `app/api/cron/expiry-reminder/route.ts` + `vercel.json` — tourne chaque jour à 9h, envoie rappel J-7 |
+| **ThemeGrid mis à jour** | `/themes` vitrine inclut les 6 nouveaux thèmes avec mini-mockups fidèles |
+| **Dashboard mis à jour** | ThemeMini + CAT_MAP + THEME_NAMES couvrent les 18 thèmes |
+| **create/page.tsx** | THEMES array passe de 12 à 18 entrées |
+| **registry.ts + i/[slug]** | 6 nouveaux configs + imports + switch cases |
 
 ### Bugs corrigés (session 2026-06-06/07)
 
@@ -64,14 +76,14 @@
 
 ## 🔧 Ce qui reste — par priorité
 
-### Priorité 1 — Tester le paiement abonnement en prod
-Le webhook Chargily pour les abonnements (`/api/subscriptions/webhook`) n'a pas été testé en prod. Les crédits IA fonctionnent ✅, les plans non encore confirmés.
+### Priorité 1 — Tester le paiement abonnement en prod ⚠️ NON TESTÉ
+Le webhook Chargily pour les abonnements (`/api/subscriptions/webhook`) n'a pas été testé en prod. Les crédits IA fonctionnent ✅, les plans non encore confirmés. **À tester manuellement.**
 
-### Priorité 2 — og:image
-`/public/og.png` n'existe pas encore. Créer une image 1200×630 pour le partage social.
+### Priorité 2 — Ajouter CRON_SECRET en prod
+Le cron job expiry-reminder est créé mais nécessite `CRON_SECRET` dans les env Vercel pour être sécurisé. Ajouter via `vercel env add CRON_SECRET production`.
 
-### Priorité 3 — Email rappel expiration plan
-`sendPlanExpiryReminderEmail` existe dans `lib/emails.ts` mais n'est pas appelée automatiquement. Il faudrait un cron job Vercel ou un webhook schedulé.
+### (Futur) Tests automatisés + Monitoring
+Zéro test automatisé, zéro Sentry / Vercel Analytics.
 
 ### (Futur) Tests automatisés
 Zéro test automatisé — les bugs sont découverts en prod.
@@ -144,22 +156,28 @@ themes/
 
 ---
 
-## 🎨 Thèmes React (12/12 ✅)
+## 🎨 Thèmes React (18/18 ✅)
 
-| Slug | Catégorie |
-|------|-----------|
-| `gold-arch` | Mariage |
-| `bordeaux-oval` | Mariage RTL |
-| `ivoire-minimal` | Mariage |
-| `confettis-or` | Anniversaire |
-| `anniv-neon` | Anniversaire |
-| `baby-shower` | Bébé |
-| `soiree-prestige` | Business |
-| `conference-tech` | Business |
-| `inauguration` | Business |
-| `blouse-lys` | Médical |
-| `congres-medical` | Médical |
-| `sensibilisation` | Médical |
+| Slug | Catégorie | Nouveau |
+|------|-----------|---------|
+| `gold-arch` | Mariage | |
+| `bordeaux-oval` | Mariage RTL | |
+| `ivoire-minimal` | Mariage | |
+| `couronne-royale` | Mariage | ✨ 2026-06-07 |
+| `glycine-bleue` | Mariage | ✨ 2026-06-07 |
+| `rose-poudre` | Mariage | ✨ 2026-06-07 |
+| `ivoire-embosse` | Mariage | ✨ 2026-06-07 |
+| `sceau-de-rose` | Mariage | ✨ 2026-06-07 |
+| `confettis-or` | Anniversaire | |
+| `anniv-neon` | Anniversaire | |
+| `baby-shower` | Bébé | |
+| `soiree-prestige` | Business | |
+| `conference-tech` | Business | |
+| `inauguration` | Business | |
+| `bordeaux-imperial` | Business · Gala | ✨ 2026-06-07 |
+| `blouse-lys` | Médical | |
+| `congres-medical` | Médical | |
+| `sensibilisation` | Médical | |
 
 ---
 

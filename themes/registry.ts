@@ -11,6 +11,12 @@ import { conferenceTechConfig } from "./business/conference-tech/theme.config";
 import { congresMedicalConfig } from "./medical/congres-medical/theme.config";
 import { inauguralionConfig } from "./business/inauguration/theme.config";
 import { sensibilisationConfig } from "./medical/sensibilisation/theme.config";
+import { couronneRoyaleConfig } from "./wedding/couronne-royale/theme.config";
+import { glycineBleuConfig } from "./wedding/glycine-bleue/theme.config";
+import { rosePoudreConfig } from "./wedding/rose-poudre/theme.config";
+import { bordeauxImperialConfig } from "./business/bordeaux-imperial/theme.config";
+import { ivoireEmbosseConfig } from "./wedding/ivoire-embosse/theme.config";
+import { sceauDeRoseConfig } from "./wedding/sceau-de-rose/theme.config";
 
 export const themeRegistry: ThemeConfig[] = [
   goldArchConfig,
@@ -25,6 +31,12 @@ export const themeRegistry: ThemeConfig[] = [
   congresMedicalConfig,
   inauguralionConfig,
   sensibilisationConfig,
+  couronneRoyaleConfig,
+  glycineBleuConfig,
+  rosePoudreConfig,
+  bordeauxImperialConfig,
+  ivoireEmbosseConfig,
+  sceauDeRoseConfig,
 ];
 
 export function getTheme(slug: string): ThemeConfig | undefined {

@@ -14,15 +14,21 @@ import { ShareWithClientButton } from "@/components/ShareWithClientButton";
 
 const CAT_MAP: Record<string, string> = {
   "gold-arch": "Mariage", "bordeaux-oval": "Mariage · RTL", "ivoire-minimal": "Mariage",
+  "couronne-royale": "Mariage", "glycine-bleue": "Mariage", "rose-poudre": "Mariage",
+  "ivoire-embosse": "Mariage", "sceau-de-rose": "Mariage",
   "confettis-or": "Anniversaire", "anniv-neon": "Anniversaire", "baby-shower": "Bébé",
   "soiree-prestige": "Business", "conference-tech": "Business", "inauguration": "Business",
+  "bordeaux-imperial": "Business",
   "blouse-lys": "Médical", "congres-medical": "Médical", "sensibilisation": "Médical",
   "dynamic": "IA",
 };
 const THEME_NAMES: Record<string, string> = {
   "gold-arch": "Or & Arche", "bordeaux-oval": "Bordeaux & Ovale", "ivoire-minimal": "Ivoire Minimal",
+  "couronne-royale": "Couronne Royale", "glycine-bleue": "Glycine Bleue", "rose-poudre": "Rose Poudré",
+  "ivoire-embosse": "Ivoire Embossé", "sceau-de-rose": "Sceau de Rose",
   "confettis-or": "Confettis d'Or", "anniv-neon": "Neon Burst", "baby-shower": "Baby Shower",
   "soiree-prestige": "Soirée Prestige", "conference-tech": "Conférence Tech", "inauguration": "Inauguration",
+  "bordeaux-imperial": "Bordeaux Impérial",
   "blouse-lys": "Blouse & Lys", "congres-medical": "Congrès Médical", "sensibilisation": "Sensibilisation",
   "dynamic": "Thème IA",
 };

@@ -173,7 +173,128 @@ const THEMES: {
     ),
   },
 
-  /* ── Mariage ── */
+  /* ── Nouveaux thèmes mariage ── */
+  {
+    cat: "mariage",
+    slug: "couronne-royale",
+    name: "Couronne Royale",
+    catLabel: "Mariage · Prestige",
+    href: "/themes-preview/couronne-royale.html",
+    badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
+    preview: (
+      <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 16%,#16234f,#0b1330 72%)" }}>
+        <div className="eb" style={{ color: "#E7C76C" }}>Mariage · Prestige</div>
+        <svg viewBox="0 0 120 92" style={{ width: 54, height: 42, margin: "8px auto 0", display: "block" }} fill="none">
+          <path d="M12 78 L18 34 L40 58 L60 22 L80 58 L102 34 L108 78 Z" fill="#E7C76C" stroke="#8A6A28" strokeWidth="1.4" strokeLinejoin="round"/>
+          <path d="M12 78 L108 78 L106 88 L14 88 Z" fill="#C29A4B"/>
+          <circle cx="60" cy="14" r="6" fill="#E7C76C"/>
+        </svg>
+        <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 30, color: "#F3E2A8", marginTop: 8, lineHeight: 1.15, marginBottom: 16 }}>Yasmine &amp; Karim</div>
+        <div className="dt" style={{ color: "#E7C76C" }}>20 JUIN 2026</div>
+      </div>
+    ),
+  },
+  {
+    cat: "mariage",
+    slug: "glycine-bleue",
+    name: "Glycine Bleue",
+    catLabel: "Mariage",
+    href: "/themes-preview/glycine-bleue.html",
+    badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
+    preview: (
+      <div className="mini" style={{ background: "linear-gradient(170deg,#FBFAF5,#F3F0E8)" }}>
+        <div className="eb" style={{ color: "#5C7BB8" }}>Mariage</div>
+        <div style={{ position: "relative", width: 88, height: 58, margin: "12px auto 0", background: "linear-gradient(160deg,#1E3A6E,#16294E)", border: "1px solid rgba(196,154,72,.4)" }}>
+          <div style={{ position: "absolute", inset: 0, clipPath: "polygon(0 0,100% 0,50% 72%)", background: "#26477f", borderBottom: "1px solid rgba(196,154,72,.25)" }} />
+          <div style={{ position: "absolute", left: "50%", top: "48%", transform: "translate(-50%,-50%)", width: 20, height: 20, borderRadius: "50%", background: "radial-gradient(circle at 38% 34%,#E0BC6A,#C49A48 62%,#9a7430)" }} />
+        </div>
+        <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 27, color: "#1E3A6E", marginTop: 10, lineHeight: 1.15, marginBottom: 16 }}>Lina &amp; Adam</div>
+        <div className="dt" style={{ color: "#5C7BB8" }}>11 JUILLET 2026</div>
+      </div>
+    ),
+  },
+  {
+    cat: "mariage",
+    slug: "rose-poudre",
+    name: "Rose Poudré",
+    catLabel: "Mariage",
+    href: "/themes-preview/rose-poudre.html",
+    badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
+    preview: (
+      <div className="mini" style={{ background: "linear-gradient(170deg,#FEF8F9,#FBEFF1)" }}>
+        <div className="eb" style={{ color: "#C77B8B" }}>Mariage</div>
+        <div style={{ position: "relative", width: 88, height: 58, margin: "12px auto 0", background: "linear-gradient(160deg,#E8B6C2,#C77B8B)", border: "1px solid rgba(196,154,72,.4)" }}>
+          <div style={{ position: "absolute", inset: 0, clipPath: "polygon(0 0,100% 0,50% 72%)", background: "#E1A8B6", borderBottom: "1px solid rgba(196,154,72,.25)" }} />
+          <div style={{ position: "absolute", left: "50%", top: "48%", transform: "translate(-50%,-50%)", width: 20, height: 20, borderRadius: "50%", background: "radial-gradient(circle at 38% 34%,#E0BC6A,#C49A48 62%,#9a7430)" }} />
+        </div>
+        <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 27, color: "#A85A6C", marginTop: 10, lineHeight: 1.15, marginBottom: 16 }}>Norah &amp; Yanis</div>
+        <div className="dt" style={{ color: "#C77B8B" }}>30 AOÛT 2026</div>
+      </div>
+    ),
+  },
+  {
+    cat: "mariage",
+    slug: "ivoire-embosse",
+    name: "Ivoire Embossé",
+    catLabel: "Mariage · Minimal",
+    href: "/themes-preview/ivoire-embosse.html",
+    badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
+    preview: (
+      <div className="mini" style={{ background: "linear-gradient(170deg,#F3EEE2,#E9E2D3)" }}>
+        <div className="eb" style={{ color: "#6F6048" }}>Mariage · Minimal</div>
+        <div style={{ width: 42, height: 42, borderRadius: "50%", margin: "12px auto 0", background: "radial-gradient(circle at 40% 36%,#8C6440,#6B4A2E 60%,#4d3420)", boxShadow: "inset 0 2px 3px rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 24, color: "#EBDFD0" }}>B</span>
+        </div>
+        <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 27, color: "#564A35", marginTop: 10, lineHeight: 1.15, marginBottom: 16 }}>Bilel &amp; Jana</div>
+        <div className="dt" style={{ color: "#6F6048" }}>5 SEPT. 2026</div>
+      </div>
+    ),
+  },
+  {
+    cat: "mariage",
+    slug: "sceau-de-rose",
+    name: "Sceau de Rose",
+    catLabel: "Mariage",
+    href: "/themes-preview/sceau-de-rose.html",
+    badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
+    preview: (
+      <div className="mini" style={{ background: "linear-gradient(170deg,#FAF3E4,#F0E6D2)" }}>
+        <div className="eb" style={{ color: "#BF9A48" }}>Mariage</div>
+        <div style={{ width: 44, height: 44, borderRadius: "50%", margin: "12px auto 0", background: "radial-gradient(circle at 40% 34%,#CC4A40,#A82828 55%,#7E1A1A)", boxShadow: "0 4px 8px rgba(0,0,0,.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 22, color: "#E89A92" }}>M</span>
+        </div>
+        <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 27, color: "#5A4326", marginTop: 10, lineHeight: 1.15, marginBottom: 16 }}>Meriem &amp; Rayan</div>
+        <div className="dt" style={{ color: "#BF9A48" }}>27 JUIN 2026</div>
+      </div>
+    ),
+  },
+
+  /* ── Nouveau thème business ── */
+  {
+    cat: "business",
+    slug: "bordeaux-imperial",
+    name: "Bordeaux Impérial",
+    catLabel: "Business · Gala",
+    href: "/themes-preview/bordeaux-imperial.html",
+    badges: [{ label: "Premium", variant: "gold" }, { label: "Nouveau", variant: "" }],
+    preview: (
+      <div className="mini dark" style={{ background: "radial-gradient(120% 70% at 50% 30%,#4a121e,#160509 72%)" }}>
+        <div className="eb" style={{ color: "#E1C06C" }}>Business · Gala</div>
+        <svg viewBox="0 0 230 60" style={{ width: 96, height: 25, margin: "10px auto 2px", display: "block" }} fill="none">
+          <g stroke="#E1C06C" strokeWidth="1.6" strokeLinecap="round">
+            <path d="M115 8 C115 20 108 26 100 30 C112 32 116 40 115 52"/>
+            <path d="M100 30 C78 24 62 36 56 20 C50 36 36 30 22 38"/>
+            <path d="M130 30 C152 24 168 36 174 20 C180 36 194 30 208 38"/>
+          </g>
+          <circle cx="115" cy="6" r="3" fill="#E1C06C"/>
+        </svg>
+        <div style={{ fontFamily: "var(--font-title)", fontSize: 20, color: "#F1DDA2", letterSpacing: ".05em", marginTop: 6 }}>Soirée de Gala</div>
+        <div className="dt" style={{ color: "#C76B79" }}>LES LAURÉATS 2026</div>
+      </div>
+    ),
+  },
+
+  /* ── Mariage existants ── */
   {
     cat: "mariage",
     slug: "bordeaux-oval",

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#F1E7D4" />
+<title>Mariage — Meriem &amp; Rayan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --paper:#F0E6D2; --paper-2:#F7F0E0; --paper-hi:#FBF6EA; --paper-lo:#E7DAC0;
+    --gold:#BF9A48; --gold-vivid:#D9B567; --gold-light:#EBD79C; --gold-soft:rgba(191,154,72,.5);
+    --wax:#A82828; --wax-deep:#7E1A1A; --wax-hi:#CC4A40; --ink:#5A4326;
+    --text:rgba(90,67,38,.84); --text-soft:rgba(90,67,38,.56); --text-faint:rgba(90,67,38,.34);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(130% 80% at 50% -5%, #FAF3E4 0%, var(--paper) 64%), var(--paper);
+    color:var(--text); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(2.5rem + env(safe-area-inset-top)) 1.2rem calc(2.5rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  .branch { position:absolute; z-index:1; pointer-events:none; color:var(--gold); }
+
+  .scene { width:100%; max-width:430px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%;
+    background:linear-gradient(165deg, var(--paper-hi) 0%, var(--paper-2) 60%, var(--paper) 100%);
+    border:1px solid rgba(191,154,72,.4);
+    padding:3.4rem 2.2rem 3rem; text-align:center; overflow:hidden;
+    box-shadow:0 38px 90px -42px rgba(90,67,38,.4), inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .card::before { content:''; position:absolute; inset:12px; border:1px solid rgba(191,154,72,.3); pointer-events:none; }
+
+  .br-tl { top:-6px; left:-6px; width:148px; height:148px; }
+  .br-tr { top:-6px; right:-6px; width:148px; height:148px; transform:scaleX(-1); }
+  .br-bl { bottom:-6px; left:-6px; width:148px; height:148px; transform:scaleY(-1); }
+  .br-br { bottom:-6px; right:-6px; width:148px; height:148px; transform:scale(-1,-1); }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .85s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .wax-mini { width:64px; height:64px; margin:0 auto 1.1rem; position:relative; z-index:2; }
+
+  .eyebrow { font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--gold); text-indent:.42em; position:relative; z-index:2; }
+  .honor { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.12rem; color:var(--text-soft);
+    line-height:1.6; margin-top:1.1rem; max-width:30ch; margin-inline:auto; }
+
+  .names { font-family:'Pinyon Script',cursive; font-size:clamp(2.8rem,13vw,4rem); line-height:.96;
+    color:var(--ink); margin-top:.8rem; }
+  .amp { display:block; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.25rem; color:var(--gold); margin:.05rem 0; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.9rem; margin:1.6rem auto; width:64%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--gold-soft),transparent); }
+  .sep svg { width:24px; height:18px; flex-shrink:0; }
+
+  .info { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--text); line-height:1.7; }
+  .info .big { font-family:'Marcellus',serif; font-size:1.02rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-indent:.16em; display:block; margin-bottom:.2rem; }
+  .info .place { font-style:italic; color:var(--gold); }
+
+  .countdown { display:flex; justify-content:center; gap:.9rem; margin:2rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:54px; padding:.7rem .4rem;
+    border:1px solid rgba(191,154,72,.4); background:rgba(191,154,72,.07); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.55rem; color:var(--ink); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Cormorant Garamond',serif; font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:.45rem; text-indent:.16em; }
+
+  .cta { margin-top:2.2rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; position:relative; z-index:2; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Marcellus',serif; font-size:.71rem; letter-spacing:.15em;
+    text-transform:uppercase; text-indent:.15em; padding:.9rem 1.5rem; cursor:pointer; text-decoration:none; transition:all .3s ease; }
+  .btn-primary { background:linear-gradient(135deg,var(--wax-hi),var(--wax)); color:var(--paper-hi); border:1px solid transparent;
+    box-shadow:0 8px 22px -8px rgba(168,40,40,.5); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 28px -8px rgba(168,40,40,.65); }
+  .btn-ghost { background:transparent; color:var(--text-soft); border:1px solid var(--gold-soft); }
+  .btn-ghost:hover { color:var(--gold); border-color:var(--gold); transform:translateY(-2px); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ WAX-SEAL GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(130% 80% at 50% 30%, #FAF3E4, var(--paper) 70%); text-align:center; padding:2rem;
+    transition:opacity .7s ease .35s, visibility 0s 1.05s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  .letter { position:relative; width:256px; min-height:200px; padding:2rem 1.4rem 3.4rem; cursor:pointer; margin-bottom:1.4rem;
+    background:linear-gradient(160deg,var(--paper-hi),var(--paper-lo)); border:1px solid rgba(191,154,72,.45);
+    box-shadow:0 24px 50px -22px rgba(90,67,38,.4), inset 0 1px 0 rgba(255,255,255,.6);
+    animation:letterIn 1s cubic-bezier(.16,1,.3,1) forwards; transition:transform .6s ease, opacity .6s ease; }
+  @keyframes letterIn { from{transform:translateY(18px) scale(.94);} to{transform:none;} }
+  .letter.open { transform:translateY(-14px); opacity:0; }
+  .letter .lt { font-family:'Marcellus',serif; font-size:.7rem; letter-spacing:.34em; text-transform:uppercase; color:var(--gold); text-indent:.34em; }
+  .letter .ln-names { font-family:'Pinyon Script',cursive; font-size:2.4rem; color:var(--ink); margin-top:.5rem; line-height:1.2; }
+  .wax { position:absolute; left:50%; bottom:-26px; transform:translateX(-50%); width:78px; height:78px; z-index:6;
+    transition:transform .5s cubic-bezier(.5,-0.4,.4,1.4), opacity .5s ease; filter:drop-shadow(0 6px 12px rgba(0,0,0,.35)); }
+  .letter.open .wax { transform:translateX(-50%) translateY(-18px) rotate(-22deg) scale(.7); opacity:0; }
+  .gate-hint { margin-top:2rem; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1rem; color:var(--gold); animation:pulseHint 2.2s ease-in-out infinite; }
+  @keyframes pulseHint { 0%,100%{opacity:.45;} 50%{opacity:1;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--wax); color:var(--paper-hi);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border:1px solid var(--gold); opacity:0;
+    pointer-events:none; transition:all .4s ease; z-index:120; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px) { .card { padding:2.8rem 1.5rem 2.4rem; } .br-tl,.br-tr,.br-bl,.br-br{width:120px;height:120px;} }
+  @media (prefers-reduced-motion:reduce) { .rev{animation:none;opacity:1;transform:none;} .letter{animation:none;} }
+</style>
+</head>
+<body>
+
+<!-- gold botanical branch template -->
+<template id="branchTpl">
+  <svg class="branch" viewBox="0 0 150 150" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round" fill="none" opacity=".85">
+      <path d="M6 6 C40 18 78 34 96 78 C100 88 102 98 100 110"/>
+      <path d="M28 14 C34 8 44 8 50 4 M28 14 C30 22 26 30 18 32"/>
+      <path d="M52 30 C58 22 70 22 76 16 M52 30 C54 40 50 48 40 50"/>
+      <path d="M74 52 C80 44 92 44 98 38 M74 52 C76 62 72 70 62 72"/>
+      <path d="M90 76 C96 70 106 72 112 68 M90 76 C92 86 88 94 80 96"/>
+    </g>
+    <g fill="currentColor" opacity=".7">
+      <ellipse cx="46" cy="6" rx="6" ry="3" transform="rotate(-32 46 6)"/>
+      <ellipse cx="72" cy="18" rx="6" ry="3" transform="rotate(-32 72 18)"/>
+      <ellipse cx="95" cy="40" rx="6" ry="3" transform="rotate(-32 95 40)"/>
+      <ellipse cx="109" cy="70" rx="5.4" ry="2.8" transform="rotate(-32 109 70)"/>
+      <ellipse cx="18" cy="33" rx="5.4" ry="2.8" transform="rotate(40 18 33)"/>
+      <ellipse cx="40" cy="52" rx="5.4" ry="2.8" transform="rotate(40 40 52)"/>
+      <ellipse cx="62" cy="74" rx="5.4" ry="2.8" transform="rotate(40 62 74)"/>
+    </g>
+  </svg>
+</template>
+
+<!-- red rose wax seal template -->
+<template id="waxTpl">
+  <svg viewBox="0 0 78 78" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="39" cy="39" r="35" fill="url(#wg)"/>
+    <path d="M39 6 l4 6 6-3 1 7 7 1 -3 6 6 4 -6 4 3 6 -7 1 -1 7 -6-3 -4 6 -4-6 -6 3 -1-7 -7-1 3-6 -6-4 6-4 -3-6 7-1 1-7 6 3 z" fill="url(#wg)" opacity=".55"/>
+    <circle cx="39" cy="39" r="28" fill="none" stroke="#6E1616" stroke-width="1" opacity=".5"/>
+    <g stroke="#E89A92" stroke-width="1.3" fill="none" opacity=".85" stroke-linecap="round">
+      <circle cx="39" cy="38" r="4.5"/>
+      <path d="M34 38 C32 30 39 26 44 30 C50 27 53 35 48 40 C53 46 47 52 41 49 C37 54 30 50 32 43"/>
+      <path d="M39 49 C39 56 35 60 30 62 M39 49 C40 56 45 59 49 60"/>
+      <path d="M30 62 C28 58 24 58 22 56 M49 60 C51 56 55 56 57 54"/>
+    </g>
+    <defs><radialGradient id="wg" cx="40%" cy="34%" r="70%"><stop offset="0" stop-color="#CC4A40"/><stop offset="55%" stop-color="#A82828"/><stop offset="100%" stop-color="#7E1A1A"/></radialGradient></defs>
+  </svg>
+</template>
+
+<!-- WAX GATE -->
+<div id="gate">
+  <div class="letter" id="letter" onclick="openGate()">
+    <div class="lt">Vous êtes conviés</div>
+    <div class="ln-names" data-gate-names>Meriem &amp; Rayan</div>
+    <div class="wax" id="gateWax"></div>
+  </div>
+  <div class="gate-hint">Touchez le sceau pour ouvrir</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card" id="card">
+    <div id="brTL"></div><div id="brTR"></div><div id="brBL"></div><div id="brBR"></div>
+
+    <div class="wax-mini" id="cardWax"></div>
+
+    <div class="eyebrow rev" style="animation-delay:.1s" data-f="eyebrow">Avec amour, nous célébrons</div>
+    <p class="honor rev" style="animation-delay:.18s" data-f="honor">Les familles Bouzid &amp; Khelil ont l'honneur de vous convier au mariage de leurs enfants</p>
+
+    <div class="names rev" style="animation-delay:.3s"><span data-f="name1">Meriem</span><span class="amp">&amp;</span><span data-f="name2">Rayan</span></div>
+
+    <div class="sep rev" style="animation-delay:.42s"><span class="ln"></span>
+      <svg viewBox="0 0 24 18" fill="none"><g stroke="#BF9A48" stroke-width="1.1" fill="none"><circle cx="12" cy="9" r="3"/><path d="M9 9 C7 4 12 2 15 5 C19 3 21 8 17 11 C20 15 15 17 12 14"/></g></svg>
+      <span class="ln r"></span></div>
+
+    <p class="info rev" style="animation-delay:.5s"><span class="big" data-f="day">Samedi 27 Juin 2026</span><span data-f="time">à partir de 18h00</span><br><span class="place" data-f="place">Riad El Andalous · Tlemcen</span></p>
+
+    <div class="countdown rev" style="animation-delay:.6s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.7s">
+      <button class="btn btn-primary" onclick="saveDate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Confirmer ma présence
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Riad+El+Andalous+Tlemcen" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  ['brTL','brTR','brBL','brBR'].forEach((id,i)=>{ const node=document.getElementById(id); const frag=document.getElementById('branchTpl').content.cloneNode(true); node.replaceWith(frag); });
+  (function(){ const br=document.querySelectorAll('.card > .branch'); ['br-tl','br-tr','br-bl','br-br'].forEach((c,i)=>{ if(br[i]) br[i].classList.add(c); }); })();
+  document.getElementById('gateWax').appendChild(document.getElementById('waxTpl').content.cloneNode(true));
+  document.getElementById('cardWax').appendChild(document.getElementById('waxTpl').content.cloneNode(true));
+  // uniquify SVG gradient ids per wax instance (avoid duplicate #wg collisions)
+  document.querySelectorAll('#gateWax svg, #cardWax svg').forEach((svg,i)=>{
+    const grad=svg.querySelector('radialGradient'); if(!grad) return;
+    const nid='wg_'+i; grad.id=nid;
+    svg.querySelectorAll('[fill="url(#wg)"]').forEach(el=>el.setAttribute('fill','url(#'+nid+')'));
+  });
+
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; document.getElementById('letter').classList.add('open');
+    setTimeout(()=>document.getElementById('gate').classList.add('opened'),180); }
+
+  let cdTarget=new Date('2026-06-27T18:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1900);
+
+  window.INVYTEK_CONFIG={
+    theme:'sceau-de-rose', accent:'#A82828', accent2:'#BF9A48', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo / monogramme (PNG, optionnel)', type:'image', mount:'.card'},
+      {key:'eyebrow', label:'Mention d\'ouverture', sel:'[data-f="eyebrow"]', type:'text'},
+      {key:'honor', label:'Texte d\'honneur', sel:'[data-f="honor"]', type:'textarea'},
+      {key:'name1', label:'Prénom 1', sel:'[data-f="name1"]', type:'text'},
+      {key:'name2', label:'Prénom 2', sel:'[data-f="name2"]', type:'text'},
+      {key:'gnames', label:'Noms (écran d\'ouverture)', sel:'[data-gate-names]', type:'text'},
+      {key:'day', label:'Date', sel:'[data-f="day"]', type:'text'},
+      {key:'time', label:'Heure', sel:'[data-f="time"]', type:'text'},
+      {key:'place', label:'Lieu', sel:'[data-f="place"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-06-27T18:00'}
+    ]
+  };
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+  function saveDate(){
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Invytek//FR','BEGIN:VEVENT',
+      'DTSTART:20260627T180000','DTEND:20260627T235900','SUMMARY:Mariage Meriem & Rayan',
+      'LOCATION:Riad El Andalous\\, Tlemcen','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='mariage-meriem-rayan.ics'; a.click();
+    toast('Présence confirmée — date enregistrée');
+  }
+</script>
+<script src="../assets/editor.js"></script>
+</body>
+</html>

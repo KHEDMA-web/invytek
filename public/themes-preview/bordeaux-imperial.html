@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#1c060b" />
+<title>Soirée de Gala — Les Lauréats 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --bg:#160509; --bg-2:#1f070d; --card:#2a0a12; --card-2:#3a0e18; --wine:#6B1622; --wine-light:#8B2533;
+    --gold:#BE9647; --gold-vivid:#E1C06C; --gold-light:#F1DDA2; --gold-soft:rgba(190,150,71,.5);
+    --ivory:#F5ECDC; --text:rgba(245,236,220,.82); --text-soft:rgba(245,236,220,.52); --text-faint:rgba(245,236,220,.32);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(120% 70% at 50% 30%, #4a121e 0%, var(--bg) 64%), var(--bg);
+    color:var(--text); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(2.5rem + env(safe-area-inset-top)) 1.2rem calc(2.5rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  .vign { position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(circle at 50% 45%, transparent 40%, rgba(0,0,0,.55) 100%); }
+
+  .scene { width:100%; max-width:460px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%;
+    background:radial-gradient(120% 80% at 50% 0%, var(--card-2) 0%, var(--card) 55%, #220810 100%);
+    border:1px solid var(--gold-soft);
+    padding:2.4rem 2.4rem 2.6rem; text-align:center; overflow:hidden;
+    box-shadow:0 50px 120px -40px rgba(0,0,0,.85), inset 0 1px 0 rgba(255,255,255,.04);
+  }
+  .card::before { content:''; position:absolute; inset:7px; border:1px solid rgba(190,150,71,.28); pointer-events:none; }
+
+  .fili { width:230px; height:auto; display:block; margin:0 auto;
+    filter:drop-shadow(0 3px 10px rgba(225,192,108,.18)); }
+  .fili.bottom { transform:scaleY(-1); margin-top:1.6rem; }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .85s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .eyebrow { font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--gold-vivid); text-indent:.42em; margin-top:1.4rem; }
+  .honor { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.12rem; color:var(--text-soft);
+    line-height:1.6; margin-top:1rem; max-width:32ch; margin-inline:auto; }
+
+  .title { font-family:'Marcellus',serif; font-size:clamp(1.9rem,8vw,2.7rem); letter-spacing:.05em;
+    color:var(--ivory); margin-top:1.1rem; line-height:1.12;
+    background:linear-gradient(180deg,var(--gold-light),var(--gold) 92%); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+  .subtitle { font-family:'Pinyon Script',cursive; font-size:2.3rem; color:var(--wine-light); margin-top:.2rem;
+    -webkit-text-fill-color:#C76B79; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.9rem; margin:1.5rem auto; width:64%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--gold-soft),transparent); }
+  .sep svg { width:18px; height:18px; flex-shrink:0; }
+
+  .info { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--text); line-height:1.7; }
+  .info .big { font-family:'Marcellus',serif; font-size:1.04rem; letter-spacing:.16em; text-transform:uppercase; color:var(--gold-vivid); text-indent:.16em; display:block; margin-bottom:.2rem; }
+  .info .place { font-style:italic; color:var(--gold-light); }
+
+  .countdown { display:flex; justify-content:center; gap:1rem; margin:1.9rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:56px; padding:.75rem .4rem;
+    border:1px solid var(--gold-soft); background:rgba(190,150,71,.06); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.6rem; color:var(--ivory); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Cormorant Garamond',serif; font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:.45rem; text-indent:.16em; }
+
+  .cta { margin-top:2rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.16em;
+    text-transform:uppercase; text-indent:.16em; padding:.92rem 1.6rem; cursor:pointer; text-decoration:none; transition:all .3s ease; }
+  .btn-primary { background:linear-gradient(135deg,var(--gold-vivid),var(--gold)); color:#2a0a12; border:1px solid transparent;
+    box-shadow:0 8px 24px -8px rgba(225,192,108,.5); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 30px -8px rgba(225,192,108,.7); }
+  .btn-ghost { background:transparent; color:var(--text-soft); border:1px solid var(--gold-soft); }
+  .btn-ghost:hover { color:var(--gold-vivid); border-color:var(--gold); transform:translateY(-2px); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(120% 80% at 50% 40%, #4a121e, var(--bg) 72%); text-align:center; padding:2rem;
+    transition:opacity .9s ease, visibility 0s .9s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  #gate .fili { width:200px; margin-bottom:.6rem; }
+  .gate-title { font-family:'Marcellus',serif; font-size:1.3rem; letter-spacing:.34em; text-transform:uppercase; color:var(--gold-vivid); text-indent:.34em; margin-top:.6rem; }
+  .gate-names { font-family:'Pinyon Script',cursive; font-size:2.5rem; line-height:1.3; color:var(--gold-light); margin-top:.2rem; padding-bottom:.4rem; }
+  .gate-btn { margin-top:2.2rem; font-family:'Marcellus',serif; font-size:.74rem; letter-spacing:.18em; text-transform:uppercase;
+    text-indent:.18em; padding:.95rem 2rem; cursor:pointer; color:var(--ivory); background:transparent; border:1px solid var(--gold);
+    transition:all .3s ease; }
+  .gate-btn:hover { background:rgba(190,150,71,.16); transform:translateY(-2px); }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--card-2); color:var(--ivory);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border:1px solid var(--gold); opacity:0;
+    pointer-events:none; transition:all .4s ease; z-index:120; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px) { .card { padding:1.8rem 1.5rem 2.2rem; } .fili{width:190px;} }
+  @media (prefers-reduced-motion:reduce) { .rev{animation:none;opacity:1;transform:none;} }
+</style>
+</head>
+<body>
+
+<div class="vign"></div>
+
+<!-- gold filigree flourish template -->
+<template id="filiTpl">
+  <svg class="fili" viewBox="0 0 230 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g stroke="url(#fg)" stroke-width="1.4" stroke-linecap="round" fill="none">
+      <path d="M115 6 C115 18 110 26 100 30 C112 32 116 40 115 52"/>
+      <path d="M115 14 C108 14 104 20 105 28 C112 27 116 22 115 14Z" fill="rgba(190,150,71,.18)"/>
+      <path d="M115 14 C122 14 126 20 125 28 C118 27 114 22 115 14Z" fill="rgba(190,150,71,.18)"/>
+      <path d="M100 30 C78 24 62 36 56 20 C50 36 36 30 22 38 C36 40 44 50 30 56"/>
+      <path d="M130 30 C152 24 168 36 174 20 C180 36 194 30 208 38 C194 40 186 50 200 56"/>
+      <path d="M56 20 C50 12 40 14 38 6 C48 6 56 12 56 20Z" fill="rgba(190,150,71,.14)"/>
+      <path d="M174 20 C180 12 190 14 192 6 C182 6 174 12 174 20Z" fill="rgba(190,150,71,.14)"/>
+      <path d="M82 30 C70 28 64 40 56 40"/><path d="M148 30 C160 28 166 40 174 40"/>
+    </g>
+    <circle cx="115" cy="4" r="2.6" fill="#E1C06C"/>
+    <circle cx="38" cy="6" r="2" fill="#E1C06C"/><circle cx="192" cy="6" r="2" fill="#E1C06C"/>
+    <circle cx="30" cy="56" r="1.8" fill="#BE9647"/><circle cx="200" cy="56" r="1.8" fill="#BE9647"/>
+    <defs><linearGradient id="fg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1DDA2"/><stop offset="1" stop-color="#A57E34"/></linearGradient></defs>
+  </svg>
+</template>
+
+<!-- GATE -->
+<div id="gate">
+  <div id="gateFili"></div>
+  <div class="gate-title">Invitation</div>
+  <div class="gate-names" data-gate-names>Soirée de Gala</div>
+  <button class="gate-btn" onclick="openGate()">Ouvrir l'invitation</button>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card" id="card">
+    <div id="filiTop"></div>
+
+    <div class="eyebrow rev" style="animation-delay:.1s" data-f="eyebrow">L'Association Atlas a l'honneur de vous convier à</div>
+
+    <div class="title rev" style="animation-delay:.2s" data-f="title">Soirée de Gala</div>
+    <div class="subtitle rev" style="animation-delay:.28s" data-f="subtitle">Les Lauréats 2026</div>
+
+    <div class="sep rev" style="animation-delay:.4s"><span class="ln"></span>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" fill="#BE9647"/></svg>
+      <span class="ln r"></span></div>
+
+    <p class="info rev" style="animation-delay:.48s"><span class="big" data-f="day">Vendredi 16 Octobre 2026</span><span data-f="time">à partir de 20h00 · tenue de soirée</span><br><span class="place" data-f="place">Hôtel El Aurassi · Alger</span></p>
+
+    <div class="countdown rev" style="animation-delay:.58s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.68s">
+      <button class="btn btn-primary" onclick="saveDate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Confirmer ma présence
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Hotel+El+Aurassi+Alger" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+
+    <div id="filiBottom"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  document.getElementById('gateFili').appendChild(document.getElementById('filiTpl').content.cloneNode(true));
+  document.getElementById('filiTop').appendChild(document.getElementById('filiTpl').content.cloneNode(true));
+  (function(){ const f=document.getElementById('filiTpl').content.cloneNode(true); document.getElementById('filiBottom').appendChild(f); document.querySelector('#filiBottom .fili').classList.add('bottom'); })();
+
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; document.getElementById('gate').classList.add('opened'); }
+
+  let cdTarget=new Date('2026-10-16T20:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1800);
+
+  window.INVYTEK_CONFIG={
+    theme:'bordeaux-imperial', accent:'#E1C06C', accent2:'#6B1622', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo / monogramme (PNG, optionnel)', type:'image', mount:'.card'},
+      {key:'eyebrow', label:'Texte d\'honneur', sel:'[data-f="eyebrow"]', type:'textarea'},
+      {key:'title', label:'Titre de l\'événement', sel:'[data-f="title"]', type:'text'},
+      {key:'subtitle', label:'Sous-titre', sel:'[data-f="subtitle"]', type:'text'},
+      {key:'gnames', label:'Titre (écran d\'ouverture)', sel:'[data-gate-names]', type:'text'},
+      {key:'day', label:'Date', sel:'[data-f="day"]', type:'text'},
+      {key:'time', label:'Heure / précisions', sel:'[data-f="time"]', type:'text'},
+      {key:'place', label:'Lieu', sel:'[data-f="place"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-10-16T20:00'}
+    ]
+  };
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+  function saveDate(){
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Invytek//FR','BEGIN:VEVENT',
+      'DTSTART:20261016T200000','DTEND:20261016T235900','SUMMARY:Soiree de Gala - Les Laureats 2026',
+      'LOCATION:Hotel El Aurassi\\, Alger','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='soiree-gala-2026.ics'; a.click();
+    toast('Présence confirmée — date enregistrée');
+  }
+</script>
+<script src="../assets/editor.js"></script>
+</body>
+</html>

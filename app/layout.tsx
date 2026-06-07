@@ -23,13 +23,13 @@ export const metadata: Metadata = {
     siteName: "Invytek",
     title: "Invytek — Invitations numériques premium",
     description: "Invitations interactives pour mariages, événements business et médicaux. Créez, partagez, suivez.",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Invytek" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Invytek — Invitations numériques premium" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Invytek — Invitations numériques premium",
     description: "Invitations interactives pour tous vos événements.",
-    images: ["/og.png"],
+    images: ["/opengraph-image"],
   },
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],

@@ -16,6 +16,12 @@ import CongresMedicalTheme from "@/themes/medical/congres-medical/Theme";
 import InaugurationTheme from "@/themes/business/inauguration/Theme";
 import SensibilisationTheme from "@/themes/medical/sensibilisation/Theme";
 import DynamicTheme from "@/themes/dynamic/DynamicTheme";
+import CouronneRoyaleTheme from "@/themes/wedding/couronne-royale/Theme";
+import GlycineBleueTheme from "@/themes/wedding/glycine-bleue/Theme";
+import RosePoudreTheme from "@/themes/wedding/rose-poudre/Theme";
+import BordeauxImperialTheme from "@/themes/business/bordeaux-imperial/Theme";
+import IvoireEmbosseTheme from "@/themes/wedding/ivoire-embosse/Theme";
+import SceauDeRoseTheme from "@/themes/wedding/sceau-de-rose/Theme";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
 import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 interface Props { params: Promise<{ slug: string }> }
@@ -67,7 +73,13 @@ export default async function InvitationPage({ params }: Props) {
   if (theme.slug === "conference-tech")  return <>{styleTag}<ConferenceTechTheme {...props} /></>;
   if (theme.slug === "congres-medical")  return <>{styleTag}<CongresMedicalTheme {...props} /></>;
   if (theme.slug === "inauguration")     return <>{styleTag}<InaugurationTheme {...props} /></>;
-  if (theme.slug === "sensibilisation")  return <>{styleTag}<SensibilisationTheme {...props} /></>;
+  if (theme.slug === "sensibilisation")    return <>{styleTag}<SensibilisationTheme {...props} /></>;
+  if (theme.slug === "couronne-royale")   return <>{styleTag}<CouronneRoyaleTheme {...props} /></>;
+  if (theme.slug === "glycine-bleue")     return <>{styleTag}<GlycineBleueTheme {...props} /></>;
+  if (theme.slug === "rose-poudre")       return <>{styleTag}<RosePoudreTheme {...props} /></>;
+  if (theme.slug === "bordeaux-imperial") return <>{styleTag}<BordeauxImperialTheme {...props} /></>;
+  if (theme.slug === "ivoire-embosse")    return <>{styleTag}<IvoireEmbosseTheme {...props} /></>;
+  if (theme.slug === "sceau-de-rose")     return <>{styleTag}<SceauDeRoseTheme {...props} /></>;
 
   notFound();
 }

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#1E3A6E" />
+<title>Mariage — Lina &amp; Adam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --paper:#F3F0E8; --paper-2:#FAF8F2; --ink:#22304F;
+    --navy:#1E3A6E; --navy-deep:#16294E; --blue:#5C7BB8; --blue-soft:#9BB4DC; --blue-wash:rgba(120,150,200,.22);
+    --gold:#C49A48; --gold-vivid:#E0BC6A; --gold-soft:rgba(196,154,72,.5);
+    --text:rgba(34,48,79,.82); --text-soft:rgba(34,48,79,.56); --text-faint:rgba(34,48,79,.34);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(130% 80% at 50% -5%, #FBFAF5 0%, var(--paper) 64%), var(--paper);
+    color:var(--text); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(2.5rem + env(safe-area-inset-top)) 1.2rem calc(2.5rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+  .paper-tex { position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+    background-image:radial-gradient(circle at 20% 30%, rgba(120,150,200,.05) 0 30%, transparent 60%),
+                     radial-gradient(circle at 80% 70%, rgba(120,150,200,.05) 0 30%, transparent 60%); }
+
+  /* ── watercolor florals (reusable) ── */
+  .floral { position:absolute; z-index:1; pointer-events:none; }
+  .blob { position:absolute; border-radius:60% 40% 55% 45%; filter:blur(2px); opacity:.85; }
+
+  .scene { width:100%; max-width:440px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%;
+    background:linear-gradient(168deg, var(--paper-2) 0%, var(--paper) 100%);
+    border:1px solid rgba(196,154,72,.35);
+    padding:3.6rem 2.2rem 3rem; text-align:center; overflow:hidden;
+    box-shadow:0 40px 100px -42px rgba(30,40,70,.4), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+  .card::before { content:''; position:absolute; inset:11px; border:1px solid rgba(120,150,200,.28); pointer-events:none; }
+
+  .fl-corner { position:absolute; width:150px; height:150px; }
+  .fl-tl { top:-10px; left:-10px; }
+  .fl-tr { top:-10px; right:-10px; transform:scaleX(-1); }
+  .fl-bl { bottom:-10px; left:-10px; transform:scaleY(-1); }
+  .fl-br { bottom:-10px; right:-10px; transform:scale(-1,-1); }
+
+  /* butterfly */
+  .butterfly { position:absolute; width:48px; height:48px; right:18px; top:120px; z-index:3;
+    transform-origin:center; animation:flutter 5s ease-in-out infinite; }
+  @keyframes flutter { 0%,100%{transform:translateY(0) rotate(-4deg);} 50%{transform:translateY(-10px) rotate(4deg);} }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .85s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .eyebrow { font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.4em; text-transform:uppercase;
+    color:var(--blue); text-indent:.4em; position:relative; z-index:2; }
+  .honor { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.12rem; color:var(--text-soft);
+    line-height:1.6; margin-top:1.2rem; max-width:30ch; margin-inline:auto; }
+
+  .names { font-family:'Pinyon Script',cursive; font-size:clamp(2.9rem,14vw,4.1rem); line-height:.96;
+    color:var(--navy); margin-top:.9rem; }
+  .amp { display:block; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.25rem; color:var(--blue); margin:.05rem 0; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.9rem; margin:1.6rem auto; width:66%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--gold-soft),transparent); }
+  .sep svg { width:20px; height:20px; flex-shrink:0; }
+
+  .info { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--text); line-height:1.7; }
+  .info .big { font-family:'Marcellus',serif; font-size:1.02rem; letter-spacing:.15em; text-transform:uppercase; color:var(--navy); text-indent:.15em; display:block; margin-bottom:.2rem; }
+  .info .place { font-style:italic; color:var(--blue); }
+
+  .countdown { display:flex; justify-content:center; gap:.9rem; margin:2rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:54px; padding:.7rem .4rem;
+    border:1px solid rgba(120,150,200,.35); background:rgba(120,150,200,.07); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.55rem; color:var(--navy); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Cormorant Garamond',serif; font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:.45rem; text-indent:.16em; }
+
+  .cta { margin-top:2.2rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; position:relative; z-index:2; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Marcellus',serif; font-size:.71rem; letter-spacing:.15em;
+    text-transform:uppercase; text-indent:.15em; padding:.9rem 1.5rem; cursor:pointer; text-decoration:none; transition:all .3s ease; }
+  .btn-primary { background:linear-gradient(135deg,var(--navy),var(--navy-deep)); color:var(--paper-2); border:1px solid transparent;
+    box-shadow:0 8px 22px -8px rgba(30,58,110,.5); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 28px -8px rgba(30,58,110,.65); }
+  .btn-ghost { background:transparent; color:var(--text-soft); border:1px solid var(--gold-soft); }
+  .btn-ghost:hover { color:var(--gold); border-color:var(--gold); transform:translateY(-2px); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ ENVELOPE GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(130% 80% at 50% 30%, #FBFAF5, var(--paper) 70%); text-align:center; padding:2rem;
+    transition:opacity .8s ease .35s, visibility 0s 1.15s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  .env { position:relative; width:248px; height:166px; cursor:pointer; perspective:900px; margin-bottom:1.6rem;
+    animation:envIn 1s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes envIn { from{transform:translateY(20px) scale(.93);} to{transform:none;} }
+  .env .body { position:absolute; inset:0; background:linear-gradient(160deg,var(--navy) 0%,var(--navy-deep) 100%);
+    border:1px solid rgba(196,154,72,.4); box-shadow:0 24px 50px -22px rgba(20,34,70,.6); }
+  .env .pocket { position:absolute; inset:0; overflow:hidden; }
+  .env .pocket::before, .env .pocket::after { content:''; position:absolute; bottom:0; width:54%; height:64%; background:linear-gradient(140deg,#22427e,#182f5a); }
+  .env .pocket::before { left:0; clip-path:polygon(0 0,0 100%,100% 100%); border-right:1px solid rgba(196,154,72,.2); }
+  .env .pocket::after { right:0; clip-path:polygon(100% 0,0 100%,100% 100%); }
+  .env .flap { position:absolute; top:0; left:0; width:100%; height:62%;
+    background:linear-gradient(150deg,#26477f,#1b3461); clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top; transform:rotateX(0deg); transition:transform .8s cubic-bezier(.6,0,.3,1); z-index:4;
+    border-bottom:1px solid rgba(196,154,72,.25); }
+  .env.open .flap { transform:rotateX(-180deg); z-index:1; }
+  .seal { position:absolute; left:50%; top:54%; transform:translate(-50%,-50%); width:58px; height:58px; border-radius:50%; z-index:6;
+    background:radial-gradient(circle at 38% 34%,var(--gold-vivid),var(--gold) 62%,#9a7430 100%);
+    box-shadow:0 6px 16px -4px rgba(0,0,0,.5), inset 0 2px 4px rgba(255,255,255,.4), inset 0 -3px 6px rgba(120,90,30,.5);
+    display:flex; align-items:center; justify-content:center; transition:transform .4s ease, opacity .4s ease; }
+  .seal span { font-family:'Pinyon Script',cursive; font-size:2rem; color:#5a4318; line-height:1; }
+  .env.open .seal { transform:translate(-50%,-50%) scale(.6); opacity:0; }
+  .gate-title { font-family:'Marcellus',serif; font-size:1.3rem; letter-spacing:.3em; text-transform:uppercase; color:var(--navy); text-indent:.3em; }
+  .gate-names { font-family:'Pinyon Script',cursive; font-size:2.7rem; color:var(--navy); margin-top:.3rem; }
+  .gate-hint { margin-top:1.4rem; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1rem; color:var(--blue); animation:pulseHint 2.2s ease-in-out infinite; }
+  @keyframes pulseHint { 0%,100%{opacity:.5;} 50%{opacity:1;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--navy); color:var(--paper-2);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border:1px solid var(--gold); opacity:0;
+    pointer-events:none; transition:all .4s ease; z-index:120; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px) { .card { padding:2.8rem 1.4rem 2.4rem; } .fl-corner{width:120px;height:120px;} }
+  @media (prefers-reduced-motion:reduce) { .rev{animation:none;opacity:1;transform:none;} .butterfly,.env{animation:none;} }
+</style>
+</head>
+<body>
+
+<div class="paper-tex"></div>
+
+<!-- floral spray template (blue watercolor) -->
+<template id="sprayTpl">
+  <div class="floral fl-corner">
+    <div class="blob" style="width:62px;height:50px;left:6px;top:4px;background:radial-gradient(circle at 40% 40%,#7C9AD0,#3E5C96)"></div>
+    <div class="blob" style="width:46px;height:40px;left:44px;top:18px;background:radial-gradient(circle at 40% 40%,#A9C0E2,#6E8CC4)"></div>
+    <div class="blob" style="width:34px;height:30px;left:18px;top:44px;background:radial-gradient(circle at 40% 40%,#5C7BB8,#2C447A)"></div>
+    <div class="blob" style="width:22px;height:20px;left:60px;top:54px;background:radial-gradient(circle at 40% 40%,#C2D4EE,#90AEDB);opacity:.7"></div>
+    <svg viewBox="0 0 150 150" style="position:absolute;inset:0" fill="none">
+      <g stroke="#3E5C96" stroke-width="1.2" stroke-linecap="round" opacity=".55">
+        <path d="M14 14 C46 30 70 60 78 96"/>
+        <path d="M30 22 C36 30 38 38 36 48"/><path d="M22 40 C30 44 38 44 46 40"/>
+        <path d="M52 48 C58 56 60 64 58 74"/><path d="M44 66 C52 70 60 70 68 66"/>
+      </g>
+      <g fill="#6E8CC4" opacity=".5">
+        <ellipse cx="40" cy="30" rx="6" ry="3.4" transform="rotate(-30 40 30)"/>
+        <ellipse cx="58" cy="56" rx="5.4" ry="3" transform="rotate(-30 58 56)"/>
+      </g>
+    </svg>
+  </div>
+</template>
+
+<!-- ENVELOPE GATE -->
+<div id="gate">
+  <div class="env" id="env" onclick="openGate()">
+    <div class="body"></div>
+    <div class="pocket"></div>
+    <div class="flap"></div>
+    <div class="seal" data-seal><span>L</span></div>
+  </div>
+  <div class="gate-title">Save the Date</div>
+  <div class="gate-names" data-gate-names>Lina &amp; Adam</div>
+  <div class="gate-hint">Touchez le sceau pour ouvrir</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card" id="card">
+    <div id="flTL"></div><div id="flTR"></div><div id="flBL"></div><div id="flBR"></div>
+
+    <svg class="butterfly" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <g fill="#5C7BB8" opacity=".85">
+        <path d="M24 24 C16 8 4 10 6 22 C7 30 18 28 24 24Z"/>
+        <path d="M24 24 C32 8 44 10 42 22 C41 30 30 28 24 24Z"/>
+        <path d="M24 24 C18 32 8 34 10 42 C16 42 22 32 24 24Z" fill="#9BB4DC"/>
+        <path d="M24 24 C30 32 40 34 38 42 C32 42 26 32 24 24Z" fill="#9BB4DC"/>
+      </g>
+      <path d="M24 14 L24 36" stroke="#2C447A" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+
+    <div class="eyebrow rev" style="animation-delay:.1s" data-f="eyebrow">Avec joie, nous célébrons</div>
+    <p class="honor rev" style="animation-delay:.18s" data-f="honor">Les familles Saïdi &amp; Mansouri vous prient d'honorer de votre présence le mariage de</p>
+
+    <div class="names rev" style="animation-delay:.3s"><span data-f="name1">Lina</span><span class="amp">&amp;</span><span data-f="name2">Adam</span></div>
+
+    <div class="sep rev" style="animation-delay:.42s"><span class="ln"></span>
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 C9 9 5 10 5 14 a4 4 0 0 0 7 2.6 a4 4 0 0 0 7-2.6 C19 10 15 9 12 3Z" fill="#C49A48"/></svg>
+      <span class="ln r"></span></div>
+
+    <p class="info rev" style="animation-delay:.5s"><span class="big" data-f="day">Samedi 11 Juillet 2026</span><span data-f="time">à partir de 18h30</span><br><span class="place" data-f="place">Domaine Les Oliviers · Tipaza</span></p>
+
+    <div class="countdown rev" style="animation-delay:.6s" id="countdown">
+      <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+      <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+      <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+    </div>
+
+    <div class="cta rev" style="animation-delay:.7s">
+      <button class="btn btn-primary" onclick="saveDate()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+        Confirmer ma présence
+      </button>
+      <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Domaine+Les+Oliviers+Tipaza" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Itinéraire
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  ['flTL','flTR','flBL','flBR'].forEach((id,i)=>{ const node=document.getElementById(id); const frag=document.getElementById('sprayTpl').content.cloneNode(true); node.replaceWith(frag); });
+  // re-tag corner classes (templates lost ids); add positional classes to the 4 sprays inside card
+  (function(){ const sprays=document.querySelectorAll('.card > .floral'); ['fl-tl','fl-tr','fl-bl','fl-br'].forEach((c,i)=>{ if(sprays[i]) sprays[i].classList.add(c); }); })();
+
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; document.getElementById('env').classList.add('open');
+    setTimeout(()=>document.getElementById('gate').classList.add('opened'),120); }
+
+  let cdTarget=new Date('2026-07-11T18:30:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 1900);
+
+  window.INVYTEK_CONFIG={
+    theme:'glycine-bleue', accent:'#1E3A6E', accent2:'#C49A48', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo / monogramme (PNG, optionnel)', type:'image', mount:'.card'},
+      {key:'eyebrow', label:'Mention d\'ouverture', sel:'[data-f="eyebrow"]', type:'text'},
+      {key:'honor', label:'Texte d\'honneur', sel:'[data-f="honor"]', type:'textarea'},
+      {key:'name1', label:'Prénom 1', sel:'[data-f="name1"]', type:'text'},
+      {key:'name2', label:'Prénom 2', sel:'[data-f="name2"]', type:'text'},
+      {key:'gnames', label:'Noms (écran d\'ouverture)', sel:'[data-gate-names]', type:'text'},
+      {key:'seal', label:'Initiale du sceau', sel:'[data-seal] span', type:'text'},
+      {key:'day', label:'Date', sel:'[data-f="day"]', type:'text'},
+      {key:'time', label:'Heure', sel:'[data-f="time"]', type:'text'},
+      {key:'place', label:'Lieu', sel:'[data-f="place"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-07-11T18:30'}
+    ]
+  };
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+  function saveDate(){
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Invytek//FR','BEGIN:VEVENT',
+      'DTSTART:20260711T183000','DTEND:20260711T235900','SUMMARY:Mariage Lina & Adam',
+      'LOCATION:Domaine Les Oliviers\\, Tipaza','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='mariage-lina-adam.ics'; a.click();
+    toast('Présence confirmée — date enregistrée');
+  }
+</script>
+<script src="../assets/editor.js"></script>
+</body>
+</html>

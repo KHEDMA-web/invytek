@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#EAE3D4" />
+<title>Mariage — Bilel &amp; Jana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --paper:#E9E2D3; --paper-2:#F1EBDD; --paper-hi:#F7F2E8; --paper-lo:#DDD4C1;
+    --taupe:#9A8A6E; --taupe-deep:#6F6048; --ink:#564A35;
+    --sepia:#6B4A2E; --sepia-light:#8C6440; --sepia-soft:rgba(107,74,46,.4);
+    --text:rgba(86,74,53,.84); --text-soft:rgba(86,74,53,.56); --text-faint:rgba(86,74,53,.34);
+  }
+  html { -webkit-font-smoothing:antialiased; scroll-behavior:smooth; }
+  body {
+    min-height:100vh; min-height:100dvh;
+    background:radial-gradient(130% 80% at 50% -5%, #F3EEE2 0%, var(--paper) 64%), var(--paper);
+    color:var(--text); font-family:'Cormorant Garamond',serif;
+    display:flex; align-items:center; justify-content:center;
+    padding:calc(2.5rem + env(safe-area-inset-top)) 1.2rem calc(2.5rem + env(safe-area-inset-bottom));
+    overflow-x:hidden;
+  }
+
+  /* embossed damask watermark (raised relief via 2 offset copies) */
+  .emboss { position:absolute; inset:0; z-index:0; pointer-events:none; opacity:.8; }
+  .emboss svg { position:absolute; inset:0; width:100%; height:100%; }
+  .emboss .lo { color:rgba(120,104,74,.16); transform:translate(1px,1px); }
+  .emboss .hi { color:rgba(255,251,242,.7); transform:translate(-1px,-1px); }
+
+  .scene { width:100%; max-width:430px; position:relative; z-index:2; }
+  .card {
+    position:relative; width:100%;
+    background:linear-gradient(165deg, var(--paper-hi) 0%, var(--paper-2) 60%, var(--paper) 100%);
+    border:1px solid rgba(154,138,110,.4);
+    padding:3.4rem 2.2rem 3rem; text-align:center; overflow:hidden;
+    box-shadow:0 38px 90px -42px rgba(86,74,53,.4), inset 0 1px 0 rgba(255,255,255,.7);
+  }
+  .card::before { content:''; position:absolute; inset:12px; border:1px solid rgba(154,138,110,.3); pointer-events:none; }
+  /* faint center fold line */
+  .card::after { content:''; position:absolute; top:0; bottom:0; left:50%; width:1px;
+    background:linear-gradient(180deg,transparent,rgba(120,104,74,.12) 20% 80%,transparent); pointer-events:none; }
+
+  .rev { opacity:0; transform:translateY(14px); animation:rise .85s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes rise { to { opacity:1; transform:translateY(0); } }
+
+  .monogram { width:74px; height:74px; margin:0 auto 1.2rem; border-radius:50%; position:relative; z-index:2;
+    background:radial-gradient(circle at 40% 36%, var(--sepia-light), var(--sepia) 60%, #4d3420 100%);
+    box-shadow:0 8px 18px -6px rgba(0,0,0,.4), inset 0 2px 4px rgba(255,255,255,.18), inset 0 -3px 6px rgba(40,26,14,.5);
+    display:flex; align-items:center; justify-content:center; }
+  .monogram span { font-family:'Pinyon Script',cursive; font-size:2.1rem; color:#EBDFD0; line-height:1; }
+
+  .eyebrow { font-family:'Marcellus',serif; font-size:.72rem; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--taupe-deep); text-indent:.42em; position:relative; z-index:2; }
+  .honor { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.12rem; color:var(--text-soft);
+    line-height:1.6; margin-top:1.1rem; max-width:30ch; margin-inline:auto; }
+
+  .names { font-family:'Pinyon Script',cursive; font-size:clamp(2.9rem,14vw,4.1rem); line-height:.96;
+    color:var(--ink); margin-top:.8rem; }
+  .amp { display:block; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1.25rem; color:var(--taupe); margin:.05rem 0; }
+
+  .sep { display:flex; align-items:center; justify-content:center; gap:.9rem; margin:1.6rem auto; width:62%; }
+  .sep .ln { flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--sepia-soft)); }
+  .sep .ln.r { background:linear-gradient(90deg,var(--sepia-soft),transparent); }
+  .sep svg { width:14px; height:14px; flex-shrink:0; transform:rotate(45deg); }
+
+  .info { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--text); line-height:1.7; }
+  .info .big { font-family:'Marcellus',serif; font-size:1.02rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-indent:.16em; display:block; margin-bottom:.2rem; }
+  .info .place { font-style:italic; color:var(--taupe-deep); }
+
+  .countdown { display:flex; justify-content:center; gap:.9rem; margin:2rem 0 .2rem; }
+  .cd { display:flex; flex-direction:column; align-items:center; min-width:54px; padding:.7rem .4rem;
+    border:1px solid rgba(154,138,110,.4); background:rgba(154,138,110,.07); }
+  .cd .num { font-family:'Marcellus',serif; font-size:1.55rem; color:var(--ink); line-height:1; font-variant-numeric:tabular-nums; }
+  .cd .lab { font-family:'Cormorant Garamond',serif; font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--text-faint); margin-top:.45rem; text-indent:.16em; }
+
+  .cta { margin-top:2.2rem; display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; position:relative; z-index:2; }
+  .btn { display:inline-flex; align-items:center; gap:.5rem; font-family:'Marcellus',serif; font-size:.71rem; letter-spacing:.15em;
+    text-transform:uppercase; text-indent:.15em; padding:.9rem 1.5rem; cursor:pointer; text-decoration:none; transition:all .3s ease; }
+  .btn-primary { background:linear-gradient(135deg,var(--sepia-light),var(--sepia)); color:var(--paper-hi); border:1px solid transparent;
+    box-shadow:0 8px 22px -8px rgba(107,74,46,.5); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 28px -8px rgba(107,74,46,.65); }
+  .btn-ghost { background:transparent; color:var(--text-soft); border:1px solid var(--sepia-soft); }
+  .btn-ghost:hover { color:var(--sepia); border-color:var(--sepia); transform:translateY(-2px); }
+  .btn svg { width:15px; height:15px; }
+
+  /* ════ FOLD-OPEN GATE ════ */
+  #gate { position:fixed; inset:0; z-index:100; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:radial-gradient(130% 80% at 50% 30%, #F3EEE2, var(--paper) 70%); text-align:center; padding:2rem;
+    transition:opacity .7s ease .5s, visibility 0s 1.2s; }
+  #gate.opened { opacity:0; visibility:hidden; }
+  .fold { position:relative; width:250px; height:330px; perspective:1400px; margin-bottom:1.4rem;
+    animation:foldIn 1s cubic-bezier(.16,1,.3,1) forwards; }
+  @keyframes foldIn { from{transform:translateY(18px) scale(.94);} to{transform:none;} }
+  .fold .panel { position:absolute; top:0; bottom:0; width:50%; cursor:pointer;
+    background:linear-gradient(160deg,var(--paper-hi),var(--paper-lo));
+    box-shadow:0 24px 50px -22px rgba(86,74,53,.45), inset 0 1px 0 rgba(255,255,255,.6);
+    transition:transform 1s cubic-bezier(.6,0,.25,1); backface-visibility:hidden; }
+  .fold .panel.l { left:0; transform-origin:left center; border-right:1px solid rgba(120,104,74,.25); }
+  .fold .panel.r { right:0; transform-origin:right center; border-left:1px solid rgba(120,104,74,.18); }
+  .fold.open .panel.l { transform:rotateY(-105deg); }
+  .fold.open .panel.r { transform:rotateY(105deg); }
+  .fold .emboss { z-index:0; opacity:.7; }
+  .fold .seal { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:64px; height:64px; border-radius:50%; z-index:8;
+    background:radial-gradient(circle at 40% 36%, var(--sepia-light), var(--sepia) 60%, #4d3420 100%);
+    box-shadow:0 8px 18px -6px rgba(0,0,0,.45), inset 0 2px 4px rgba(255,255,255,.2), inset 0 -3px 6px rgba(40,26,14,.5);
+    display:flex; align-items:center; justify-content:center; transition:transform .4s ease, opacity .4s ease; pointer-events:none; }
+  .fold .seal span { font-family:'Pinyon Script',cursive; font-size:2.2rem; color:#EBDFD0; line-height:1; }
+  .fold.open .seal { transform:translate(-50%,-50%) scale(.5); opacity:0; }
+  .gate-title { font-family:'Marcellus',serif; font-size:1.2rem; letter-spacing:.32em; text-transform:uppercase; color:var(--taupe-deep); text-indent:.32em; }
+  .gate-names { font-family:'Pinyon Script',cursive; font-size:2.6rem; color:var(--ink); margin-top:.2rem; line-height:1.25; padding-bottom:.3rem; }
+  .gate-hint { margin-top:1.7rem; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:1rem; color:var(--taupe-deep); animation:pulseHint 2.2s ease-in-out infinite; }
+  @keyframes pulseHint { 0%,100%{opacity:.45;} 50%{opacity:1;} }
+
+  .toast { position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--sepia); color:var(--paper-hi);
+    font-family:'Cormorant Garamond',serif; font-size:1rem; padding:.8rem 1.5rem; border:1px solid var(--sepia-light); opacity:0;
+    pointer-events:none; transition:all .4s ease; z-index:120; }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  @media (max-width:430px) { .card { padding:2.8rem 1.5rem 2.4rem; } }
+  @media (prefers-reduced-motion:reduce) { .rev{animation:none;opacity:1;transform:none;} .fold{animation:none;} }
+</style>
+</head>
+<body>
+
+<!-- damask emboss template (tone-on-tone relief) -->
+<template id="embossTpl">
+  <div class="emboss">
+    <svg class="lo" viewBox="0 0 100 130" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="currentColor" stroke-width="1.1" fill="none">
+        <path d="M50 8 C50 28 36 34 30 50 C40 54 46 44 50 38 C54 44 60 54 70 50 C64 34 50 28 50 8Z"/>
+        <path d="M50 60 C50 80 36 86 30 102 C40 106 46 96 50 90 C54 96 60 106 70 102 C64 86 50 80 50 60Z"/>
+        <path d="M16 30 C26 40 26 54 16 64 M84 30 C74 40 74 54 84 64"/>
+        <path d="M16 84 C26 94 26 108 16 118 M84 84 C74 94 74 108 84 118"/>
+        <circle cx="50" cy="52" r="3"/><circle cx="50" cy="104" r="3"/>
+      </g>
+    </svg>
+    <svg class="hi" viewBox="0 0 100 130" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g stroke="currentColor" stroke-width="1.1" fill="none">
+        <path d="M50 8 C50 28 36 34 30 50 C40 54 46 44 50 38 C54 44 60 54 70 50 C64 34 50 28 50 8Z"/>
+        <path d="M50 60 C50 80 36 86 30 102 C40 106 46 96 50 90 C54 96 60 106 70 102 C64 86 50 80 50 60Z"/>
+        <path d="M16 30 C26 40 26 54 16 64 M84 30 C74 40 74 54 84 64"/>
+        <path d="M16 84 C26 94 26 108 16 118 M84 84 C74 94 74 108 84 118"/>
+        <circle cx="50" cy="52" r="3"/><circle cx="50" cy="104" r="3"/>
+      </g>
+    </svg>
+  </div>
+</template>
+
+<!-- FOLD GATE -->
+<div id="gate">
+  <div class="fold" id="fold" onclick="openGate()">
+    <div class="panel l"><div id="embL"></div></div>
+    <div class="panel r"><div id="embR"></div></div>
+    <div class="seal" data-seal><span>B</span></div>
+  </div>
+  <div class="gate-title">Invitation</div>
+  <div class="gate-names" data-gate-names>Bilel &amp; Jana</div>
+  <div class="gate-hint">Touchez pour ouvrir</div>
+</div>
+
+<!-- CARD -->
+<div class="scene">
+  <div class="card" id="card">
+    <div id="embCard"></div>
+    <div style="position:relative;z-index:2">
+      <div class="monogram" data-seal><span>B</span></div>
+      <div class="eyebrow rev" style="animation-delay:.1s" data-f="eyebrow">Nous vous convions au mariage de</div>
+      <div class="names rev" style="animation-delay:.24s"><span data-f="name1">Bilel</span><span class="amp">&amp;</span><span data-f="name2">Jana</span></div>
+
+      <div class="sep rev" style="animation-delay:.38s"><span class="ln"></span>
+        <svg viewBox="0 0 14 14" fill="none"><rect x="2" y="2" width="10" height="10" fill="#8C6440"/></svg>
+        <span class="ln r"></span></div>
+
+      <p class="honor rev" style="animation-delay:.46s" data-f="honor">Les familles Hamdi &amp; Touati ont l'honneur de partager avec vous ce jour de bonheur</p>
+
+      <p class="info rev" style="animation-delay:.56s"><span class="big" data-f="day">Samedi 5 Septembre 2026</span><span data-f="time">à partir de 19h00</span><br><span class="place" data-f="place">Villa Médina · Constantine</span></p>
+
+      <div class="countdown rev" style="animation-delay:.66s" id="countdown">
+        <div class="cd"><span class="num" id="cd-j">––</span><span class="lab">Jours</span></div>
+        <div class="cd"><span class="num" id="cd-h">––</span><span class="lab">Heures</span></div>
+        <div class="cd"><span class="num" id="cd-m">––</span><span class="lab">Min</span></div>
+      </div>
+
+      <div class="cta rev" style="animation-delay:.76s">
+        <button class="btn btn-primary" onclick="saveDate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg>
+          Confirmer ma présence
+        </button>
+        <a class="btn btn-ghost" data-map href="https://www.google.com/maps/search/?api=1&query=Villa+Medina+Constantine" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+          Itinéraire
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  ['embL','embR','embCard'].forEach((id)=>{ document.getElementById(id).appendChild(document.getElementById('embossTpl').content.cloneNode(true)); });
+
+  let opened=false;
+  function openGate(){ if(opened) return; opened=true; document.getElementById('fold').classList.add('open');
+    setTimeout(()=>document.getElementById('gate').classList.add('opened'),200); }
+
+  let cdTarget=new Date('2026-09-05T19:00:00').getTime();
+  window.setEventDate=function(iso){ const t=new Date(iso).getTime(); if(!isNaN(t)){ cdTarget=t; updateCountdown(); } };
+  function updateCountdown(){
+    let diff=cdTarget-Date.now();
+    if(diff<0){ document.getElementById('countdown').style.display='none'; return; }
+    document.getElementById('countdown').style.display='';
+    const j=Math.floor(diff/86400000); diff%=86400000;
+    const h=Math.floor(diff/3600000); diff%=3600000;
+    const m=Math.floor(diff/60000);
+    document.getElementById('cd-j').textContent=j;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+  }
+  updateCountdown(); setInterval(updateCountdown,30000);
+  setTimeout(function(){ document.querySelectorAll('.rev').forEach(function(e){ e.style.opacity='1'; e.style.transform='none'; }); }, 2000);
+
+  window.INVYTEK_CONFIG={
+    theme:'ivoire-embosse', accent:'#6B4A2E', accent2:'#9A8A6E', backHref:'../themes.html',
+    fields:[
+      {key:'logo', label:'Logo / monogramme (PNG, optionnel)', type:'image', mount:'.card'},
+      {key:'eyebrow', label:'Mention d\'ouverture', sel:'[data-f="eyebrow"]', type:'text'},
+      {key:'name1', label:'Prénom 1', sel:'[data-f="name1"]', type:'text'},
+      {key:'name2', label:'Prénom 2', sel:'[data-f="name2"]', type:'text'},
+      {key:'gnames', label:'Noms (écran d\'ouverture)', sel:'[data-gate-names]', type:'text'},
+      {key:'seal', label:'Initiale du sceau', sel:'[data-seal] span', type:'text'},
+      {key:'honor', label:'Texte d\'honneur', sel:'[data-f="honor"]', type:'textarea'},
+      {key:'day', label:'Date', sel:'[data-f="day"]', type:'text'},
+      {key:'time', label:'Heure', sel:'[data-f="time"]', type:'text'},
+      {key:'place', label:'Lieu', sel:'[data-f="place"]', type:'text'},
+      {key:'map', label:'Lien itinéraire (Google Maps)', sel:'[data-map]', attr:'href', type:'text'},
+      {key:'iso', label:'Date & heure (compte à rebours)', type:'datetime', val:'2026-09-05T19:00'}
+    ]
+  };
+
+  function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600); }
+  // keep monogram + seal initials in sync if edited
+  (function(){ const obs=new MutationObserver(()=>{ const v=document.querySelector('.fold .seal span'); if(v){ const m=document.querySelector('.monogram span'); if(m&&m.textContent!==v.textContent) m.textContent=v.textContent; } }); const s=document.querySelector('.fold .seal span'); if(s) obs.observe(s,{childList:true,characterData:true,subtree:true}); })();
+  function saveDate(){
+    const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Invytek//FR','BEGIN:VEVENT',
+      'DTSTART:20260905T190000','DTEND:20260905T235900','SUMMARY:Mariage Bilel & Jana',
+      'LOCATION:Villa Medina\\, Constantine','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const blob=new Blob([ics],{type:'text/calendar'}); const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='mariage-bilel-jana.ics'; a.click();
+    toast('Présence confirmée — date enregistrée');
+  }
+</script>
+<script src="../assets/editor.js"></script>
+</body>
+</html>

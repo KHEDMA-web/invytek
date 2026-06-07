@@ -8,18 +8,24 @@ import type { WeddingContent } from "@/lib/schemas/wedding";
 
 const CAT_MAP: Record<string, string> = {
   "gold-arch": "Mariage", "bordeaux-oval": "Mariage · RTL", "ivoire-minimal": "Mariage",
+  "couronne-royale": "Mariage", "glycine-bleue": "Mariage", "rose-poudre": "Mariage",
+  "ivoire-embosse": "Mariage", "sceau-de-rose": "Mariage",
   "confettis-or": "Anniversaire", "anniv-neon": "Anniversaire",
   "baby-shower": "Bébé",
   "soiree-prestige": "Business", "conference-tech": "Business", "inauguration": "Business",
+  "bordeaux-imperial": "Business",
   "blouse-lys": "Médical", "congres-medical": "Médical", "sensibilisation": "Médical",
   "dynamic": "IA",
 };
 
 const THEME_NAMES: Record<string, string> = {
   "gold-arch": "Or & Arche", "bordeaux-oval": "Bordeaux & Ovale", "ivoire-minimal": "Ivoire Minimal",
+  "couronne-royale": "Couronne Royale", "glycine-bleue": "Glycine Bleue", "rose-poudre": "Rose Poudré",
+  "ivoire-embosse": "Ivoire Embossé", "sceau-de-rose": "Sceau de Rose",
   "confettis-or": "Confettis d'Or", "anniv-neon": "Neon Burst",
   "baby-shower": "Baby Shower",
   "soiree-prestige": "Soirée Prestige", "conference-tech": "Conférence Tech", "inauguration": "Inauguration",
+  "bordeaux-imperial": "Bordeaux Impérial",
   "blouse-lys": "Blouse & Lys", "congres-medical": "Congrès Médical", "sensibilisation": "Sensibilisation",
   "dynamic": "Thème IA",
 };
@@ -162,6 +168,81 @@ function ThemeMini({ themeId, n1, n2, date }: { themeId: string; n1: string; n2:
       <div className="ttl">{n1}</div>
       <div className="org">{n2}</div>
       <div className="sdt">{dt}</div>
+    </div>
+  );
+
+  if (themeId === "couronne-royale") return (
+    <div className="tm tm--couronne-royale" style={{ background: "radial-gradient(120% 70% at 50% 16%,#16234f,#0b1330 72%)", color: "#F6F1E4" }}>
+      <div className="tm-eb" style={{ color: "#E7C76C" }}>Mariage · Prestige</div>
+      <svg viewBox="0 0 120 92" style={{ width: 44, height: 34, margin: "8px auto 0", display: "block" }} fill="none">
+        <path d="M12 78 L18 34 L40 58 L60 22 L80 58 L102 34 L108 78 Z" fill="#E7C76C" stroke="#8A6A28" strokeWidth="1.4" strokeLinejoin="round"/>
+        <path d="M12 78 L108 78 L106 88 L14 88 Z" fill="#C29A4B"/>
+        <circle cx="60" cy="14" r="5" fill="#E7C76C"/>
+      </svg>
+      <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 28, color: "#F3E2A8", marginTop: 6, marginBottom: 14 }}>{n1.split(" ")[0]}</div>
+      <div className="dt" style={{ color: "#E7C76C" }}>{dt}</div>
+    </div>
+  );
+
+  if (themeId === "glycine-bleue") return (
+    <div className="tm tm--glycine-bleue" style={{ background: "linear-gradient(170deg,#FBFAF5,#F3F0E8)", color: "#22304F" }}>
+      <div className="tm-eb" style={{ color: "#5C7BB8" }}>Mariage</div>
+      <div style={{ position: "relative", width: 80, height: 52, margin: "10px auto 0", background: "linear-gradient(160deg,#1E3A6E,#16294E)", border: "1px solid rgba(196,154,72,.4)" }}>
+        <div style={{ position: "absolute", inset: 0, clipPath: "polygon(0 0,100% 0,50% 72%)", background: "#26477f" }} />
+        <div style={{ position: "absolute", left: "50%", top: "48%", transform: "translate(-50%,-50%)", width: 18, height: 18, borderRadius: "50%", background: "radial-gradient(circle at 38% 34%,#E0BC6A,#C49A48 62%,#9a7430)" }} />
+      </div>
+      <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 26, color: "#1E3A6E", marginTop: 8, marginBottom: 14 }}>{n1.split(" ")[0]}</div>
+      <div className="dt" style={{ color: "#5C7BB8" }}>{dt}</div>
+    </div>
+  );
+
+  if (themeId === "rose-poudre") return (
+    <div className="tm tm--rose-poudre" style={{ background: "linear-gradient(170deg,#FEF8F9,#FBEFF1)", color: "#A85A6C" }}>
+      <div className="tm-eb" style={{ color: "#C77B8B" }}>Mariage</div>
+      <div style={{ position: "relative", width: 80, height: 52, margin: "10px auto 0", background: "linear-gradient(160deg,#E8B6C2,#C77B8B)", border: "1px solid rgba(196,154,72,.35)" }}>
+        <div style={{ position: "absolute", inset: 0, clipPath: "polygon(0 0,100% 0,50% 72%)", background: "#E1A8B6" }} />
+        <div style={{ position: "absolute", left: "50%", top: "48%", transform: "translate(-50%,-50%)", width: 18, height: 18, borderRadius: "50%", background: "radial-gradient(circle at 38% 34%,#E0BC6A,#C49A48 62%,#9a7430)" }} />
+      </div>
+      <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 26, color: "#A85A6C", marginTop: 8, marginBottom: 14 }}>{n1.split(" ")[0]}</div>
+      <div className="dt" style={{ color: "#C77B8B" }}>{dt}</div>
+    </div>
+  );
+
+  if (themeId === "ivoire-embosse") return (
+    <div className="tm tm--ivoire-embosse" style={{ background: "linear-gradient(170deg,#F3EEE2,#E9E2D3)", color: "#564A35" }}>
+      <div className="tm-eb" style={{ color: "#6F6048" }}>Mariage · Minimal</div>
+      <div style={{ width: 40, height: 40, borderRadius: "50%", margin: "10px auto 0", background: "radial-gradient(circle at 40% 36%,#8C6440,#6B4A2E 60%,#4d3420)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 22, color: "#EBDFD0" }}>{n1[0]?.toUpperCase() || "B"}</span>
+      </div>
+      <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 26, color: "#564A35", marginTop: 8, marginBottom: 14 }}>{n1.split(" ")[0]}</div>
+      <div className="dt" style={{ color: "#6F6048" }}>{dt}</div>
+    </div>
+  );
+
+  if (themeId === "sceau-de-rose") return (
+    <div className="tm tm--sceau-de-rose" style={{ background: "linear-gradient(170deg,#FAF3E4,#F0E6D2)", color: "#5A4326" }}>
+      <div className="tm-eb" style={{ color: "#BF9A48" }}>Mariage</div>
+      <div style={{ width: 40, height: 40, borderRadius: "50%", margin: "10px auto 0", background: "radial-gradient(circle at 40% 34%,#CC4A40,#A82828 55%,#7E1A1A)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 6px rgba(0,0,0,.2)" }}>
+        <span style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 20, color: "#E89A92" }}>{n1[0]?.toUpperCase() || "M"}</span>
+      </div>
+      <div className="nm" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: 26, color: "#5A4326", marginTop: 8, marginBottom: 14 }}>{n1.split(" ")[0]}</div>
+      <div className="dt" style={{ color: "#BF9A48" }}>{dt}</div>
+    </div>
+  );
+
+  if (themeId === "bordeaux-imperial") return (
+    <div className="tm tm--bordeaux-imperial" style={{ background: "radial-gradient(120% 70% at 50% 30%,#4a121e,#160509 72%)", color: "#F5ECDC" }}>
+      <div className="tm-eb" style={{ color: "#E1C06C" }}>Business · Gala</div>
+      <svg viewBox="0 0 230 60" style={{ width: 90, height: 24, margin: "10px auto 2px", display: "block" }} fill="none">
+        <g stroke="#E1C06C" strokeWidth="1.6" strokeLinecap="round">
+          <path d="M115 8 C115 20 108 26 100 30 C112 32 116 40 115 52"/>
+          <path d="M100 30 C78 24 62 36 56 20 C50 36 36 30 22 38"/>
+          <path d="M130 30 C152 24 168 36 174 20 C180 36 194 30 208 38"/>
+        </g>
+        <circle cx="115" cy="6" r="3" fill="#E1C06C"/>
+      </svg>
+      <div className="nm" style={{ fontFamily: "var(--font-title)", fontSize: 18, color: "#F1DDA2", letterSpacing: ".05em", marginTop: 4, marginBottom: 14 }}>{n1}</div>
+      <div className="dt" style={{ color: "#C76B79" }}>{n2}</div>
     </div>
   );
 
