@@ -83,15 +83,12 @@ export default async function CommunityThemesPage() {
             const bg      = spec?.palette.bg      ?? colors["--bg-1"] ?? "#14100a";
 
             return (
-              <div key={theme.id} style={{
+              <div key={theme.id} className="gallery-card" style={{
                 border: theme.isPromoted ? `2px solid ${primary}` : "1px solid var(--hair)",
                 borderRadius: 16, overflow: "hidden",
                 background: "linear-gradient(160deg, var(--bg-raise), var(--bg))",
                 display: "flex", flexDirection: "column",
-                transition: "transform .4s cubic-bezier(.16,1,.3,1), border-color .35s, box-shadow .4s",
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = "translateY(-5px)"; (e.currentTarget as HTMLElement).style.boxShadow = "0 36px 64px -38px rgba(0,0,0,.85)"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = "none"; (e.currentTarget as HTMLElement).style.boxShadow = "none"; }}>
+              }}>
 
                 {/* Aperçu — DynamicTheme ou palette swatches */}
                 <div style={{ position: "relative", height: 200, overflow: "hidden" }}>

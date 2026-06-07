@@ -863,6 +863,10 @@ header.hero {
 .rsvp-done2 .close2 { margin-top:22px; }
 .done-spark2 { position:absolute; top:30px; left:50%; width:6px; height:6px; border-radius:50%; animation:rsvpSpark 1s ease-out .25s forwards; }
 
+/* ─── Gallery card hover (Server Component safe — CSS only) ─── */
+.gallery-card { transition:transform .4s cubic-bezier(.16,1,.3,1),border-color .35s,box-shadow .4s; }
+.gallery-card:hover { transform:translateY(-5px); border-color:var(--hair-strong) !important; box-shadow:0 36px 64px -38px rgba(0,0,0,.85); }
+
 @keyframes rsvpSpin { to{transform:rotate(360deg)} }
 @keyframes rsvpDraw { from{stroke-dashoffset:46} to{stroke-dashoffset:0} }
 @keyframes rsvpPop { 0%{transform:scale(.5)} 60%{transform:scale(1.08)} 100%{transform:scale(1)} }
