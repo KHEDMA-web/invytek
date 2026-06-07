@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.paid" && event.data?.status === "paid") {
     const { userId, plan, months = 1 } = event.data.metadata ?? {};
-    if (!userId || !plan || !["pro", "business"].includes(plan)) {
+    if (!userId || !plan || !["simple", "pro", "business"].includes(plan)) {
       return NextResponse.json({ ok: true });
     }
 

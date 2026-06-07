@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import { getDbUser } from "@/lib/getDbUser";
 
 const PLANS = {
-  pro:      { label: "Plan Pro",      amount: 990,  months: 1 },
-  business: { label: "Plan Business", amount: 2900, months: 1 },
+  simple:   { label: "Plan Simple",   amount: 1000, months: 1 },
+  pro:      { label: "Plan Pro",      amount: 3000, months: 1 },
+  business: { label: "Plan Business", amount: 5000, months: 1 },
 } as const;
 
 export async function POST(req: Request) {

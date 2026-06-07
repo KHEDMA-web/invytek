@@ -219,9 +219,10 @@ export default async function DashboardPage() {
             {currentPlan !== "free" && (
               <span style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase",
                 padding: "5px 12px", borderRadius: 100,
-                background: currentPlan === "business" ? "linear-gradient(135deg,#a080e0,#7050c0)" : "linear-gradient(135deg,var(--gold-vivid),var(--accent))",
-                color: currentPlan === "business" ? "#fff" : "#2a2008" }}>
-                {currentPlan === "business" ? "Business" : "Pro"} ✓
+                background: currentPlan === "business" ? "linear-gradient(135deg,#a080e0,#7050c0)" : currentPlan === "pro" ? "linear-gradient(135deg,var(--gold-vivid),var(--accent))" : "rgba(184,146,60,0.15)",
+                color: currentPlan === "business" ? "#fff" : currentPlan === "pro" ? "#2a2008" : "var(--gold-vivid)",
+                border: currentPlan === "simple" ? "1px solid var(--hair-strong)" : "none" }}>
+                {currentPlan === "business" ? "Business" : currentPlan === "pro" ? "Pro" : "Simple"} ✓
               </span>
             )}
             <Link href="/create" className="btn btn-gold btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
@@ -360,12 +361,12 @@ export default async function DashboardPage() {
           {/* Plan actuel */}
           {currentPlan === "free" && (
             <div style={{ flex: 1, minWidth: 260, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
-              background: "rgba(184,146,60,0.05)", border: "1px solid var(--hair)", borderRadius: 12, padding: "1rem 1.4rem" }}>
+              background: "rgba(200,60,60,0.07)", border: "1px solid rgba(200,60,60,0.25)", borderRadius: 12, padding: "1rem 1.4rem" }}>
               <div>
-                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 4 }}>Plan actuel</div>
-                <div style={{ fontFamily: "var(--font-title)", fontSize: 15, color: "var(--ivory)" }}>Gratuit <span style={{ fontSize: 12, color: "var(--text-faint)" }}>— 1 invitation max</span></div>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "#e07070", marginBottom: 4 }}>Aucun abonnement</div>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>Souscrivez pour créer des invitations</div>
               </div>
-              <Link href="/pricing" className="btn btn-gold btn-sm">Passer au Pro →</Link>
+              <Link href="/pricing" className="btn btn-gold btn-sm">Voir les plans →</Link>
             </div>
           )}
           {currentPlan !== "free" && dbUser.planExpiresAt && (

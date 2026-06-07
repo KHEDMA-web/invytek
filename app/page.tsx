@@ -34,7 +34,7 @@ export default function HomePage() {
                 Créez des invitations interactives et animées, partagez un simple lien, et recevez les confirmations en temps réel.
               </p>
               <div className="hero-actions reveal d3">
-                <Link className="btn btn-gold" href="/themes">Créer mon invitation gratuitement</Link>
+                <Link className="btn btn-gold" href="/auth">Créer mon invitation</Link>
                 <Link className="btn btn-ghost" href="/themes">Découvrir les thèmes</Link>
               </div>
               <div className="hero-meta reveal d4">
@@ -224,9 +224,10 @@ export default function HomePage() {
             Offrez une <span className="script" style={{ fontSize: "1.25em" }}>première émotion</span><br />
             à la hauteur de l&apos;événement.
           </h2>
-          <p className="lede">Créez votre première invitation gratuitement. Aucune carte bancaire requise.</p>
-          <div style={{ marginTop: 38 }}>
-            <Link className="btn btn-gold" href="/themes">Créer mon invitation gratuitement</Link>
+          <p className="lede">Choisissez votre plan, créez votre première invitation en quelques minutes.</p>
+          <div style={{ marginTop: 38, display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
+            <Link className="btn btn-gold" href="/auth">Créer mon invitation</Link>
+            <Link className="btn btn-ghost" href="/pricing">Voir les tarifs</Link>
           </div>
         </div>
       </section>

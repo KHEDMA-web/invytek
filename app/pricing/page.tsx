@@ -8,33 +8,33 @@ import { Footer } from "@/components/Footer";
 
 const PLANS = [
   {
-    name: "Gratuit",
-    price: "0",
-    period: "pour toujours",
-    desc: "Parfait pour découvrir Invytek.",
+    name: "Simple",
+    planKey: "simple",
+    price: "1 000",
+    period: "DA / mois",
+    desc: "Idéal pour les agences qui démarrent.",
     pop: false,
-    cta: "Commencer gratuitement",
-    ctaHref: "/auth",
+    cta: "Choisir Simple",
     features: [
-      { text: "1 invitation active", ok: true },
-      { text: "3 thèmes disponibles", ok: true },
-      { text: "10 invités nominatifs", ok: true },
+      { text: "5 invitations actives", ok: true },
+      { text: "Tous les thèmes (12+)", ok: true },
+      { text: "Invités illimités", ok: true },
       { text: "RSVP en ligne", ok: true },
       { text: "Lien public partageable", ok: true },
-      { text: "Thèmes Business & Médical", ok: false },
+      { text: "Liens nominatifs + WhatsApp", ok: true },
       { text: "QR Code check-in", ok: false },
-      { text: "Stats & exports", ok: false },
+      { text: "Export CSV & stats", ok: false },
     ],
   },
   {
     name: "Pro",
-    price: "990",
+    planKey: "pro",
+    price: "3 000",
     period: "DA / mois",
     desc: "Pour des événements mémorables, sans limite.",
     pop: true,
     badge: "Populaire",
     cta: "Choisir Pro",
-    ctaHref: "/auth",
     features: [
       { text: "Invitations illimitées", ok: true },
       { text: "Tous les thèmes (12+)", ok: true },
@@ -42,24 +42,24 @@ const PLANS = [
       { text: "RSVP en ligne", ok: true },
       { text: "Liens nominatifs + email/WhatsApp", ok: true },
       { text: "QR Code check-in à l'entrée", ok: true },
-      { text: "Stats en temps réel", ok: true },
-      { text: "Support prioritaire", ok: false },
+      { text: "Stats & export CSV", ok: true },
+      { text: "Support prioritaire", ok: true },
     ],
   },
   {
     name: "Business",
-    price: "2 900",
+    planKey: "business",
+    price: "5 000",
     period: "DA / mois",
     desc: "Entreprises, cliniques, organisateurs d'événements.",
     pop: false,
-    cta: "Contacter l'équipe",
-    ctaHref: "mailto:contact@invytek.app",
+    cta: "Choisir Business",
     features: [
       { text: "Tout le plan Pro", ok: true },
       { text: "Multi-utilisateurs", ok: true },
       { text: "Marque personnalisée (logo)", ok: true },
       { text: "Domaine personnalisé", ok: true },
-      { text: "Export CSV invités & RSVP", ok: true },
+      { text: "Portail client B2B", ok: true },
       { text: "API webhooks RSVP", ok: true },
       { text: "Support dédié", ok: true },
       { text: "Onboarding personnalisé", ok: true },
@@ -181,19 +181,7 @@ export default function PricingPage() {
                     <span className="per">{plan.period}</span>
                   </div>
                   <p className="p-desc">{plan.desc}</p>
-                  {plan.name === "Gratuit" ? (
-                    <Link href="/auth" className={`btn btn-ghost btn-sm p-cta`}
-                      style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem", display: "inline-flex", alignItems: "center" }}>
-                      {plan.cta}
-                    </Link>
-                  ) : plan.name === "Business" ? (
-                    <a href="mailto:contact@invytek.app" className="btn btn-ghost btn-sm p-cta"
-                      style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem", display: "inline-flex", alignItems: "center" }}>
-                      {plan.cta}
-                    </a>
-                  ) : (
-                    <PlanCta planKey={plan.name.toLowerCase()} label={plan.cta} className={`btn ${plan.pop ? "btn-gold" : "btn-ghost"} btn-sm`} />
-                  )}
+                  <PlanCta planKey={plan.planKey} label={plan.cta} className={`btn ${plan.pop ? "btn-gold" : "btn-ghost"} btn-sm`} />
                   <div className="p-sep" />
                   <ul className="feats">
                     {plan.features.map(f => (

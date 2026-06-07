@@ -37,7 +37,13 @@ function AuthForm() {
         else setError("Une erreur est survenue (" + code + ").");
       } else {
         const raw = params.get("callbackUrl");
-        window.location.href = raw?.startsWith("/") ? raw : "/dashboard";
+        if (raw?.startsWith("/")) {
+          window.location.href = raw;
+        } else {
+          const planRes = await fetch("/api/credits");
+          const planData = await planRes.json() as { plan?: string };
+          window.location.href = planData.plan && planData.plan !== "free" ? "/dashboard" : "/pricing";
+        }
       }
     } finally {
       setLoading(false);
