@@ -255,8 +255,9 @@ export async function POST(req: Request) {
 
   const raw = message.content[0]?.type === "text" ? (message.content[0].text ?? "").trim() : "";
 
+  const userId = dbUser.id;
   async function refund() {
-    await prisma.user.update({ where: { id: dbUser.id }, data: { credits: { increment: CREDIT_COST } } });
+    await prisma.user.update({ where: { id: userId }, data: { credits: { increment: CREDIT_COST } } });
   }
 
   let rawObj: unknown;
