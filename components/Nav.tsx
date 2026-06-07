@@ -175,6 +175,7 @@ export function Nav() {
     : "#c0a0f0";
 
   const NAV_LINKS = [
+    { href: "/",                 label: "Accueil" },
     { href: "/themes",           label: "Thèmes" },
     { href: "/themes/community", label: "Galerie IA" },
     { href: "/#how",             label: "Comment ça marche" },

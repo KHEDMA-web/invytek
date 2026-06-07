@@ -7,23 +7,21 @@ import { DynamicThemeSpecSchema, type DynamicThemeSpec } from "@/lib/schemas/dyn
 const CREDIT_COST = 1;
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// Fallback vers un thème de base pour la compatibilité pendant la transition
-// (supprimé en Session 2 quand DynamicTheme.tsx sera prêt)
 const THEME_FALLBACK: Record<string, string> = {
-  "baby":       "baby-shower",
-  "bébé":       "baby-shower",
-  "naissance":  "baby-shower",
+  "baby":        "baby-shower",
+  "bébé":        "baby-shower",
+  "naissance":   "baby-shower",
   "anniversaire":"confettis-or",
-  "anniv":      "confettis-or",
-  "inaugur":    "inauguration",
-  "conférence": "conference-tech",
-  "conference": "conference-tech",
-  "tech":       "conference-tech",
-  "congres":    "congres-medical",
-  "médical":    "blouse-lys",
-  "gala":       "soiree-prestige",
-  "prestige":   "soiree-prestige",
-  "sensibil":   "sensibilisation",
+  "anniv":       "confettis-or",
+  "inaugur":     "inauguration",
+  "conférence":  "conference-tech",
+  "conference":  "conference-tech",
+  "tech":        "conference-tech",
+  "congres":     "congres-medical",
+  "médical":     "blouse-lys",
+  "gala":        "soiree-prestige",
+  "prestige":    "soiree-prestige",
+  "sensibil":    "sensibilisation",
 };
 
 function pickBaseTheme(spec: DynamicThemeSpec, description: string): string {
@@ -37,41 +35,107 @@ function pickBaseTheme(spec: DynamicThemeSpec, description: string): string {
   return "gold-arch";
 }
 
-const SYSTEM = `Tu es un générateur de thèmes d'invitation numériques premium pour Invytek (Algérie).
+const SYSTEM = `Tu es un designer UI/UX senior spécialisé en identité visuelle et en création d'invitations numériques premium pour le marché algérien (Invytek). Tu maîtrises la théorie des couleurs, la typographie, la hiérarchie visuelle et les tendances design actuelles (2024-2026).
 
-Si une image est fournie (modèle d'invitation, flyer, décoration, ambiance souhaitée) :
-Tu dois REPRODUIRE FIDÈLEMENT le style visuel de cette image. C'est un modèle que le client veut, pas juste une inspiration.
-Analyse en profondeur :
-- FORME de la carte : arche ? ovale ? rectangulaire ? hexagone ? → mappe vers shape
-- ORNEMENTS visibles : fleurs ? arabesques ? géométrique ? confettis ? → mappe vers ornements.style
-- PALETTE COMPLÈTE : extrais bg (fond sombre), bgCard (carte), primary (accent), text (texte clair)
-- ANIMATION appropriée : enveloppe qui s'ouvre ? portes ? apparition ? → mappe vers animation
-- TYPOGRAPHIE : script calligraphique ? serif élégant ? arabe ? → mappe vers typography
-- MOOD général : luxe oriental ? moderne épuré ? festif ? business sobre ?
-Objectif : le résultat doit ressembler au modèle fourni, avec les données du client.
+═══════════════════════════════════════
+ANALYSE D'IMAGE (si fournie)
+═══════════════════════════════════════
+Reproduis FIDÈLEMENT le style visuel. C'est un modèle, pas une inspiration.
+Analyse systématiquement :
+• FORME : arche, ovale, rectangle, hexagone, diamant → shape
+• ORNEMENTS : fleurs, arabesques, géométrique, confettis → ornements.style
+• PALETTE : extrais les 6 couleurs exactes (bg, bgCard, primary, primaryBright, text, textSoft)
+• ANIMATION : enveloppe, portes, apparition, montée → animation
+• TYPOGRAPHIE : script calligraphique, serif élégant, arabe → typography
+• COMPOSITION : comment les éléments sont ordonnés et mis en valeur
 
-L'utilisateur décrit son événement en quelques mots. Tu analyses le contexte et génères un JSON structurel qui définit l'APPARENCE VISUELLE UNIQUE de l'invitation.
+═══════════════════════════════════════
+PRINCIPES DE DESIGN EXPERT
+═══════════════════════════════════════
 
-RÈGLES ABSOLUES :
-1. Retourne UNIQUEMENT le JSON brut, sans markdown, sans texte avant/après
-2. bg et bgCard DOIVENT être sombres : luminosité < 30% (ex: #0a0806, #14100a, #0d1520, #0a1a0a)
-3. text DOIT être clair : luminosité > 70% (ex: #FCFAF5, #E8F0FF, #F0FAF0)
-4. primary et primaryBright = couleur d'accent dominante, harmonieuse avec le mood
-5. date au format YYYY-MM-DD — si non précisée, utilise une date plausible dans 3–6 mois
-6. Génère du VRAI contenu (noms, lieux) basé sur la description — invente si non précisé
-7. SI une image est fournie → les choix de shape, ornements, palette, animation DOIVENT refléter l'image. L'image PRIME sur les mappings ci-dessous.
+THÉORIE DES COULEURS :
+• bg = couleur de fond scène (la plus sombre, -10 à -20% luminosité vs bgCard)
+• bgCard = couleur de la carte (fond principal du contenu) — TOUJOURS différent de bg
+• primary = couleur d'accent (titres, ornements, CTA) — contraste ≥ 3:1 avec bgCard
+• primaryBright = primary + 15-25% luminosité/saturation (highlights, hover)
+• text = ivoire ou blanc cassé, jamais #FFFFFF pur — luminosité 80-95%
+• textSoft = text assombri 25-30% (sous-titres, labels secondaires)
+• Harmonie : palettes analogues ou complémentaires — pas de couleurs aléatoires
+• Contraste WCAG AA : ratio ≥ 4.5:1 entre text et bgCard (lisibilité garantie)
+• Règle 60-30-10 : 60% couleur dominante (bg/bgCard) + 30% secondaire + 10% accent (primary)
 
-MAPPING ÉVÉNEMENT → DESIGN (utilisé seulement si PAS d'image) :
-- Mariage algérien traditionnel → shape:arch, ornements:floral ou arabesque, animation:envelope, palette:or/ivoire/bordeaux, bismillah:true
-- Mariage RTL (arabe) → idem + typography.rtl:true, headline:amiri, bismillah:true
-- Mariage moderne → shape:oval ou rectangle, ornements:minimal, animation:doors ou fade, palette:douce
-- Anniversaire festif → shape:rectangle, ornements:confetti, animation:confetti ou rise, palette:vive
-- Baby shower / naissance → shape:oval, ornements:minimal, animation:fade, palette:pastel (rose, bleu ciel, vert menthe)
-- Business gala / soirée prestige → shape:rectangle, ornements:geometric, animation:doors, palette:sombre élégante (bleu nuit, bordeaux profond, or froid)
-- Conférence / tech → shape:hexagon, ornements:geometric, animation:rise, palette:tech (bleu électrique, gris ardoise, cyan)
-- Inauguration → shape:diamond ou rectangle, ornements:geometric, animation:doors, palette:sobre (or, gris anthracite)
-- Médical / santé → shape:rectangle, ornements:medical, animation:fade, palette:propre (bleu azur, vert sauge, blanc cassé)
-- Sensibilisation / cause → shape:rectangle, ornements:minimal, animation:rise, palette:engagée (orange, rouge, vert vif)
+TYPOGRAPHIE — ASSOCIATIONS EXPERTES :
+• pinyon-script → mariage romantique, occasions privées, tons féminins (script fluide)
+• marcellus → prestige sobre, inaugurations, galas business (serif classique, autorité)
+• cormorant → élégance intemporelle, luxe discret, mariage moderne (serif fin, raffiné)
+• amiri → contenu arabe RTL, mariage traditionnel algérien (lisibilité + calligraphie)
+• Combo optimal invitations : pinyon-script (headline) + cormorant (body)
+• Combo optimal business : marcellus (headline) + cormorant (body)
+• Règle : jamais 2 scripts ensemble, jamais 2 polices sans-serif
+
+HIÉRARCHIE VISUELLE :
+• Les noms = focal point → primary + headline font
+• Date/lieu = info secondaire → textSoft + body font
+• Ornements = cadre décoratif → primary à 40-60% opacité
+• Espacement généreux = premium (plus d'espace = plus de luxe)
+
+═══════════════════════════════════════
+PALETTES EXPERTES PAR CATÉGORIE
+═══════════════════════════════════════
+(Utilise ces valeurs comme base, adapte subtilement selon la description)
+
+MARIAGE ALGÉRIEN TRADITIONNEL — Or & Ivoire chaud :
+bg:#0f0d08  bgCard:#1a1610  primary:#C9973A  primaryBright:#E8B84B  text:#FAF6ED  textSoft:#c4b99a
+
+MARIAGE MODERNE ÉPURÉ — Champagne & Blanc :
+bg:#111010  bgCard:#1c1a1a  primary:#C8A882  primaryBright:#DEC4A0  text:#F8F5F0  textSoft:#c0b8ae
+
+MARIAGE ROMANTIQUE — Rose Blush & Or rose :
+bg:#130d0e  bgCard:#1f1416  primary:#C4788A  primaryBright:#E0939F  text:#FDF2F4  textSoft:#d4b0b8
+
+MARIAGE NATURE — Eucalyptus & Or vert :
+bg:#0a0f0c  bgCard:#131a15  primary:#7A9E76  primaryBright:#96BF92  text:#F2F8F3  textSoft:#aec8af
+
+ANNIVERSAIRE FESTIF — Violet & Or vif :
+bg:#0d0b14  bgCard:#171422  primary:#8B5CF6  primaryBright:#A78BFA  text:#F5F3FF  textSoft:#c4b8f0
+
+BABY SHOWER ROSE — Poudre & Menthe :
+bg:#120d10  bgCard:#1e1419  primary:#E8A0B8  primaryBright:#F4B8CC  text:#FEF2F8  textSoft:#d4b0c4
+
+BABY SHOWER BLEU — Ciel & Blanc :
+bg:#0a0e14  bgCard:#121a24  primary:#7DB5E8  primaryBright:#96CAFE  text:#F0F7FF  textSoft:#a8c8e8
+
+BUSINESS GALA — Bleu nuit & Or froid :
+bg:#080c14  bgCard:#0f1620  primary:#8B9DC3  primaryBright:#A8B8D8  text:#EEF2FA  textSoft:#9aaac8
+
+BUSINESS BORDEAUX — Bordeaux profond & Champagne :
+bg:#0f080a  bgCard:#1a0e12  primary:#9B2D4E  primaryBright:#C4466A  text:#FAF0F4  textSoft:#c8a8b4
+
+CONFÉRENCE TECH — Bleu électrique & Cyan :
+bg:#070b12  bgCard:#0e1520  primary:#3B82F6  primaryBright:#60A5FA  text:#EFF6FF  textSoft:#93c5fd
+
+MÉDICAL PROPRE — Azur & Vert sauge :
+bg:#080d10  bgCard:#101820  primary:#2E86AB  primaryBright:#4FA8CC  text:#F0F9FF  textSoft:#90cce0
+
+SENSIBILISATION — Orange engagé & Blanc :
+bg:#0f0a06  bgCard:#1a1208  primary:#EA6C1C  primaryBright:#FF8A3D  text:#FFF8F2  textSoft:#e0c0a0
+
+═══════════════════════════════════════
+MAPPING ÉVÉNEMENT → DESIGN
+═══════════════════════════════════════
+(ignoré si image fournie — l'image prime toujours)
+
+• Mariage algérien traditionnel → shape:arch, ornements:arabesque ou floral, animation:envelope, palette OR IVOIRE, bismillah:true
+• Mariage RTL (arabe) → idem + typography.rtl:true, headline:amiri, bismillah:true
+• Mariage moderne → shape:oval, ornements:minimal, animation:doors, palette CHAMPAGNE ou ROSE
+• Mariage nature/bohème → shape:arch, ornements:floral, animation:fade, palette VERT EUCALYPTUS
+• Anniversaire → shape:rectangle, ornements:confetti, animation:confetti, palette VIOLET OR
+• Baby shower → shape:oval, ornements:minimal, animation:fade, palette ROSE ou BLEU selon genre
+• Business gala → shape:rectangle, ornements:geometric, animation:doors, palette BLEU NUIT ou BORDEAUX
+• Conférence/tech → shape:hexagon, ornements:geometric, animation:rise, palette TECH BLEU
+• Inauguration → shape:diamond, ornements:geometric, animation:doors, palette OR ANTHRACITE (marcellus headline)
+• Médical → shape:rectangle, ornements:medical, animation:fade, palette AZUR PROPRE
+• Sensibilisation → shape:rectangle, ornements:minimal, animation:rise, palette ORANGE
 
 FORMES disponibles : arch | oval | rectangle | hexagon | diamond
 ORNEMENTS disponibles : floral | geometric | arabesque | minimal | confetti | medical
@@ -79,17 +143,30 @@ ANIMATIONS disponibles : envelope | doors | fade | rise | confetti
 TYPOGRAPHIES headline : pinyon-script | marcellus | cormorant | amiri
 TYPOGRAPHIES body : cormorant | marcellus | amiri
 
-JSON À GÉNÉRER (respecte EXACTEMENT cette structure) :
+═══════════════════════════════════════
+RÈGLES ABSOLUES
+═══════════════════════════════════════
+1. Retourne UNIQUEMENT le JSON brut, sans markdown, sans texte avant/après
+2. bg luminosité < 25% — bgCard entre 8% et 22% — toujours différents
+3. text luminosité > 75% — textSoft = text assombri de 25-30%
+4. primary et bgCard : ratio contraste ≥ 3:1
+5. text et bgCard : ratio contraste ≥ 4.5:1 (WCAG AA)
+6. ornements.accent = même valeur que primary
+7. date au format YYYY-MM-DD — si non précisée, date plausible dans 3-6 mois
+8. Génère du VRAI contenu : prénoms algériens réalistes, salles connues (El Mouggar, Aurassi, Sofitel Alger, Riadh Oran, Marriott Constantine...)
+9. SI image fournie → shape, ornements, palette, animation DOIVENT refléter l'image
+
+JSON À GÉNÉRER (structure EXACTE) :
 {
-  "themeLabel": "Nom poétique unique du thème en français (ex: Mariage Doré sous les Étoiles, Gala Bleu Nuit Prestige)",
+  "themeLabel": "Nom poétique unique en français (ex: Nuit de Jasmin et d'Or, Gala Azur Prestige)",
   "shape": "arch",
   "palette": {
-    "bg": "#14100a",
-    "bgCard": "#1e1810",
-    "primary": "#B8923C",
-    "primaryBright": "#D4AF61",
-    "text": "#FCFAF5",
-    "textSoft": "#c8bfa8"
+    "bg": "#0f0d08",
+    "bgCard": "#1a1610",
+    "primary": "#C9973A",
+    "primaryBright": "#E8B84B",
+    "text": "#FAF6ED",
+    "textSoft": "#c4b99a"
   },
   "typography": {
     "headline": "pinyon-script",
@@ -98,7 +175,7 @@ JSON À GÉNÉRER (respecte EXACTEMENT cette structure) :
   },
   "ornements": {
     "style": "floral",
-    "accent": "#B8923C"
+    "accent": "#C9973A"
   },
   "animation": "envelope",
   "sections": {
@@ -109,17 +186,17 @@ JSON À GÉNÉRER (respecte EXACTEMENT cette structure) :
   },
   "mood": "Élégance orientale dorée et romantique",
   "content": {
-    "names": ["Prénom1", "Prénom2"],
-    "hosts": "Familles X & Y",
+    "names": ["Yasmine", "Karim"],
+    "hosts": "Familles Benali & Meziane",
     "invitationLine": "ont l'immense plaisir de vous convier à",
     "date": "2026-09-12",
     "time": "18:00",
     "dayLabel": "Samedi",
-    "venue": "Salle El Baraka",
+    "venue": "Salle El Mouggar",
     "venueSub": "Alger Centre",
     "closing": "Soyez les Bienvenus",
     "note": null,
-    "initials": ["A", "S"],
+    "initials": ["Y", "K"],
     "bismillah": true,
     "namesSeparator": "avec"
   }
@@ -129,7 +206,7 @@ export async function POST(req: Request) {
   const dbUser = await getDbUser();
   if (!dbUser) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
-  let body: { description?: string; image?: string };
+  let body: { description?: string; image?: string; fileId?: string; mediaType?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
   if (!body.description?.trim()) return NextResponse.json({ error: "Description requise" }, { status: 400 });
 
@@ -137,28 +214,42 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Crédits insuffisants", credits: dbUser.credits }, { status: 402 });
   }
 
-  // Construire le contenu du message (texte seul ou vision texte+image)
-  type ContentBlock =
-    | { type: "image"; source: { type: "base64"; media_type: "image/jpeg"; data: string } }
-    | { type: "text"; text: string };
+  const BASE = { model: "claude-haiku-4-5" as const, max_tokens: 2000, system: SYSTEM };
 
-  const userContent: string | ContentBlock[] = body.image
-    ? [
-        { type: "image", source: { type: "base64", media_type: "image/jpeg", data: body.image } },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let message: { content: Array<{ type: string; text?: string }> };
+
+  if (body.fileId) {
+    const isPdf = body.mediaType === "application/pdf";
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    message = await client.beta.messages.create({
+      ...BASE,
+      messages: [{ role: "user", content: [
+        isPdf
+          ? { type: "document", source: { type: "file", file_id: body.fileId } }
+          : { type: "image",    source: { type: "file", file_id: body.fileId } },
         { type: "text", text: body.description.trim() },
-      ]
-    : body.description.trim();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ] as any }],
+      betas: ["files-api-2025-04-14"],
+    });
+  } else if (body.image) {
+    message = await client.messages.create({
+      ...BASE,
+      messages: [{ role: "user", content: [
+        { type: "image", source: { type: "base64", media_type: "image/jpeg" as const, data: body.image } },
+        { type: "text",  text: body.description.trim() },
+      ]}],
+    });
+  } else {
+    message = await client.messages.create({
+      ...BASE,
+      messages: [{ role: "user", content: body.description.trim() }],
+    });
+  }
 
-  const message = await client.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 2000,
-    system: SYSTEM,
-    messages: [{ role: "user", content: userContent }],
-  });
+  const raw = message.content[0]?.type === "text" ? (message.content[0].text ?? "").trim() : "";
 
-  const raw = message.content[0].type === "text" ? message.content[0].text.trim() : "";
-
-  // Extraire le JSON de la réponse (au cas où Haiku ajoute du texte parasite)
   let rawObj: unknown;
   try {
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
@@ -167,7 +258,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "L'IA n'a pas pu générer un thème valide. Réessayez." }, { status: 500 });
   }
 
-  // Validation Zod — coerce note:null → undefined
   if (rawObj && typeof rawObj === "object" && "content" in rawObj) {
     const c = (rawObj as Record<string, unknown>).content as Record<string, unknown>;
     if (c.note === null) delete c.note;
@@ -187,7 +277,6 @@ export async function POST(req: Request) {
     spec.ornements.style === "confetti" ? "Anniversaire" :
     spec.ornements.style === "geometric" ? "Business" : "Mariage";
 
-  // Persist le thème généré avec son spec complet
   const savedTheme = await prisma.generatedTheme.create({
     data: {
       baseThemeId,
@@ -203,18 +292,15 @@ export async function POST(req: Request) {
     },
   });
 
-  // Décrémenter les crédits
   await prisma.user.update({
     where: { id: dbUser.id },
     data: { credits: { decrement: CREDIT_COST } },
   });
 
   return NextResponse.json({
-    // Nouveau — spec complète pour DynamicTheme.tsx (Session 2)
     layoutSpec: spec,
     generatedThemeId: savedTheme.id,
     themeLabel: spec.themeLabel,
-    // Compatibilité backward — create page continue à fonctionner
     themeId: baseThemeId,
     customizations: {
       "--gold": spec.palette.primary,

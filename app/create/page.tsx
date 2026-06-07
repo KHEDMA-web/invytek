@@ -9,6 +9,16 @@ import type { DynamicThemeSpec } from "@/lib/schemas/dynamicTheme";
 
 const PREVIEW_MAP: Record<string, string> = { "gold-arch": "or-arche" };
 
+function injectPreviewCSS(e: React.SyntheticEvent<HTMLIFrameElement>) {
+  try {
+    const doc = (e.target as HTMLIFrameElement).contentDocument;
+    if (!doc) return;
+    const s = doc.createElement("style");
+    s.textContent = ".ivk-back,.ivk-panel,.ivk-backdrop,.ivk-launch{display:none!important}body{overflow:hidden!important}";
+    doc.head.appendChild(s);
+  } catch { /* cross-origin guard */ }
+}
+
 const THEMES = [
   { id: "gold-arch",          name: "Or & Arche",              cat: "Mariage",       available: true },
   { id: "bordeaux-oval",      name: "Bordeaux & Ovale Floral", cat: "Mariage · RTL", available: true },
@@ -304,7 +314,7 @@ function CreateForm() {
                 Thèmes disponibles
               </h2>
               <p style={{ color: "var(--text-soft)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
-                Choisissez parmi 12 thèmes prêts à l&apos;emploi — mariage, anniversaire, business et médical.
+                Choisissez parmi {THEMES.length} thèmes prêts à l&apos;emploi — mariage, anniversaire, business et médical.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                 {["Mariage", "Anniversaire", "Bébé", "Business", "Médical"].map(c => (
@@ -453,13 +463,23 @@ function CreateForm() {
                 <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 12 }}>
                   Aperçu — {THEMES.find(t => t.id === themeId)?.name}
                 </div>
-                <div style={{ width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid var(--hair)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+                <div style={{ position: "relative", width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid var(--hair)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
                   <iframe key={themeId} src={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
                     style={{ width: 375, height: 850, border: "none", transform: `scale(${340 / 375})`, transformOrigin: "top left", pointerEvents: "none" }}
-                    title="Aperçu" />
+                    title="Aperçu"
+                    scrolling="no"
+                    onLoad={injectPreviewCSS}
+                  />
+                  <a
+                    href={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
+                    target="_blank"
+                    rel="noopener"
+                    style={{ position: "absolute", inset: 0, zIndex: 10, cursor: "pointer" }}
+                    title="Voir en plein écran"
+                  />
                 </div>
-                <p style={{ marginTop: 10, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", lineHeight: 1.6 }}>
-                  Les couleurs s&apos;appliqueront sur l&apos;invitation finale.
+                <p style={{ marginTop: 8, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", lineHeight: 1.6 }}>
+                  Cliquez pour voir en plein écran · Les couleurs s&apos;appliqueront sur l&apos;invitation finale.
                 </p>
               </div>
             </div>
@@ -779,14 +799,26 @@ function CreateForm() {
               <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 12 }}>
                 Aperçu — {theme.name}
               </div>
-              <div style={{ width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid var(--hair)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+              <div style={{ position: "relative", width: 340, height: 620, overflow: "hidden", borderRadius: 16, border: "1px solid var(--hair)", background: "#0a0806", boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
                 <iframe
                   key={themeId}
                   src={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
                   style={{ width: 375, height: 850, border: "none", transform: `scale(${340 / 375})`, transformOrigin: "top left", pointerEvents: "none" }}
                   title={`Aperçu ${theme.name}`}
+                  scrolling="no"
+                  onLoad={injectPreviewCSS}
+                />
+                <a
+                  href={`/themes-preview/${PREVIEW_MAP[themeId] ?? themeId}.html`}
+                  target="_blank"
+                  rel="noopener"
+                  style={{ position: "absolute", inset: 0, zIndex: 10, cursor: "pointer" }}
+                  title="Voir en plein écran"
                 />
               </div>
+              <p style={{ marginTop: 8, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)" }}>
+                Cliquez pour voir en plein écran →
+              </p>
             </div>
           </div>
         )}

@@ -5,6 +5,7 @@ import { Particles } from "@/components/Particles";
 import { RevealObserver } from "@/components/RevealObserver";
 import { ParallaxInit } from "@/components/ParallaxInit";
 import { InviteHero } from "@/components/InviteHero";
+import { themeRegistry } from "@/themes/registry";
 
 export const metadata = {
   title: "Invytek — Invitations numériques d'exception",
@@ -181,7 +182,7 @@ export default function HomePage() {
           </div>
           <div className="stats">
             <div className="stat reveal d1"><div className="v">3 200<small>+</small></div><div className="k">Invitations envoyées</div></div>
-            <div className="stat reveal d2"><div className="v">12</div><div className="k">Thèmes signés</div></div>
+            <div className="stat reveal d2"><div className="v">{themeRegistry.length}</div><div className="k">Thèmes signés</div></div>
             <div className="stat reveal d3"><div className="v">94<small>%</small></div><div className="k">De confirmations reçues</div></div>
             <div className="stat reveal d4"><div className="v">4<small>min</small></div><div className="k">Pour créer la vôtre</div></div>
           </div>
@@ -199,8 +200,8 @@ export default function HomePage() {
           <div className="reveal" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))", gap: 20, maxWidth: 860, margin: "0 auto 2.5rem" }}>
             {[
               { name: "Gratuit", price: "0 DA", desc: "1 invitation · 10 invités · 3 thèmes", highlight: false },
-              { name: "Pro", price: "990 DA/mois", desc: "Illimité · Tous les thèmes · QR Code · Stats", highlight: true },
-              { name: "Business", price: "2 900 DA/mois", desc: "Multi-users · Marque perso · API · Support dédié", highlight: false },
+              { name: "Pro", price: "3 000 DA/mois", desc: "Illimité · Tous les thèmes · QR Code · Stats", highlight: true },
+              { name: "Business", price: "5 000 DA/mois", desc: "Multi-users · Marque perso · Domaine · Support dédié", highlight: false },
             ].map(p => (
               <div key={p.name} style={{ border: p.highlight ? "1px solid rgba(184,146,60,0.6)" : "1px solid var(--hair)", borderRadius: 10, padding: "1.4rem", background: p.highlight ? "linear-gradient(160deg,#2a2010,#1e1808)" : "linear-gradient(160deg,var(--bg-raise),var(--bg))", textAlign: "center" }}>
                 <p style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>{p.name}</p>

@@ -373,7 +373,7 @@ export function ThemeGrid() {
           <a
             key={t.slug}
             href={t.href}
-            className={`tcard reveal${i % 3 === 1 ? " d1" : i % 3 === 2 ? " d2" : ""}${!visible.has(t.slug) ? " hide" : ""}`}
+            className={`tcard reveal in${i % 3 === 1 ? " d1" : i % 3 === 2 ? " d2" : ""}${!visible.has(t.slug) ? " hide" : ""}`}
           >
             <div className="preview">
               <div className="badges">
