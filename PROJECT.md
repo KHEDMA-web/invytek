@@ -64,6 +64,16 @@
 | Business | 5 000 DA/mois | Pro + marque + domaine |
 | Crédit IA | 100 DA | 1 inv. IA |
 
+## Dernières features ajoutées (session 2026-06-07)
+- **Logo** : upload PNG dans create → `options.logo` base64 → overlay fixe sur invitation
+- **Google Maps** : `mapsUrl` auto-généré dans publish() · bouton Itinéraire sur tous les thèmes
+- **ICS** : bouton "Enregistrer la date" ajouté aux 6 nouveaux thèmes
+- **Nav** : lien Accueil ajouté
+- **Tarifs landing** : 3 000 / 5 000 DA corrects
+- **Preview iframe** : bouton retour + panel caché · cliquable → plein écran
+- **ThemeGrid** : fix opacity:0 sur filtrage Business/Médical
+- **System prompt IA** : designer senior · palettes hex précises · WCAG AA · Files API (PDF/image)
+
 ## Commandes utiles
 ```bash
 npm run dev          # dev :3000
@@ -74,4 +84,4 @@ npx prisma studio    # UI base locale
 
 ## Ce qui reste
 - ⚠️ Tester webhook abonnements Chargily en prod (non testé)
-- Ajouter `CRON_SECRET` en env Vercel prod pour sécuriser le cron expiry-reminder
+- ⚠️ Ajouter `CRON_SECRET` en env Vercel prod : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66`

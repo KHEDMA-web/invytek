@@ -185,11 +185,26 @@ function CreateForm() {
   const [showCountdown, setShowCountdown] = useState(true);
   const [showRsvp, setShowRsvp] = useState(true);
 
+  const [logo, setLogo] = useState<string | null>(null);
+
   const [slug, setSlug] = useState("");
   const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null);
   const [slugChecking, setSlugChecking] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handleLogoFile(file: File) {
+    const canvas = document.createElement("canvas");
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    await new Promise<void>((res, rej) => { img.onload = () => res(); img.onerror = rej; img.src = url; });
+    URL.revokeObjectURL(url);
+    const max = 300;
+    const r = Math.min(max / img.width, max / img.height, 1);
+    canvas.width = Math.round(img.width * r); canvas.height = Math.round(img.height * r);
+    canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+    setLogo(canvas.toDataURL("image/png"));
+  }
 
   useEffect(() => {
     const nd = DEFAULTS[cat] || DEFAULTS["Mariage"];
@@ -230,6 +245,8 @@ function CreateForm() {
       const dateObj = new Date(date + "T12:00:00");
       const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
       const n2 = isWedding ? name2 : (name2 || "—");
+      const mapsQuery = [venue, venueSub].filter(Boolean).join(", ");
+      const mapsUrl = mapsQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}` : undefined;
       const content = {
         hosts, invitationLine: invLine,
         names: [name1, n2] as [string, string],
@@ -238,6 +255,7 @@ function CreateForm() {
         date, time,
         dayLabel: dayLabels[dateObj.getDay()] || dayLabel,
         venue, venueSub: venueSub || undefined,
+        mapsUrl,
         note: note || undefined, closing,
         initials: [name1[0]?.toUpperCase() || "A", n2[0]?.toUpperCase() || "B"] as [string, string],
       };
@@ -245,6 +263,7 @@ function CreateForm() {
       const isDynamic = mode === "ai" && aiLayoutSpec !== null;
       const options = {
         showCountdown, showRsvp, showArabic: isWedding ? showArabic : false, showNote: !!note,
+        ...(logo ? { logo } : {}),
         ...(hasCustom ? { customizations: customColors } : {}),
         ...(isDynamic ? { layoutSpec: aiLayoutSpec } : {}),
       };
@@ -869,6 +888,29 @@ function CreateForm() {
               <Row label="Lieu">
                 <input value={venue} onChange={e => setVenue(e.target.value)} placeholder={isEvent ? "Hôtel El Aurassi" : "Salle Al Baraka"} style={inp} />
                 <input value={venueSub} onChange={e => setVenueSub(e.target.value)} placeholder="Adresse, Ville (optionnel)" style={{ ...inp, marginTop: 8 }} />
+                {venue && (
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue, venueSub].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 6, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--gold)", textDecoration: "none", letterSpacing: ".1em" }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13 }}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    Voir sur Google Maps →
+                  </a>
+                )}
+              </Row>
+
+              <Row label="Logo (optionnel)">
+                {logo ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logo} alt="Logo" style={{ height: 48, maxWidth: 120, objectFit: "contain", background: "rgba(255,255,255,0.06)", borderRadius: 6, padding: 4 }} />
+                    <button onClick={() => setLogo(null)} style={{ fontFamily: "var(--font-title)", fontSize: 11, color: "var(--text-faint)", background: "none", border: "none", cursor: "pointer", letterSpacing: ".1em" }}>Supprimer</button>
+                  </div>
+                ) : (
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: ".65rem 1rem", border: "1px dashed rgba(184,146,60,0.3)", borderRadius: 8, cursor: "pointer", fontFamily: "var(--font-title)", fontSize: 12, color: "var(--text-soft)", letterSpacing: ".1em" }}>
+                    <input type="file" accept="image/png,image/webp,image/svg+xml" onChange={e => { const f = e.target.files?.[0]; if (f) handleLogoFile(f); }} style={{ display: "none" }} />
+                    + Choisir un logo PNG
+                  </label>
+                )}
+                <p style={{ fontFamily: "var(--font-title)", fontSize: 10, color: "var(--text-faint)", marginTop: 5 }}>PNG transparent recommandé · affiché sur votre invitation</p>
               </Row>
 
               <Row label="Mot de clôture">

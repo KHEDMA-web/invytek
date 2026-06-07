@@ -29,6 +29,7 @@ export const WeddingOptionsSchema = z.object({
   webhookUrl: z.string().url().optional(),
   customizations: z.record(z.string(), z.string()).optional(),
   layoutSpec: z.unknown().optional(),
+  logo: z.string().optional(),
 }).passthrough();
 
 export type WeddingOptions = z.infer<typeof WeddingOptionsSchema>;

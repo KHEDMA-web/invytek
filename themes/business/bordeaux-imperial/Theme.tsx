@@ -67,6 +67,16 @@ export default function BordeauxImperialTheme({ content, options = {}, invitatio
     } catch { /* silent */ } finally { setRsvpLoading(false); }
   }
 
+  function saveDate() {
+    const [y, mo, d] = content.date.split("-"); const [hh, mm] = content.time.split(":");
+    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Invytek//FR","CALSCALE:GREGORIAN","BEGIN:VEVENT",
+      `DTSTART:${y}${mo}${d}T${hh}${mm}00`,`SUMMARY:${content.names[0]} — ${content.names[1]}`,
+      `LOCATION:${content.venue}${content.venueSub?"\\, "+content.venueSub:""}`,`DESCRIPTION:${content.hosts}`,
+      "END:VEVENT","END:VCALENDAR"].join("\r\n");
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
+    a.download = `event-${content.names[0].toLowerCase().replace(/\s+/g,"-")}.ics`; a.click();
+  }
+
   const C = {
     bg: "#160509", bg2: "#1f070d", card: "#2a0a12", card2: "#3a0e18",
     wine: "#6B1622", wineL: "#8B2533",
@@ -160,6 +170,16 @@ export default function BordeauxImperialTheme({ content, options = {}, invitatio
               <p className="bi-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.1rem", color: C.textS, marginTop: ".8rem", animationDelay: ".68s" }}>{content.closing}</p>
 
               <div className="bi-rev" style={{ marginTop: "2rem", display: "flex", gap: ".8rem", justifyContent: "center", flexWrap: "wrap", animationDelay: ".7s" }}>
+                <button style={btnSt(false)} onClick={saveDate}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  Enregistrer la date
+                </button>
+                {content.mapsUrl && (
+                  <a style={{ ...btnSt(false), textDecoration: "none" }} href={content.mapsUrl} target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    Itinéraire
+                  </a>
+                )}
                 {showRsvp && invitationId && <button style={btnSt(true)} onClick={() => document.getElementById("bi-rsvp")?.scrollIntoView({ behavior: "smooth" })}>Confirmer ma présence</button>}
               </div>
 

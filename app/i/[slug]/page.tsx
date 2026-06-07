@@ -61,25 +61,36 @@ export default async function InvitationPage({ params }: Props) {
   const styleTag = custom && Object.keys(custom).length > 0
     ? <style>{`:root{${Object.entries(custom).map(([k, v]) => `${k}:${v}!important`).join(';')}}`}</style>
     : null;
+  const logoOverlay = options.logo
+    // eslint-disable-next-line @next/next/no-img-element
+    ? <img src={options.logo} alt="Logo" style={{ position: "fixed", top: 18, left: "50%", transform: "translateX(-50%)", maxHeight: 54, maxWidth: 140, objectFit: "contain", zIndex: 9999, pointerEvents: "none" }} />
+    : null;
 
-  if (theme.slug === "gold-arch")        return <>{styleTag}<GoldArchTheme {...props} /></>;
-  if (theme.slug === "bordeaux-oval")    return <>{styleTag}<BordeauxOvalTheme {...props} /></>;
-  if (theme.slug === "ivoire-minimal")   return <>{styleTag}<IvoireMinimalTheme {...props} /></>;
-  if (theme.slug === "confettis-or")     return <>{styleTag}<ConfettisOrTheme {...props} /></>;
-  if (theme.slug === "soiree-prestige")  return <>{styleTag}<SoireePrestigeTheme {...props} /></>;
-  if (theme.slug === "blouse-lys")       return <>{styleTag}<BlouseLysTheme {...props} /></>;
-  if (theme.slug === "anniv-neon")       return <>{styleTag}<AnnivNeonTheme {...props} /></>;
-  if (theme.slug === "baby-shower")      return <>{styleTag}<BabyShowerTheme {...props} /></>;
-  if (theme.slug === "conference-tech")  return <>{styleTag}<ConferenceTechTheme {...props} /></>;
-  if (theme.slug === "congres-medical")  return <>{styleTag}<CongresMedicalTheme {...props} /></>;
-  if (theme.slug === "inauguration")     return <>{styleTag}<InaugurationTheme {...props} /></>;
-  if (theme.slug === "sensibilisation")    return <>{styleTag}<SensibilisationTheme {...props} /></>;
-  if (theme.slug === "couronne-royale")   return <>{styleTag}<CouronneRoyaleTheme {...props} /></>;
-  if (theme.slug === "glycine-bleue")     return <>{styleTag}<GlycineBleueTheme {...props} /></>;
-  if (theme.slug === "rose-poudre")       return <>{styleTag}<RosePoudreTheme {...props} /></>;
-  if (theme.slug === "bordeaux-imperial") return <>{styleTag}<BordeauxImperialTheme {...props} /></>;
-  if (theme.slug === "ivoire-embosse")    return <>{styleTag}<IvoireEmbosseTheme {...props} /></>;
-  if (theme.slug === "sceau-de-rose")     return <>{styleTag}<SceauDeRoseTheme {...props} /></>;
+  const THEME_NODE: Record<string, React.ReactNode> = {
+    "gold-arch":        <GoldArchTheme {...props} />,
+    "bordeaux-oval":    <BordeauxOvalTheme {...props} />,
+    "ivoire-minimal":   <IvoireMinimalTheme {...props} />,
+    "confettis-or":     <ConfettisOrTheme {...props} />,
+    "soiree-prestige":  <SoireePrestigeTheme {...props} />,
+    "blouse-lys":       <BlouseLysTheme {...props} />,
+    "anniv-neon":       <AnnivNeonTheme {...props} />,
+    "baby-shower":      <BabyShowerTheme {...props} />,
+    "conference-tech":  <ConferenceTechTheme {...props} />,
+    "congres-medical":  <CongresMedicalTheme {...props} />,
+    "inauguration":     <InaugurationTheme {...props} />,
+    "sensibilisation":  <SensibilisationTheme {...props} />,
+    "couronne-royale":  <CouronneRoyaleTheme {...props} />,
+    "glycine-bleue":    <GlycineBleueTheme {...props} />,
+    "rose-poudre":      <RosePoudreTheme {...props} />,
+    "bordeaux-imperial":<BordeauxImperialTheme {...props} />,
+    "ivoire-embosse":   <IvoireEmbosseTheme {...props} />,
+    "sceau-de-rose":    <SceauDeRoseTheme {...props} />,
+  };
+
+  const themeNode = THEME_NODE[theme.slug];
+  if (!themeNode) notFound();
+
+  return <>{styleTag}{logoOverlay}{themeNode}</>;
 
   notFound();
 }
