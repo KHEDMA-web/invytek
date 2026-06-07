@@ -17,7 +17,7 @@ const PLANS = [
     cta: "Choisir Simple",
     features: [
       { text: "5 invitations actives", ok: true },
-      { text: "Tous les thèmes (12+)", ok: true },
+      { text: "Tous les thèmes (18+)", ok: true },
       { text: "Invités illimités", ok: true },
       { text: "RSVP en ligne", ok: true },
       { text: "Lien public partageable", ok: true },
@@ -37,7 +37,7 @@ const PLANS = [
     cta: "Choisir Pro",
     features: [
       { text: "Invitations illimitées", ok: true },
-      { text: "Tous les thèmes (12+)", ok: true },
+      { text: "Tous les thèmes (18+)", ok: true },
       { text: "Invités illimités", ok: true },
       { text: "RSVP en ligne", ok: true },
       { text: "Liens nominatifs + email/WhatsApp", ok: true },

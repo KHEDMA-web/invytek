@@ -53,7 +53,7 @@ export async function sendWelcomeEmail(email: string, name: string | null) {
         Votre compte Invytek est prêt. Créez votre première invitation numérique premium en quelques minutes.
       </p>
       <p style="font-size:14px;color:#c8bfa8;line-height:1.7;margin-bottom:28px;">
-        Choisissez parmi 12 thèmes prêts à l'emploi, personnalisez les couleurs, ou laissez notre IA créer un design unique pour vous.
+        Choisissez parmi 18 thèmes prêts à l'emploi, personnalisez les couleurs, ou laissez notre IA créer un design unique pour vous.
       </p>
       ${btn(`${BASE_URL}/pricing`, "Choisir mon plan →")}
       <p style="margin-top:24px;font-size:13px;color:rgba(252,250,245,0.4);">

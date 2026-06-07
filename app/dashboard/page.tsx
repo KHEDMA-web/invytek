@@ -457,7 +457,7 @@ export default async function DashboardPage() {
               borderRadius: 12, padding: "1rem 1.4rem" }}>
               <div>
                 <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: currentPlan === "business" ? "#a080e0" : "var(--gold)", marginBottom: 4 }}>
-                  Plan {currentPlan === "business" ? "Business" : "Pro"} ✓
+                  Plan {currentPlan === "business" ? "Business" : currentPlan === "simple" ? "Simple" : "Pro"} ✓
                 </div>
                 <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>
                   Expire le {new Date(dbUser.planExpiresAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}

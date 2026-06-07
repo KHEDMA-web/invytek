@@ -31,8 +31,9 @@ export async function generateMetadata({ params }: Props) {
   const invitation = await prisma.invitation.findUnique({ where: { slug, status: "published" } });
   if (!invitation) return { title: "Invitation" };
   const content = JSON.parse(invitation.content) as WeddingContent;
+  const nameTitle = content.names[1] ? `${content.names[0]} & ${content.names[1]}` : content.names[0];
   return {
-    title: `${content.names[0]} & ${content.names[1]} — ${new Date(content.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
+    title: `${nameTitle} — ${new Date(content.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}`,
     description: content.invitationLine,
   };
 }
@@ -91,6 +92,4 @@ export default async function InvitationPage({ params }: Props) {
   if (!themeNode) notFound();
 
   return <>{styleTag}{logoOverlay}{themeNode}</>;
-
-  notFound();
 }

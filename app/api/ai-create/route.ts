@@ -210,7 +210,12 @@ export async function POST(req: Request) {
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
   if (!body.description?.trim()) return NextResponse.json({ error: "Description requise" }, { status: 400 });
 
-  if (dbUser.credits < CREDIT_COST) {
+  // Atomic decrement — prevent race conditions when parallel requests hit the endpoint
+  const deducted = await prisma.user.updateMany({
+    where: { id: dbUser.id, credits: { gte: CREDIT_COST } },
+    data: { credits: { decrement: CREDIT_COST } },
+  });
+  if (deducted.count === 0) {
     return NextResponse.json({ error: "Crédits insuffisants", credits: dbUser.credits }, { status: 402 });
   }
 
@@ -250,11 +255,16 @@ export async function POST(req: Request) {
 
   const raw = message.content[0]?.type === "text" ? (message.content[0].text ?? "").trim() : "";
 
+  async function refund() {
+    await prisma.user.update({ where: { id: dbUser.id }, data: { credits: { increment: CREDIT_COST } } });
+  }
+
   let rawObj: unknown;
   try {
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     rawObj = JSON.parse(jsonMatch ? jsonMatch[0] : raw);
   } catch {
+    await refund();
     return NextResponse.json({ error: "L'IA n'a pas pu générer un thème valide. Réessayez." }, { status: 500 });
   }
 
@@ -267,6 +277,7 @@ export async function POST(req: Request) {
   const parsed = DynamicThemeSpecSchema.safeParse(rawObj);
   if (!parsed.success) {
     console.error("DynamicTheme validation error:", parsed.error.issues);
+    await refund();
     return NextResponse.json({ error: "Thème généré invalide. Réessayez avec une description plus précise." }, { status: 500 });
   }
 
@@ -290,11 +301,6 @@ export async function POST(req: Request) {
       category,
       label: spec.themeLabel,
     },
-  });
-
-  await prisma.user.update({
-    where: { id: dbUser.id },
-    data: { credits: { decrement: CREDIT_COST } },
   });
 
   return NextResponse.json({
