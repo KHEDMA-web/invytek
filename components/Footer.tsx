@@ -18,21 +18,21 @@ export function Footer() {
           <h4>Produit</h4>
           <ul>
             <li><Link href="/themes">Thèmes</Link></li>
-            <li><Link href="/#how">Comment ça marche</Link></li>
-            <li><Link href="#">Tarifs</Link></li>
+            <li><Link href="/themes/community">Galerie IA</Link></li>
+            <li><Link href="/pricing">Tarifs</Link></li>
           </ul>
         </div>
         <div>
           <h4>Invytek</h4>
           <ul>
-            <li><Link href="#">À propos</Link></li>
-            <li><Link href="#">Contact</Link></li>
-            <li><Link href="#">Confidentialité</Link></li>
+            <li><Link href="/legal">Mentions légales</Link></li>
+            <li><Link href="/legal">CGU</Link></li>
+            <li><a href="mailto:contact@invytek.app">Contact</a></li>
           </ul>
         </div>
         <div className="copy">
           <span>© 2026 Invytek. Tous droits réservés.</span>
-          <span>Fait avec soin à Alger.</span>
+          <span>Fait avec soin à Alger 🇩🇿</span>
         </div>
       </div>
     </footer>

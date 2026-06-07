@@ -230,7 +230,7 @@ function AuthForm() {
           <button
             onClick={() => {
               const raw = params.get("callbackUrl");
-              signIn("google", { callbackUrl: raw?.startsWith("/") ? raw : "/dashboard" });
+              signIn("google", { callbackUrl: raw?.startsWith("/") ? raw : "/post-login" });
             }}
             style={{
               width: "100%", padding: "0.85rem",

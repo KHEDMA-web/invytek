@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { z } from "zod";
+import { sendWelcomeEmail } from "@/lib/emails";
 
 class AuthError extends CredentialsSignin {
   constructor(code: string) {
@@ -44,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const user = await prisma.user.create({
             data: { email, name: name?.trim() || email.split("@")[0], password: hash, credits: 3 },
           });
+          void sendWelcomeEmail(user.email, user.name);
           return { id: user.id, email: user.email, name: user.name };
         }
 
@@ -61,11 +63,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
       } else if ((account?.provider === "google" || account?.provider === "github") && token.email) {
         // Upsert user on first Google login
+        const existing = await prisma.user.findUnique({ where: { email: token.email! }, select: { id: true } });
         const dbUser = await prisma.user.upsert({
-          where: { email: token.email },
+          where: { email: token.email! },
           update: { name: token.name ?? undefined, image: token.picture as string ?? undefined },
-          create: { email: token.email, name: token.name ?? token.email.split("@")[0], image: token.picture as string ?? undefined, credits: 3 },
+          create: { email: token.email!, name: token.name ?? token.email!.split("@")[0], image: token.picture as string ?? undefined, credits: 3 },
         });
+        if (!existing) void sendWelcomeEmail(dbUser.email, dbUser.name);
         token.id = dbUser.id;
       }
       return token;

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
+import { sendPlanActivatedEmail } from "@/lib/emails";
 
 export async function POST(req: Request) {
   const secret = process.env.CHARGILY_WEBHOOK_SECRET;
@@ -34,10 +35,12 @@ export async function POST(req: Request) {
     const planExpiresAt = new Date(base);
     planExpiresAt.setDate(planExpiresAt.getDate() + months * 30);
 
-    await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: userId },
       data: { plan, planExpiresAt },
+      select: { email: true, name: true },
     });
+    void sendPlanActivatedEmail(updatedUser.email, updatedUser.name, plan, planExpiresAt);
   }
 
   return NextResponse.json({ ok: true });
