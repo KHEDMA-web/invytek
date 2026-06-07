@@ -7,14 +7,16 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  email       String       @unique
-  name        String?
-  image       String?
-  password    String?
-  credits     Int          @default(0)
-  createdAt   DateTime     @default(now())
-  invitations Invitation[]
+  id             String       @id @default(cuid())
+  email          String       @unique
+  name           String?
+  image          String?
+  password       String?
+  credits        Int          @default(0)
+  plan           String       @default("free") // free | pro | business
+  planExpiresAt  DateTime?
+  createdAt      DateTime     @default(now())
+  invitations    Invitation[]
 }
 
 model Invitation {

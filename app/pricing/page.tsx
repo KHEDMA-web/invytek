@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
@@ -93,6 +94,34 @@ const IC_NO = (
   </svg>
 );
 
+function PlanCta({ planKey, label, className }: { planKey: string; label: string; className: string }) {
+  const { status } = useSession();
+  const [loading, setLoading] = useState(false);
+
+  if (status !== "authenticated") {
+    return <Link href="/auth" className={className} style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem", display: "inline-flex", alignItems: "center" }}>{label}</Link>;
+  }
+
+  async function subscribe() {
+    setLoading(true);
+    const res = await fetch("/api/subscriptions/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ plan: planKey }),
+    });
+    const d = await res.json() as { url?: string; error?: string };
+    if (d.url) window.location.href = d.url;
+    else { alert(d.error || "Erreur"); setLoading(false); }
+  }
+
+  return (
+    <button onClick={subscribe} disabled={loading} className={className}
+      style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem", cursor: loading ? "wait" : "pointer" }}>
+      {loading ? "Redirection…" : label}
+    </button>
+  );
+}
+
 export default function PricingPage() {
   const [pane, setPane] = useState<"abos" | "credits">("abos");
 
@@ -152,12 +181,19 @@ export default function PricingPage() {
                     <span className="per">{plan.period}</span>
                   </div>
                   <p className="p-desc">{plan.desc}</p>
-                  <Link
-                    href={plan.ctaHref}
-                    className={`btn ${plan.pop ? "btn-gold" : "btn-ghost"} btn-sm p-cta`}
-                  >
-                    {plan.cta}
-                  </Link>
+                  {plan.name === "Gratuit" ? (
+                    <Link href="/auth" className={`btn btn-ghost btn-sm p-cta`}
+                      style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem", display: "inline-flex", alignItems: "center" }}>
+                      {plan.cta}
+                    </Link>
+                  ) : plan.name === "Business" ? (
+                    <a href="mailto:contact@invytek.app" className="btn btn-ghost btn-sm p-cta"
+                      style={{ width: "100%", justifyContent: "center", marginBottom: "1.5rem", display: "inline-flex", alignItems: "center" }}>
+                      {plan.cta}
+                    </a>
+                  ) : (
+                    <PlanCta planKey={plan.name.toLowerCase()} label={plan.cta} className={`btn ${plan.pop ? "btn-gold" : "btn-ghost"} btn-sm`} />
+                  )}
                   <div className="p-sep" />
                   <ul className="feats">
                     {plan.features.map(f => (

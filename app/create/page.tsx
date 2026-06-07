@@ -238,9 +238,17 @@ function CreateForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ themeId: publishThemeId, slug, content, options }),
       });
-      let data: { error?: string } = {};
+      let data: { error?: string; upgrade?: boolean } = {};
       try { data = await res.json(); } catch { /* non-JSON */ }
-      if (!res.ok) { setError(data.error || `Erreur ${res.status}`); return; }
+      if (!res.ok) {
+        if (data.upgrade) {
+          setError(data.error || "Limite atteinte");
+          setTimeout(() => router.push("/pricing"), 2000);
+          return;
+        }
+        setError(data.error || `Erreur ${res.status}`);
+        return;
+      }
       router.push("/dashboard");
     } catch (err) {
       setError("Erreur : " + (err instanceof Error ? err.message : String(err)));

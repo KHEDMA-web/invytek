@@ -180,9 +180,12 @@ export default async function DashboardPage() {
 
   const dbUser = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { id: true, credits: true },
+    select: { id: true, credits: true, plan: true, planExpiresAt: true },
   });
   if (!dbUser) redirect("/auth");
+
+  const planActive = dbUser.plan !== "free" && dbUser.planExpiresAt && dbUser.planExpiresAt > new Date();
+  const currentPlan = planActive ? dbUser.plan : "free";
 
   const invitations = await prisma.invitation.findMany({
     where: { userId: dbUser.id },
@@ -212,10 +215,20 @@ export default async function DashboardPage() {
             <h1>Mes invitations</h1>
             <p>Créez, partagez et suivez vos invitations en temps réel.</p>
           </div>
-          <Link href="/create" className="btn btn-gold btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-            Créer une invitation
-          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {currentPlan !== "free" && (
+              <span style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase",
+                padding: "5px 12px", borderRadius: 100,
+                background: currentPlan === "business" ? "linear-gradient(135deg,#a080e0,#7050c0)" : "linear-gradient(135deg,var(--gold-vivid),var(--accent))",
+                color: currentPlan === "business" ? "#fff" : "#2a2008" }}>
+                {currentPlan === "business" ? "Business" : "Pro"} ✓
+              </span>
+            )}
+            <Link href="/create" className="btn btn-gold btn-sm" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+              Créer une invitation
+            </Link>
+          </div>
         </div>
 
         {/* Stats */}
@@ -342,29 +355,57 @@ export default async function DashboardPage() {
           </div>
         )}
 
-        {/* Credits widget */}
-        {credits <= 2 && (
-          <div style={{
-            marginTop: 40,
-            display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
-            background: credits === 0 ? "rgba(200,60,60,0.07)" : "rgba(220,140,40,0.08)",
-            border: `1px solid ${credits === 0 ? "rgba(200,60,60,0.3)" : "rgba(220,140,40,0.3)"}`,
-            borderRadius: 12, padding: "1rem 1.4rem",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <span>✨</span>
+        {/* Plan + crédits widget */}
+        <div style={{ marginTop: 40, display: "flex", gap: 12, flexWrap: "wrap" }}>
+          {/* Plan actuel */}
+          {currentPlan === "free" && (
+            <div style={{ flex: 1, minWidth: 260, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+              background: "rgba(184,146,60,0.05)", border: "1px solid var(--hair)", borderRadius: 12, padding: "1rem 1.4rem" }}>
               <div>
-                <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--ivory)" }}>
-                  {credits} crédit{credits !== 1 ? "s" : ""} IA
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--text-faint)", marginBottom: 4 }}>Plan actuel</div>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 15, color: "var(--ivory)" }}>Gratuit <span style={{ fontSize: 12, color: "var(--text-faint)" }}>— 1 invitation max</span></div>
+              </div>
+              <Link href="/pricing" className="btn btn-gold btn-sm">Passer au Pro →</Link>
+            </div>
+          )}
+          {currentPlan !== "free" && dbUser.planExpiresAt && (
+            <div style={{ flex: 1, minWidth: 260, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+              background: currentPlan === "business" ? "rgba(110,80,200,0.07)" : "rgba(184,146,60,0.06)",
+              border: `1px solid ${currentPlan === "business" ? "rgba(110,80,200,0.25)" : "rgba(184,146,60,0.3)"}`,
+              borderRadius: 12, padding: "1rem 1.4rem" }}>
+              <div>
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, letterSpacing: ".18em", textTransform: "uppercase", color: currentPlan === "business" ? "#a080e0" : "var(--gold)", marginBottom: 4 }}>
+                  Plan {currentPlan === "business" ? "Business" : "Pro"} ✓
                 </div>
-                <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: credits === 0 ? "#e07070" : "#e0a040", marginTop: 2 }}>
-                  {credits === 0 ? "Rechargez pour utiliser la génération IA" : "Crédits faibles — pensez à recharger"}
+                <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--text-soft)" }}>
+                  Expire le {new Date(dbUser.planExpiresAt).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                 </div>
               </div>
+              <Link href="/pricing" className="btn btn-ghost btn-sm">Renouveler</Link>
             </div>
-            <Link href="/pricing" className="btn btn-ghost btn-sm">Recharger</Link>
-          </div>
-        )}
+          )}
+
+          {/* Crédits IA */}
+          {credits <= 2 && (
+            <div style={{ flex: 1, minWidth: 220, display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12,
+              background: credits === 0 ? "rgba(200,60,60,0.07)" : "rgba(220,140,40,0.08)",
+              border: `1px solid ${credits === 0 ? "rgba(200,60,60,0.3)" : "rgba(220,140,40,0.3)"}`,
+              borderRadius: 12, padding: "1rem 1.4rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span>✨</span>
+                <div>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 13, color: "var(--ivory)" }}>
+                    {credits} crédit{credits !== 1 ? "s" : ""} IA
+                  </div>
+                  <div style={{ fontFamily: "var(--font-title)", fontSize: 11, color: credits === 0 ? "#e07070" : "#e0a040", marginTop: 2 }}>
+                    {credits === 0 ? "Rechargez pour utiliser l'IA" : "Crédits faibles"}
+                  </div>
+                </div>
+              </div>
+              <Link href="/pricing?tab=credits" className="btn btn-ghost btn-sm">Recharger</Link>
+            </div>
+          )}
+        </div>
       </div>
       <Footer />
     </div>

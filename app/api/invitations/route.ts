@@ -27,6 +27,18 @@ export async function POST(req: Request) {
     },
   });
 
+  // Vérifier la limite du plan gratuit
+  const planActive = dbUser.plan !== "free" && dbUser.planExpiresAt && dbUser.planExpiresAt > new Date();
+  if (!planActive) {
+    const invCount = await prisma.invitation.count({ where: { userId: dbUser.id } });
+    if (invCount >= 1) {
+      return NextResponse.json({
+        error: "Limite du plan Gratuit atteinte (1 invitation max). Passez au plan Pro pour créer des invitations illimitées.",
+        upgrade: true,
+      }, { status: 403 });
+    }
+  }
+
   let body: unknown;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Requête invalide" }, { status: 400 }); }
 
