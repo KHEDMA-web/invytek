@@ -32,11 +32,22 @@ export async function POST(req: Request) {
   const activePlan = planActive ? dbUser.plan : "free";
 
   if (activePlan === "free") {
-    // Sans abonnement : 0 invitation (doit souscrire)
-    return NextResponse.json({
-      error: "Un abonnement est requis pour créer des invitations. Choisissez un plan dès 1 000 DA/mois.",
-      upgrade: true,
-    }, { status: 403 });
+    // Sans abonnement : autorisé uniquement si l'utilisateur a des crédits IA
+    // (les crédits permettent de créer des invitations IA sans abonnement)
+    if (dbUser.credits <= 0) {
+      return NextResponse.json({
+        error: "Un abonnement est requis pour créer des invitations. Choisissez un plan dès 1 000 DA/mois, ou achetez des crédits IA pour créer avec l'IA.",
+        upgrade: true,
+      }, { status: 403 });
+    }
+    // Avec crédits : max 3 invitations sans abonnement
+    const invCount = await prisma.invitation.count({ where: { userId: dbUser.id } });
+    if (invCount >= 3) {
+      return NextResponse.json({
+        error: "Limite sans abonnement atteinte (3 invitations max). Souscrivez à un plan pour continuer.",
+        upgrade: true,
+      }, { status: 403 });
+    }
   }
 
   if (activePlan === "simple") {
