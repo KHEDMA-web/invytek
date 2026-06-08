@@ -327,7 +327,7 @@ function CreateForm() {
             >
               <div style={{ fontSize: 32, marginBottom: "1rem" }}>🎨</div>
               <div style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".22em", textTransform: "uppercase", color: "var(--gold)", marginBottom: 8 }}>
-                Gratuit
+                Abonnement requis
               </div>
               <h2 style={{ fontFamily: "var(--font-title)", fontSize: "1.35rem", color: "var(--ivory)", fontWeight: 400, marginBottom: "0.7rem" }}>
                 Thèmes disponibles

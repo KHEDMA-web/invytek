@@ -75,7 +75,7 @@ const PACKS = [
 
 const FAQ = [
   { q: "Puis-je changer de plan à tout moment ?", a: "Oui. Vous pouvez upgrader ou downgrader votre abonnement à tout moment depuis votre tableau de bord." },
-  { q: "Quelle différence entre abonnement et crédits ?", a: "L'abonnement débloque les thèmes et fonctionnalités (publication illimitée, check-in, stats). Les crédits servent uniquement à la génération par l'IA — utiles ponctuellement, même sur le plan Gratuit." },
+  { q: "Quelle différence entre abonnement et crédits ?", a: "L'abonnement débloque les thèmes et fonctionnalités (publication illimitée, check-in, stats). Les crédits servent uniquement à la génération par l'IA — utiles ponctuellement, même sans abonnement actif." },
   { q: "Quels modes de paiement acceptez-vous ?", a: "CIB, Edahabia (Dahabia) et virement bancaire. Le paiement par carte internationale (Visa/Mastercard) arrive prochainement." },
   { q: "Les crédits IA expirent-ils ?", a: "Non. Vos crédits restent disponibles sans limite de durée et se cumulent avec les 3 crédits offerts à l'inscription." },
   { q: "Mes invitations restent-elles actives si j'arrête mon abonnement ?", a: "Vos invitations passées restent visibles. Vous perdez l'accès aux fonctionnalités Pro mais vos données sont conservées." },
