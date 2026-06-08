@@ -39,7 +39,7 @@ export async function POST(req: Request) {
       ? user.planExpiresAt
       : new Date();
     const planExpiresAt = new Date(base);
-    planExpiresAt.setDate(planExpiresAt.getDate() + months * 30);
+    planExpiresAt.setMonth(planExpiresAt.getMonth() + months);
 
     try {
       await prisma.$transaction([

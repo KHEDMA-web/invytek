@@ -99,12 +99,33 @@
 
 ---
 
+### Fait (session 2026-06-08 — audit sécurité + admin)
+
+| Quoi | Détail |
+|------|--------|
+| **Idempotence webhook** | Table `ProcessedWebhook` (PK = checkoutId) + transaction atomique + catch P2002 → retries Chargily sans double-crédit |
+| **Metadata forgery** | Modèle `PendingCheckout` — plan/userId stockés en DB avant checkout, webhook lit la DB (plus de métadonnées client) |
+| **Bug setDate→setMonth** | `planExpiresAt.setDate(+30*months)` → `setMonth(+months)` — expire correctement au même jour du mois |
+| **Bug publish-preview bypass** | Route utilisait `session.user.id` stale — remplacé par `getDbUser()` + enforcement plan complet |
+| **Crédits IA scope** | Plan free : seul `themeId === "dynamic"` autorisé — les thèmes classiques nécessitent un abonnement |
+| **Revoke trial** | La révocation efface aussi les crédits (`credits: 0`) pour bloquer complètement l'accès |
+| **Page /admin** | Formulaire création compte d'essai (email + mdp + plan + durée) + tableau isTrial + bouton Révoquer |
+| **Nav lien Admin** | Dropdown nav affiche "⚙ Admin" uniquement pour `aniskhelifiusthb@gmail.com` |
+| **Select Windows Chrome** | `colorScheme: "dark"` + hex hardcodés dans `inputStyle` — dropdown natif visible sur Windows |
+| **Schéma Prisma** | Ajout `ProcessedWebhook`, `PendingCheckout`, `User.isTrial Boolean @default(false)` |
+
+---
+
 ## 🔧 Ce qui reste — par priorité
 
-### Priorité 1 — Tester le paiement Chargily avec un compte non-admin ⚠️
-Le bypass admin fait que les paiements semblent fonctionner sur le compte `aniskhelifiusthb@gmail.com` — c'est normal. Pour valider le vrai flux Chargily (Edahabia/CIB), créer un compte test avec un autre email et acheter un plan/crédit.
+### Priorité 1 — Bug 5 : Exposition données portail client ⚠️
+**Fichier** : `app/client/[accessToken]/page.tsx`  
+**Problème** : Le portail client expose les messages privés des invités (champ `message` dans les réponses RSVP). Ces messages sont visibles à tous les visiteurs ayant le lien. À décider : masquer le champ `message` dans la vue client, ou le réserver au dashboard agence.
 
-### Priorité 2 — Ajouter CRON_SECRET en prod ⚠️
+### Priorité 2 — Tester le paiement Chargily avec un compte non-admin ⚠️
+Le bypass admin fait que les paiements semblent fonctionner sur `aniskhelifiusthb@gmail.com` — c'est normal. Pour valider le vrai flux Chargily (Edahabia/CIB), créer un compte test avec un autre email et acheter un plan/crédit.
+
+### Priorité 3 — Ajouter CRON_SECRET en prod ⚠️
 Secret : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66`  
 Ajouter dans Vercel → Settings → Environment Variables → `CRON_SECRET` → Production.
 
@@ -157,6 +178,11 @@ app/
     publish-preview/route.ts              — aperçu avant publication
     cron/expiry-reminder/route.ts         — tourne chaque jour 9h (sécurisé CRON_SECRET)
     admin/promote-theme/route.ts          — admin → galerie communautaire
+    admin/trial/route.ts                  — GET liste isTrial · POST créer · DELETE révoquer
+
+app/admin/
+  page.tsx                              — dashboard admin (stats + form + tableau essais)
+  TrialForm.tsx                         — formulaire création compte d'essai
 
 themes/
   registry.ts                             — 18 ThemeConfig, getTheme(), getThemesByCategory()
@@ -224,13 +250,16 @@ public/themes-preview/                    — 18 fichiers HTML statiques (previe
 | `CHARGILY_SECRET_KEY` + `CHARGILY_WEBHOOK_SECRET` | ✅ |
 | `RESEND_API_KEY` | ✅ |
 | `ADMIN_EMAIL` | ✅ `aniskhelifiusthb@gmail.com` |
-| `CRON_SECRET` | ⚠️ À ajouter : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66` |
+| `CRON_SECRET` | ⚠️ À ajouter en prod : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66` |
+| `ADMIN_EMAIL` | ✅ `aniskhelifiusthb@gmail.com` (bypass paiement + accès /admin) |
 
 ---
 
 ## 🐞 Bugs connus / points d'attention
 
 - **Webhook abonnements Chargily** : non testé en prod avec un vrai paiement — tester avec un compte non-admin avant de vendre des plans
+- **Portail client /client/[accessToken]** : les messages RSVP des invités sont visibles → à décider si on les masque (priorité faible)
+- **Comptes d'essai** : isTrial=true, crédits=3 à la création — crédits effacés lors de la révocation
 - **Bypass admin** : le compte `aniskhelifiusthb@gmail.com` active tout sans paiement — comportement voulu, pas un bug
 - **Logo overlay** : affiché en `position:fixed` — convient aux logos petits/transparents ; pour les gros logos, envisager une intégration par thème
 - **Preview iframe** : `.ivk-back` et `.ivk-panel` cachés via CSS injecté `onLoad`

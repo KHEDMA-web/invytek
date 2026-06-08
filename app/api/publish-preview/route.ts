@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { getDbUser } from "@/lib/getDbUser";
 
 // Mapping fields → WeddingContent / generic content per theme
 function mapFields(theme: string, fields: Record<string, string>) {
@@ -163,9 +163,28 @@ async function uniqueSlug(base: string): Promise<string> {
 }
 
 export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+  const dbUser = await getDbUser();
+  if (!dbUser) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
+
+  // Vérification du plan
+  const planActive = dbUser.plan !== "free" && dbUser.planExpiresAt && dbUser.planExpiresAt > new Date();
+  const activePlan = planActive ? dbUser.plan : "free";
+
+  if (activePlan === "free") {
+    return NextResponse.json({
+      error: "Un abonnement est requis pour créer des invitations. Souscrivez à un plan dès 1 000 DA/mois.",
+      upgrade: true,
+    }, { status: 403 });
+  }
+
+  if (activePlan === "simple") {
+    const invCount = await prisma.invitation.count({ where: { userId: dbUser.id } });
+    if (invCount >= 5) {
+      return NextResponse.json({
+        error: "Limite du plan Simple atteinte (5 invitations max). Passez au plan Pro pour des invitations illimitées.",
+        upgrade: true,
+      }, { status: 403 });
+    }
   }
 
   let body: { theme: string; fields: Record<string, string> };
@@ -194,7 +213,7 @@ export async function POST(req: Request) {
 
   const invitation = await prisma.invitation.create({
     data: {
-      userId: session.user.id,
+      userId: dbUser.id,
       slug,
       themeId: theme,
       category: mapped.category,
