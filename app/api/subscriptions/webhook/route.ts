@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
+import { Prisma } from "@prisma/client";
 import { sendPlanActivatedEmail } from "@/lib/emails";
 
 export async function POST(req: Request) {
@@ -15,32 +16,41 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
   }
 
-  let event: { type?: string; data?: { status?: string; metadata?: { userId?: string; plan?: string; months?: number } } };
+  let event: { type?: string; data?: { id?: string; status?: string; metadata?: { userId?: string; plan?: string; months?: number } } };
   try { event = JSON.parse(body); } catch { return NextResponse.json({ error: "JSON invalide" }, { status: 400 }); }
 
   if (event.type === "checkout.paid" && event.data?.status === "paid") {
+    const checkoutId = event.data.id;
     const { userId, plan, months = 1 } = event.data.metadata ?? {};
     if (!userId || !plan || !["simple", "pro", "business"].includes(plan)) {
       return NextResponse.json({ ok: true });
     }
 
-    const user = await prisma.user.findUnique({ where: { id: userId }, select: { plan: true, planExpiresAt: true } });
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { plan: true, planExpiresAt: true, email: true, name: true },
+    });
     if (!user) return NextResponse.json({ ok: true });
 
-    // Prolonger si plan actif, sinon partir de maintenant
     const base = user.plan !== "free" && user.planExpiresAt && user.planExpiresAt > new Date()
       ? user.planExpiresAt
       : new Date();
-
     const planExpiresAt = new Date(base);
     planExpiresAt.setDate(planExpiresAt.getDate() + months * 30);
 
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: { plan, planExpiresAt },
-      select: { email: true, name: true },
-    });
-    void sendPlanActivatedEmail(updatedUser.email, updatedUser.name, plan, planExpiresAt);
+    try {
+      const ops: Prisma.PrismaPromise<unknown>[] = [];
+      if (checkoutId) ops.push(prisma.processedWebhook.create({ data: { checkoutId } }));
+      ops.push(prisma.user.update({ where: { id: userId }, data: { plan, planExpiresAt } }));
+      await prisma.$transaction(ops);
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+        return NextResponse.json({ ok: true });
+      }
+      throw e;
+    }
+
+    void sendPlanActivatedEmail(user.email, user.name, plan, planExpiresAt);
   }
 
   return NextResponse.json({ ok: true });
