@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Nav } from "@/components/Nav";
+import { QrScanner } from "@/components/QrScanner";
 
 interface CheckinResult {
   name: string;
@@ -15,28 +16,28 @@ interface CheckinResult {
 const RECENT_MAX = 5;
 
 export default function CheckinPage() {
-  const [token, setToken]   = useState("");
-  const [result, setResult] = useState<CheckinResult | null>(null);
-  const [error, setError]   = useState<string | null>(null);
+  const [token, setToken]     = useState("");
+  const [result, setResult]   = useState<CheckinResult | null>(null);
+  const [error, setError]     = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [recent, setRecent] = useState<{ name: string; time: string; party: number }[]>([]);
+  const [recent, setRecent]   = useState<{ name: string; time: string; party: number }[]>([]);
+  const [scanning, setScanning] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!token.trim()) return;
+  async function checkin(rawToken: string) {
+    const t = rawToken.includes("/g/") ? rawToken.split("/g/").pop()! : rawToken;
+    if (!t.trim()) return;
     setLoading(true); setError(null); setResult(null);
     try {
-      const raw = token.trim();
-      const t = raw.includes("/g/") ? raw.split("/g/").pop()! : raw;
       const res = await fetch("/api/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: t }),
+        body: JSON.stringify({ token: t.trim() }),
       });
       const data = await res.json() as CheckinResult & { error?: string };
       if (!res.ok) throw new Error(data.error || "Token invalide");
       setResult(data);
       setToken("");
+      setScanning(false);
       if (!data.alreadyCheckedIn) {
         const time = new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
         setRecent(prev => [{ name: data.name, time, party: data.partySize }, ...prev].slice(0, RECENT_MAX));
@@ -46,6 +47,11 @@ export default function CheckinPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await checkin(token);
   }
 
   return (
@@ -63,23 +69,58 @@ export default function CheckinPage() {
             Check-in invités
           </h1>
           <p style={{ color: "var(--text-soft)", marginTop: 8 }}>
-            Scannez le QR code ou collez le lien nominatif de l&apos;invité.
+            Scannez le QR code de l&apos;invité ou collez son lien nominatif.
           </p>
         </div>
 
-        {/* Form */}
-        <div style={{ border: "1px solid var(--hair)", borderRadius: 16, padding: "2rem",
+        {/* Scanner caméra */}
+        <div style={{ marginBottom: "1.5rem" }}>
+          {!scanning ? (
+            <button
+              onClick={() => { setScanning(true); setResult(null); setError(null); }}
+              className="btn btn-gold"
+              style={{ width: "100%", justifyContent: "center", display: "flex", alignItems: "center", gap: 10, fontSize: "1rem", padding: "1rem" }}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width={20} height={20}>
+                <path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/>
+                <rect x="7" y="7" width="10" height="10" rx="1"/>
+              </svg>
+              Scanner avec la caméra
+            </button>
+          ) : (
+            <div>
+              <QrScanner active={scanning} onScan={checkin} />
+              <button
+                onClick={() => setScanning(false)}
+                style={{ marginTop: 10, width: "100%", padding: "0.7rem", background: "transparent",
+                  border: "1px solid var(--hair)", borderRadius: 10, color: "var(--text-soft)",
+                  fontFamily: "var(--font-title)", fontSize: 12, cursor: "pointer", letterSpacing: ".12em" }}
+              >
+                Annuler le scan
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Séparateur */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: "1.5rem" }}>
+          <div style={{ flex: 1, height: 1, background: "var(--hair)" }} />
+          <span style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".18em", textTransform: "uppercase", color: "var(--text-faint)" }}>ou</span>
+          <div style={{ flex: 1, height: 1, background: "var(--hair)" }} />
+        </div>
+
+        {/* Saisie manuelle */}
+        <div style={{ border: "1px solid var(--hair)", borderRadius: 16, padding: "1.5rem",
           background: "linear-gradient(160deg, var(--bg-raise), var(--bg))", marginBottom: "1.5rem" }}>
           <form onSubmit={handleSubmit}>
             <label style={{ fontFamily: "var(--font-title)", fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", color: "var(--text-faint)", display: "block", marginBottom: 8 }}>
-              Token ou lien invité
+              Lien ou token invité
             </label>
             <div style={{ display: "flex", gap: 10 }}>
               <input
                 value={token}
                 onChange={e => setToken(e.target.value)}
                 placeholder="Collez le lien /i/…/g/… ou le token"
-                autoFocus
                 style={{ flex: 1, padding: "0.9rem 1rem",
                   background: "rgba(255,255,255,0.04)", border: "1px solid var(--hair-strong)",
                   borderRadius: 10, color: "var(--ivory)", fontFamily: "var(--font-body)",
@@ -90,9 +131,6 @@ export default function CheckinPage() {
                 {loading ? "…" : "Valider →"}
               </button>
             </div>
-            <p style={{ marginTop: 8, fontFamily: "var(--font-title)", fontSize: 10, color: "var(--text-faint)" }}>
-              Le token = dernière partie du lien <code style={{ background: "rgba(255,255,255,0.06)", padding: "1px 6px", borderRadius: 4 }}>/g/[token]</code>
-            </p>
           </form>
         </div>
 
