@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
-const ADMIN_EMAIL = "aniskhelifiusthb@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "aniskhelifiusthb@gmail.com";
 
 const PACKS = [
   { credits: 5,  amount: 500,  label: "Pack Starter" },
@@ -33,16 +33,15 @@ export async function POST(req: Request) {
     },
   });
 
-  const baseUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+  const base = process.env.VERCEL_PROJECT_PRODUCTION_URL
     ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
     : "http://localhost:3000";
 
   if (dbUser.email === ADMIN_EMAIL) {
     await prisma.user.update({ where: { id: dbUser.id }, data: { credits: { increment: pack.credits } } });
-    return NextResponse.json({ url: `${baseUrl}/dashboard?credits=ok` });
+    return NextResponse.json({ url: `${base}/dashboard?credits=ok` });
   }
 
-  // URL test si clé test, prod sinon
   const isTest = apiKey.startsWith("test_");
   const chargilyUrl = isTest
     ? "https://pay.chargily.net/test/api/v2/checkouts"
@@ -56,11 +55,10 @@ export async function POST(req: Request) {
       currency: "dzd",
       payment_method: "edahabia",
       description: `${pack.label} — ${pack.credits} crédits Invytek`,
-      success_url: `${baseUrl}/dashboard?credits=ok`,
-      failure_url: `${baseUrl}/dashboard?credits=fail`,
-      webhook_endpoint: `${baseUrl}/api/credits/webhook`,
+      success_url: `${base}/dashboard?credits=ok`,
+      failure_url: `${base}/dashboard?credits=fail`,
+      webhook_endpoint: `${base}/api/credits/webhook`,
       locale: "fr",
-      metadata: { userId: dbUser.id, credits: pack.credits },
     }),
   });
 
@@ -70,6 +68,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: `Erreur paiement (${res.status})`, detail: err }, { status: 502 });
   }
 
-  const data = await res.json() as { checkout_url?: string };
+  const data = await res.json() as { checkout_url?: string; id?: string };
+
+  if (data.id) {
+    await prisma.pendingCheckout.create({
+      data: { checkoutId: data.id, userId: dbUser.id, type: "credits", credits: pack.credits },
+    });
+  }
+
   return NextResponse.json({ url: data.checkout_url });
 }

@@ -75,6 +75,16 @@ model ProcessedWebhook {
   processedAt DateTime @default(now())
 }
 
+model PendingCheckout {
+  checkoutId String   @id
+  userId     String
+  type       String   // subscription | credits
+  plan       String?
+  months     Int      @default(1)
+  credits    Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
 model GeneratedTheme {
   id             String   @id @default(cuid())
   baseThemeId    String

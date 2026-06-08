@@ -16,15 +16,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Signature invalide" }, { status: 401 });
   }
 
-  let event: { type?: string; data?: { id?: string; status?: string; metadata?: { userId?: string; plan?: string; months?: number } } };
+  let event: { type?: string; data?: { id?: string; status?: string } };
   try { event = JSON.parse(body); } catch { return NextResponse.json({ error: "JSON invalide" }, { status: 400 }); }
 
   if (event.type === "checkout.paid" && event.data?.status === "paid") {
     const checkoutId = event.data.id;
-    const { userId, plan, months = 1 } = event.data.metadata ?? {};
-    if (!userId || !plan || !["simple", "pro", "business"].includes(plan)) {
-      return NextResponse.json({ ok: true });
-    }
+    if (!checkoutId) return NextResponse.json({ ok: true });
+
+    const intent = await prisma.pendingCheckout.findUnique({ where: { checkoutId } });
+    if (!intent || intent.type !== "subscription") return NextResponse.json({ ok: true });
+
+    const { userId, plan, months } = intent;
+    if (!plan || !["simple", "pro", "business"].includes(plan)) return NextResponse.json({ ok: true });
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -39,10 +42,11 @@ export async function POST(req: Request) {
     planExpiresAt.setDate(planExpiresAt.getDate() + months * 30);
 
     try {
-      const ops: Prisma.PrismaPromise<unknown>[] = [];
-      if (checkoutId) ops.push(prisma.processedWebhook.create({ data: { checkoutId } }));
-      ops.push(prisma.user.update({ where: { id: userId }, data: { plan, planExpiresAt } }));
-      await prisma.$transaction(ops);
+      await prisma.$transaction([
+        prisma.processedWebhook.create({ data: { checkoutId } }),
+        prisma.pendingCheckout.delete({ where: { checkoutId } }),
+        prisma.user.update({ where: { id: userId }, data: { plan, planExpiresAt } }),
+      ]);
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
         return NextResponse.json({ ok: true });
