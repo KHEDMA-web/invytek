@@ -163,6 +163,7 @@ export function Nav() {
     }
   }
 
+  const isAdmin  = session?.user?.email === "aniskhelifiusthb@gmail.com";
   const userName = session?.user?.name?.split(" ")[0]
     ?? session?.user?.email?.split("@")[0]
     ?? "Mon espace";
@@ -294,6 +295,7 @@ export function Nav() {
                       {[
                         { href: "/dashboard", label: "Mon dashboard" },
                         { href: "/create",    label: "Créer une invitation" },
+                        ...(isAdmin ? [{ href: "/admin", label: "⚙ Admin" }] : []),
                       ].map(item => (
                         <Link
                           key={item.href}

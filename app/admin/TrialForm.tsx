@@ -65,7 +65,7 @@ export function TrialForm({ onCreated }: { onCreated: () => void }) {
         <label style={labelStyle}>
           <span style={labelText}>Mot de passe</span>
           <input
-            type="text"
+            type="password"
             required
             minLength={6}
             value={password}
@@ -77,13 +77,13 @@ export function TrialForm({ onCreated }: { onCreated: () => void }) {
         <label style={labelStyle}>
           <span style={labelText}>Plan</span>
           <select value={plan} onChange={e => setPlan(e.target.value)} style={inputStyle}>
-            {PLANS.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+            {PLANS.map(p => <option key={p.value} value={p.value} style={{ background: "#1a1508", color: "#e8d5a8" }}>{p.label}</option>)}
           </select>
         </label>
         <label style={labelStyle}>
           <span style={labelText}>Durée</span>
           <select value={days} onChange={e => setDays(Number(e.target.value))} style={inputStyle}>
-            {DURATIONS.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
+            {DURATIONS.map(d => <option key={d.value} value={d.value} style={{ background: "#1a1508", color: "#e8d5a8" }}>{d.label}</option>)}
           </select>
         </label>
       </div>

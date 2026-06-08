@@ -36,7 +36,7 @@ export default function AdminPage() {
 
   const fetchTrials = useCallback(async () => {
     const res = await fetch("/api/admin/trial");
-    if (res.status === 403) { router.push("/dashboard"); return; }
+    if (res.status === 403) { router.push("/auth"); return; }
     const data = await res.json();
     setTrials(data.trials ?? []);
     setLoading(false);
