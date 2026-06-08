@@ -1,6 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import { usePetals, useTilt } from "@/hooks/useThemeEffects";
+import styles from "./Theme.module.css";
 
 interface Props {
   content: WeddingContent;
@@ -11,32 +14,44 @@ interface Props {
   alreadyResponded?: boolean;
 }
 
-const KS = `
-@keyframes gbRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes gbFlutter{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-10px) rotate(4deg)}}
-@keyframes gbPulse{0%,100%{opacity:.5}50%{opacity:1}}
-@keyframes gbEnvIn{from{transform:translateY(20px) scale(.93)}to{transform:none}}
-.gb-rev{opacity:0;animation:gbRise .85s cubic-bezier(.16,1,.3,1) forwards}
-.gb-gate{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(130% 80% at 50% 30%,#FBFAF5,#F3F0E8 70%);text-align:center;padding:2rem;transition:opacity .8s ease .35s,visibility 0s 1.15s}
-.gb-gate.out{opacity:0;visibility:hidden}
-.gb-env{position:relative;width:248px;height:166px;cursor:pointer;perspective:900px;margin-bottom:1.6rem;animation:gbEnvIn 1s cubic-bezier(.16,1,.3,1) forwards}
-.gb-flap{position:absolute;top:0;left:0;width:100%;height:62%;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top;transform:rotateX(0deg);transition:transform .8s cubic-bezier(.6,0,.3,1);z-index:4;background:linear-gradient(150deg,#26477f,#1b3461);border-bottom:1px solid rgba(196,154,72,.25)}
-.gb-env.open .gb-flap{transform:rotateX(-180deg);z-index:1}
-.gb-seal{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);width:58px;height:58px;border-radius:50%;z-index:6;background:radial-gradient(circle at 38% 34%,#E0BC6A,#C49A48 62%,#9a7430 100%);box-shadow:0 6px 16px -4px rgba(0,0,0,.5),inset 0 2px 4px rgba(255,255,255,.4),inset 0 -3px 6px rgba(120,90,30,.5);display:flex;align-items:center;justify-content:center;transition:transform .4s ease,opacity .4s ease}
-.gb-env.open .gb-seal{transform:translate(-50%,-50%) scale(.6);opacity:0}
-`;
+function FloralCorner() {
+  return (
+    <svg viewBox="0 0 120 120" fill="none" width="112" height="112" aria-hidden>
+      <g stroke="#3E5C96" strokeLinecap="round" fill="none" opacity=".55">
+        <path d="M12 12 C44 28 68 58 76 96" strokeWidth="1.2"/>
+        <path d="M28 18 C34 28 36 38 32 50" strokeWidth="1"/>
+        <path d="M18 38 C26 42 38 40 44 34" strokeWidth="1"/>
+        <path d="M54 54 C58 64 60 74 56 84" strokeWidth="1"/>
+      </g>
+      <g fill="#6E8CC4" opacity=".55">
+        <ellipse cx="38" cy="26" rx="5.5" ry="3.2" transform="rotate(-30 38 26)"/>
+        <ellipse cx="58" cy="52" rx="5" ry="2.8" transform="rotate(-25 58 52)"/>
+        <ellipse cx="62" cy="76" rx="4.5" ry="2.5" transform="rotate(-20 62 76)"/>
+      </g>
+    </svg>
+  );
+}
 
-export default function GlycineBleueTheme({ content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false }: Props) {
+export default function GlycineBleueTheme({
+  content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false,
+}: Props) {
   const { showCountdown = true, showRsvp = true } = options;
-  const [opened, setOpened] = useState(false);
-  const [envOpen, setEnvOpen] = useState(false);
-  const [cd, setCd] = useState({ j: "––", h: "––", m: "––" });
-  const [cdDone, setCdDone] = useState(false);
-  const [rsvpName, setRsvpName] = useState(guestName ?? "");
-  const [rsvpAttending, setRsvpAttending] = useState<"attending" | "declined" | null>(null);
-  const [rsvpSize, setRsvpSize] = useState(1);
-  const [rsvpMsg, setRsvpMsg] = useState("");
-  const [rsvpSent, setRsvpSent] = useState(false);
+
+  const petalsRef = useRef<HTMLDivElement>(null);
+  const cardRef   = useRef<HTMLDivElement>(null);
+  usePetals(petalsRef, { color: "rgba(108,140,196,.45)", count: 14 });
+  useTilt(cardRef);
+
+  const [opened,      setOpened]      = useState(false);
+  const [envOpen,     setEnvOpen]     = useState(false);
+  const [toast,       setToast]       = useState<string | null>(null);
+  const [cd,          setCd]          = useState({ j: "––", h: "––", m: "––" });
+  const [cdDone,      setCdDone]      = useState(false);
+  const [rsvpName,    setRsvpName]    = useState(guestName ?? "");
+  const [rsvpStatus,  setRsvpStatus]  = useState<"attending"|"declined"|null>(null);
+  const [rsvpSize,    setRsvpSize]    = useState(1);
+  const [rsvpMsg,     setRsvpMsg]     = useState("");
+  const [rsvpSent,    setRsvpSent]    = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
 
   useEffect(() => {
@@ -46,24 +61,28 @@ export default function GlycineBleueTheme({ content, options = {}, invitationId,
       let diff = target.getTime() - Date.now();
       if (diff < 0) { setCdDone(true); return; }
       const j = Math.floor(diff / 86400000); diff %= 86400000;
-      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const h = Math.floor(diff / 3600000);  diff %= 3600000;
       const m = Math.floor(diff / 60000);
-      setCd({ j: String(j), h: String(h).padStart(2, "0"), m: String(m).padStart(2, "0") });
+      setCd({ j: String(j), h: String(h).padStart(2,"0"), m: String(m).padStart(2,"0") });
     }
     tick(); const id = setInterval(tick, 30000); return () => clearInterval(id);
   }, [content.date, content.time, showCountdown]);
 
-  function openGate() {
-    setEnvOpen(true);
-    setTimeout(() => setOpened(true), 500);
-  }
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
+
+  function openGate() { setEnvOpen(true); setTimeout(() => setOpened(true), 500); }
 
   async function submitRsvp(e: React.FormEvent) {
     e.preventDefault();
-    if (!invitationId || !rsvpAttending || rsvpName.trim().length < 2) return;
+    if (!invitationId || !rsvpStatus || rsvpName.trim().length < 2) return;
     setRsvpLoading(true);
     try {
-      await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invitationId, name: rsvpName.trim(), status: rsvpAttending, partySize: rsvpSize, message: rsvpMsg || undefined, token: guestToken }) });
+      await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invitationId, name: rsvpName.trim(), status: rsvpStatus, partySize: rsvpSize, message: rsvpMsg || undefined, token: guestToken }) });
       setRsvpSent(true);
     } catch { /* silent */ } finally { setRsvpLoading(false); }
   }
@@ -71,63 +90,58 @@ export default function GlycineBleueTheme({ content, options = {}, invitationId,
   function saveDate() {
     const [y, mo, d] = content.date.split("-"); const [hh, mm] = content.time.split(":");
     const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Invytek//FR","CALSCALE:GREGORIAN","BEGIN:VEVENT",
-      `DTSTART:${y}${mo}${d}T${hh}${mm}00`,`SUMMARY:Mariage de ${content.names[0]} avec ${content.names[1]}`,
-      `LOCATION:${content.venue}${content.venueSub?"\\, "+content.venueSub:""}`,`DESCRIPTION:${content.hosts}`,
+      `DTSTART:${y}${mo}${d}T${hh}${mm}00`,
+      `SUMMARY:Mariage de ${content.names[0]} & ${content.names[1]}`,
+      `LOCATION:${content.venue}${content.venueSub ? "\\, "+content.venueSub : ""}`,
+      `DESCRIPTION:${content.hosts}`,
       "END:VEVENT","END:VCALENDAR"].join("\r\n");
-    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
-    a.download = `mariage-${content.names[0].toLowerCase()}-${content.names[1].toLowerCase()}.ics`; a.click();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    a.download = `mariage-${content.names[0].toLowerCase()}-${content.names[1].toLowerCase()}.ics`;
+    a.click();
+    setToast("Date enregistrée dans votre calendrier");
   }
 
-  const C = {
-    paper: "#F3F0E8", paper2: "#FAF8F2", ink: "#22304F",
-    navy: "#1E3A6E", navyD: "#16294E", blue: "#5C7BB8", blueS: "#9BB4DC", blueW: "rgba(120,150,200,.22)",
-    gold: "#C49A48", vivid: "#E0BC6A", goldS: "rgba(196,154,72,.5)",
-    text: "rgba(34,48,79,.82)", soft: "rgba(34,48,79,.56)", faint: "rgba(34,48,79,.34)",
-  };
   const dateObj = new Date(content.date + "T12:00:00");
   const dateStr = dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
-  const inp: React.CSSProperties = { width: "100%", padding: ".75rem .9rem", background: "rgba(120,150,200,.05)", border: `1px solid rgba(120,150,200,.3)`, borderRadius: 4, color: C.ink, fontFamily: "'Cormorant Garamond',serif", fontSize: "1rem", outline: "none" };
-  const btnSt = (primary?: boolean): React.CSSProperties => ({ display: "inline-flex", alignItems: "center", gap: 6, padding: ".9rem 1.5rem", fontFamily: "'Marcellus',serif", fontSize: ".72rem", letterSpacing: ".16em", textTransform: "uppercase", cursor: "pointer", border: primary ? "none" : `1px solid ${C.goldS}`, background: primary ? `linear-gradient(135deg,${C.navy},${C.navyD})` : "transparent", color: primary ? C.paper2 : C.soft, transition: "all .25s", borderRadius: 40 });
-
-  const initials = (content.names[0][0] ?? "L") + (content.names[1][0] ?? "A");
+  const initials = (content.names[0][0] ?? "L");
 
   return (
-    <div style={{ minHeight: "100dvh", background: `radial-gradient(130% 80% at 50% -5%,#FBFAF5 0%,${C.paper} 64%),${C.paper}`, color: C.text, fontFamily: "'Cormorant Garamond',serif", overflow: "hidden" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet" />
-      <style>{KS}</style>
+    <div className={styles.root}>
+      <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&display=swap" rel="stylesheet"/>
+
+      <div className={styles.petals} ref={petalsRef} />
 
       {/* Gate */}
-      {!opened && (
-        <div className={`gb-gate${envOpen ? " out" : ""}`} onClick={openGate}>
-          <div className={`gb-env${envOpen ? " open" : ""}`}>
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(160deg,${C.navy} 0%,${C.navyD} 100%)`, border: `1px solid rgba(196,154,72,.4)`, boxShadow: "0 24px 50px -22px rgba(20,34,70,.6)" }} />
-            <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
-              <div style={{ position: "absolute", bottom: 0, left: 0, width: "54%", height: "64%", background: `linear-gradient(140deg,#22427e,#182f5a)`, clipPath: "polygon(0 0,0 100%,100% 100%)", borderRight: "1px solid rgba(196,154,72,.2)" }} />
-              <div style={{ position: "absolute", bottom: 0, right: 0, width: "54%", height: "64%", background: `linear-gradient(140deg,#22427e,#182f5a)`, clipPath: "polygon(100% 0,0 100%,100% 100%)" }} />
-            </div>
-            <div className="gb-flap" />
-            <div className="gb-seal"><span style={{ fontFamily: "'Pinyon Script',cursive", fontSize: "2rem", color: "#5a4318", lineHeight: 1 }}>{initials[0]}</span></div>
-          </div>
-          <div style={{ fontFamily: "'Marcellus',serif", fontSize: "1.3rem", letterSpacing: ".3em", textTransform: "uppercase", color: C.navy, textIndent: ".3em" }}>Save the Date</div>
-          <div style={{ fontFamily: "'Pinyon Script',cursive", fontSize: "2.7rem", color: C.navy, marginTop: ".3rem" }}>
-            {content.names[0]} &amp; {content.names[1]}
-          </div>
-          <div style={{ marginTop: "1.4rem", fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1rem", color: C.blue, animation: "gbPulse 2.2s ease-in-out infinite" }}>
-            Touchez le sceau pour ouvrir
+      <div className={`${styles.gate} ${envOpen ? styles.out : ""}`} onClick={openGate}>
+        <div className={styles.envWrap}>
+          <div className={styles.envBody} />
+          <div className={styles.envBL} />
+          <div className={styles.envBR} />
+          <div className={`${styles.envFlap} ${envOpen ? styles.open : ""}`} />
+          <div className={`${styles.envSeal} ${envOpen ? styles.open : ""}`}>
+            <span style={{ fontFamily: "'Pinyon Script',cursive", fontSize: "2rem", color: "#5a4318", lineHeight: 1 }}>{initials}</span>
           </div>
         </div>
-      )}
+        <div className={styles.gateLabel}>Save the Date</div>
+        <div className={styles.gateNames}>{content.names[0]} &amp; {content.names[1]}</div>
+        <p className={styles.gatePulse}>Touchez le sceau pour ouvrir</p>
+      </div>
 
       {/* Card */}
       {opened && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100dvh", padding: "calc(2.5rem + env(safe-area-inset-top)) 1.2rem calc(2.5rem + env(safe-area-inset-bottom))" }}>
-          <div style={{ position: "relative", width: "100%", maxWidth: 440, zIndex: 2 }}>
-            <div style={{ position: "relative", width: "100%", background: `linear-gradient(168deg,${C.paper2} 0%,${C.paper} 100%)`, border: `1px solid rgba(196,154,72,.35)`, padding: "3.6rem 2.2rem 3rem", textAlign: "center", overflow: "hidden", boxShadow: `0 40px 100px -42px rgba(30,40,70,.4),inset 0 1px 0 rgba(255,255,255,.6)` }}>
-              <div style={{ position: "absolute", inset: 11, border: `1px solid rgba(120,150,200,.28)`, pointerEvents: "none" }} />
+        <div className={styles.scene}>
+          <div className={styles.cardWrap} ref={cardRef}>
+            <div className={styles.card}>
+              <div className={styles.innerBorder} />
+              <div className={`${styles.corner} ${styles.cornerTL}`}><FloralCorner /></div>
+              <div className={`${styles.corner} ${styles.cornerTR}`}><FloralCorner /></div>
+              <div className={`${styles.corner} ${styles.cornerBL}`}><FloralCorner /></div>
+              <div className={`${styles.corner} ${styles.cornerBR}`}><FloralCorner /></div>
 
               {/* Butterfly */}
-              <div style={{ position: "absolute", width: 48, height: 48, right: 18, top: 120, zIndex: 3, animation: "gbFlutter 5s ease-in-out infinite" }}>
-                <svg viewBox="0 0 48 48" fill="none" width="48" height="48">
+              <div className={styles.butterfly}>
+                <svg viewBox="0 0 48 48" fill="none" width="48" height="48" aria-hidden>
                   <g fill="#5C7BB8" opacity=".85">
                     <path d="M24 24 C16 8 4 10 6 22 C7 30 18 28 24 24Z"/>
                     <path d="M24 24 C32 8 44 10 42 22 C41 30 30 28 24 24Z"/>
@@ -138,106 +152,116 @@ export default function GlycineBleueTheme({ content, options = {}, invitationId,
                 </svg>
               </div>
 
-              {/* Floral corners (simplified) */}
-              {[["top: -10px; left: -10px", ""], ["top: -10px; right: -10px", "scaleX(-1)"], ["bottom: -10px; left: -10px", "scaleY(-1)"], ["bottom: -10px; right: -10px", "scale(-1,-1)"]].map(([pos, tf], i) => (
-                <div key={i} style={{ position: "absolute", width: 120, height: 120, ...(pos.includes("top") && pos.includes("left") ? { top: -10, left: -10 } : pos.includes("top") ? { top: -10, right: -10 } : pos.includes("left") ? { bottom: -10, left: -10 } : { bottom: -10, right: -10 }), transform: tf || undefined, zIndex: 1, pointerEvents: "none", opacity: .6 }}>
-                  <svg viewBox="0 0 150 150" fill="none" width="120" height="120">
-                    <g fill="#6E8CC4" opacity=".5">
-                      <ellipse cx="40" cy="30" rx="6" ry="3.4" transform="rotate(-30 40 30)"/>
-                      <ellipse cx="58" cy="56" rx="5.4" ry="3" transform="rotate(-30 58 56)"/>
-                    </g>
-                    <g stroke="#3E5C96" strokeWidth="1.2" strokeLinecap="round" opacity=".55">
-                      <path d="M14 14 C46 30 70 60 78 96"/>
-                      <path d="M30 22 C36 30 38 38 36 48"/><path d="M22 40 C30 44 38 44 46 40"/>
-                    </g>
-                  </svg>
-                </div>
-              ))}
-
               {guestName && (
-                <div className="gb-rev" style={{ marginBottom: "1rem" }}>
-                  <p style={{ fontFamily: "'Marcellus',serif", fontSize: ".65rem", letterSpacing: ".22em", textTransform: "uppercase", color: C.gold }}>À l&apos;attention de</p>
-                  <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.4rem", color: C.ink }}>{guestName}</p>
+                <div className={`${styles.guestBadge} ${styles.rev}`}>
+                  <span className={styles.guestPre}>À l&apos;attention de</span>
+                  <span className={styles.guestName}>{guestName}</span>
                 </div>
               )}
 
-              <p className="gb-rev" style={{ fontFamily: "'Marcellus',serif", fontSize: ".72rem", letterSpacing: ".4em", textTransform: "uppercase", color: C.blue, textIndent: ".4em", animationDelay: ".1s" }}>
+              <p className={`${styles.eyebrow} ${styles.rev}`} style={{ animationDelay: ".1s" }}>
                 {content.invitationLine || "Avec joie, nous célébrons"}
               </p>
-              <p className="gb-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.12rem", color: C.soft, lineHeight: 1.6, marginTop: "1.2rem", maxWidth: "30ch", marginInline: "auto", animationDelay: ".18s" }}>
+              <p className={`${styles.hosts} ${styles.rev}`} style={{ animationDelay: ".18s" }}>
                 {content.hosts}
               </p>
-              <div className="gb-rev" style={{ fontFamily: "'Pinyon Script',cursive", fontSize: "clamp(2.9rem,14vw,4.1rem)", lineHeight: .96, color: C.navy, marginTop: ".9rem", animationDelay: ".3s" }}>
-                {content.names[0]}<span style={{ display: "block", fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.25rem", color: C.blue, margin: ".05rem 0" }}>&amp;</span>{content.names[1]}
+
+              <div className={`${styles.names} ${styles.rev}`} style={{ animationDelay: ".3s" }}>
+                {content.names[0]}
+                <span className={styles.amp}>&amp;</span>
+                {content.names[1]}
               </div>
 
-              <div className="gb-rev" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".9rem", margin: "1.6rem auto", width: "66%", animationDelay: ".42s" }}>
-                <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg,transparent,${C.goldS})` }} />
-                <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M12 3 C9 9 5 10 5 14 a4 4 0 0 0 7 2.6 a4 4 0 0 0 7-2.6 C19 10 15 9 12 3Z" fill={C.gold}/></svg>
-                <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg,${C.goldS},transparent)` }} />
+              <div className={`${styles.sep} ${styles.rev}`} style={{ animationDelay: ".42s" }}>
+                <span className={`${styles.sepLine} ${styles.sepLineL}`} />
+                <svg viewBox="0 0 24 24" fill="none" width="20" height="20" aria-hidden>
+                  <path d="M12 3 C9 9 5 10 5 14 a4 4 0 0 0 7 2.6 a4 4 0 0 0 7-2.6 C19 10 15 9 12 3Z" fill="#C49A48"/>
+                </svg>
+                <span className={`${styles.sepLine} ${styles.sepLineR}`} />
               </div>
 
-              <p className="gb-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.2rem", color: C.text, lineHeight: 1.7, animationDelay: ".5s" }}>
-                <span style={{ fontFamily: "'Marcellus',serif", fontSize: "1.02rem", letterSpacing: ".15em", textTransform: "uppercase", color: C.navy, display: "block", marginBottom: ".2rem" }}>{dateStr}</span>
-                {content.time.replace(":", "h")}<br/><span style={{ fontStyle: "italic", color: C.blue }}>{content.venue}{content.venueSub ? ` · ${content.venueSub}` : ""}</span>
-              </p>
+              <div className={`${styles.dateBlock} ${styles.rev}`} style={{ animationDelay: ".5s" }}>
+                <span className={styles.dateStr}>{dateStr}</span>
+                <p className={styles.dateTime}>
+                  {content.time.replace(":"," h ")}<br/>
+                  <span className={styles.venue}>{content.venue}{content.venueSub ? ` · ${content.venueSub}` : ""}</span>
+                </p>
+              </div>
 
               {showCountdown && !cdDone && (
-                <div className="gb-rev" style={{ display: "flex", justifyContent: "center", gap: ".9rem", margin: "2rem 0 .2rem", animationDelay: ".6s" }}>
+                <div className={`${styles.countdown} ${styles.rev}`} style={{ animationDelay: ".6s" }}>
                   {[{ val: cd.j, lab: "Jours" }, { val: cd.h, lab: "Heures" }, { val: cd.m, lab: "Min" }].map(({ val, lab }) => (
-                    <div key={lab} style={{ textAlign: "center", minWidth: 54, padding: ".7rem .4rem", border: `1px solid rgba(120,150,200,.35)`, background: "rgba(120,150,200,.07)" }}>
-                      <span style={{ fontFamily: "'Marcellus',serif", fontSize: "1.55rem", color: C.navy, display: "block", lineHeight: 1 }}>{val}</span>
-                      <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: ".64rem", letterSpacing: ".16em", textTransform: "uppercase", color: C.faint, display: "block", marginTop: ".45rem" }}>{lab}</span>
+                    <div key={lab} className={styles.cdBox}>
+                      <span className={styles.cdNum}>{val}</span>
+                      <span className={styles.cdLab}>{lab}</span>
                     </div>
                   ))}
                 </div>
               )}
 
-              <p className="gb-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.1rem", color: C.soft, marginTop: "1.2rem", animationDelay: ".68s" }}>{content.closing}</p>
+              <p className={`${styles.closing} ${styles.rev}`} style={{ animationDelay: ".68s" }}>
+                {content.closing}
+              </p>
 
-              <div className="gb-rev" style={{ marginTop: "2rem", display: "flex", gap: ".8rem", justifyContent: "center", flexWrap: "wrap", animationDelay: ".7s" }}>
-                <button style={btnSt(false)} onClick={saveDate}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <div className={`${styles.cta} ${styles.rev}`} style={{ animationDelay: ".7s" }}>
+                <button className={`${styles.btn} ${styles.btnGhost}`} onClick={saveDate}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" width={14} height={14}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                   Enregistrer la date
                 </button>
                 {content.mapsUrl && (
-                  <a style={{ ...btnSt(false), textDecoration: "none" }} href={content.mapsUrl} target="_blank" rel="noopener noreferrer">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                  <a className={`${styles.btn} ${styles.btnGhost}`} href={content.mapsUrl} target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width={14} height={14}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
                     Itinéraire
                   </a>
                 )}
-                {showRsvp && invitationId && <button style={btnSt(true)} onClick={() => document.getElementById("gb-rsvp")?.scrollIntoView({ behavior: "smooth" })}>Confirmer ma présence</button>}
+                {showRsvp && invitationId && (
+                  <button className={`${styles.btn} ${styles.btnPrimary}`}
+                    onClick={() => document.getElementById("gb-rsvp")?.scrollIntoView({ behavior: "smooth" })}>
+                    Confirmer ma présence
+                  </button>
+                )}
               </div>
 
               {showRsvp && invitationId && (
-                <section id="gb-rsvp" style={{ marginTop: "2.2rem", borderTop: `1px solid rgba(120,150,200,.3)`, paddingTop: "1.8rem" }}>
-                  <h2 style={{ fontFamily: "'Marcellus',serif", fontSize: "1.1rem", color: C.navy, marginBottom: "1rem" }}>Votre réponse</h2>
+                <section id="gb-rsvp" className={`${styles.rsvp} ${styles.rev}`} style={{ animationDelay: ".8s" }}>
+                  <h2 className={styles.rsvpTitle}>Votre réponse</h2>
                   {rsvpSent || alreadyResponded ? (
-                    <p style={{ color: C.soft, fontFamily: "'Cormorant Garamond',serif", fontSize: "1rem", lineHeight: 1.8 }}>
-                      {alreadyResponded && !rsvpSent ? "Vous avez déjà répondu — merci !" : <>Merci <strong style={{ color: C.navy }}>{rsvpName}</strong> — réponse enregistrée.</>}
+                    <p className={styles.rsvpDone}>
+                      {alreadyResponded && !rsvpSent
+                        ? "Vous avez déjà répondu — merci !"
+                        : <>Merci <strong>{rsvpName}</strong> — réponse enregistrée.</>}
                     </p>
                   ) : (
-                    <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={submitRsvp}>
-                      <input style={inp} type="text" placeholder="Votre nom" value={rsvpName} onChange={e => setRsvpName(e.target.value)} required minLength={2} />
-                      <div style={{ display: "flex", gap: 8 }}>
-                        {(["attending", "declined"] as const).map((v, i) => (
-                          <button key={v} type="button" onClick={() => setRsvpAttending(v)} style={{ flex: 1, padding: ".65rem", border: `1.5px solid ${rsvpAttending === v ? C.navy : "rgba(120,150,200,.35)"}`, background: rsvpAttending === v ? "rgba(30,58,110,.08)" : "transparent", color: rsvpAttending === v ? C.navy : C.soft, fontFamily: "'Marcellus',serif", fontSize: ".68rem", letterSpacing: ".1em", textTransform: "uppercase", cursor: "pointer", borderRadius: 40 }}>
+                    <form className={styles.rsvpForm} onSubmit={submitRsvp}>
+                      <input className={styles.inp} type="text" placeholder="Votre nom complet"
+                        value={rsvpName} onChange={e => setRsvpName(e.target.value)} required minLength={2} maxLength={80}/>
+                      <div className={styles.toggle}>
+                        {(["attending","declined"] as const).map((v, i) => (
+                          <button key={v} type="button"
+                            className={`${styles.toggleBtn} ${rsvpStatus === v ? (i === 0 ? styles.active : styles.declined) : ""}`}
+                            onClick={() => setRsvpStatus(v)}>
                             {i === 0 ? "Confirmer" : "Décliner"}
                           </button>
                         ))}
                       </div>
-                      {rsvpAttending === "attending" && (
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                          <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: ".9rem", color: C.soft }}>Nombre de personnes</span>
-                          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                            <button type="button" onClick={() => setRsvpSize(s => Math.max(1, s - 1))} style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid rgba(120,150,200,.35)`, background: "transparent", color: C.navy, cursor: "pointer" }}>−</button>
-                            <span style={{ fontFamily: "'Marcellus',serif", color: C.ink, minWidth: 20, textAlign: "center" }}>{rsvpSize}</span>
-                            <button type="button" onClick={() => setRsvpSize(s => Math.min(20, s + 1))} style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid rgba(120,150,200,.35)`, background: "transparent", color: C.navy, cursor: "pointer" }}>+</button>
+                      {rsvpStatus === "attending" && (
+                        <div className={styles.sizeRow}>
+                          <span className={styles.sizeLabel}>Nombre de personnes</span>
+                          <div className={styles.sizeCtrl}>
+                            <button type="button" className={styles.sizeBtn} onClick={() => setRsvpSize(s => Math.max(1,s-1))}>−</button>
+                            <span className={styles.sizeVal}>{rsvpSize}</span>
+                            <button type="button" className={styles.sizeBtn} onClick={() => setRsvpSize(s => Math.min(20,s+1))}>+</button>
                           </div>
                         </div>
                       )}
-                      <textarea style={{ ...inp, resize: "vertical" }} placeholder="Message (optionnel)" value={rsvpMsg} onChange={e => setRsvpMsg(e.target.value)} rows={2} />
-                      <button type="submit" disabled={!rsvpAttending || rsvpName.trim().length < 2 || rsvpLoading} style={{ ...btnSt(true), alignSelf: "center" } as React.CSSProperties}>{rsvpLoading ? "Envoi…" : "Envoyer →"}</button>
+                      <textarea className={styles.inp} placeholder="Message (optionnel)"
+                        value={rsvpMsg} onChange={e => setRsvpMsg(e.target.value)} rows={2}
+                        style={{ resize: "vertical" }}/>
+                      <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`}
+                        style={{ alignSelf: "center" }}
+                        disabled={!rsvpStatus || rsvpName.trim().length < 2 || rsvpLoading}>
+                        {rsvpLoading ? "Envoi…" : "Envoyer →"}
+                      </button>
                     </form>
                   )}
                 </section>
@@ -246,6 +270,8 @@ export default function GlycineBleueTheme({ content, options = {}, invitationId,
           </div>
         </div>
       )}
+
+      <div className={`${styles.toast} ${toast ? styles.show : ""}`}>{toast}</div>
     </div>
   );
 }
