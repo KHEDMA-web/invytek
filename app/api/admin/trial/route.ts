@@ -80,7 +80,7 @@ export async function DELETE(req: Request) {
 
   await prisma.user.update({
     where: { id: body.userId },
-    data: { plan: "free", planExpiresAt: null, isTrial: false },
+    data: { plan: "free", planExpiresAt: null, isTrial: false, credits: 0 },
   });
 
   return NextResponse.json({ ok: true });
