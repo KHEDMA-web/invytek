@@ -118,16 +118,8 @@
 
 ## 🔧 Ce qui reste — par priorité
 
-### Priorité 1 — Bug 5 : Exposition données portail client ⚠️
-**Fichier** : `app/client/[accessToken]/page.tsx`  
-**Problème** : Le portail client expose les messages privés des invités (champ `message` dans les réponses RSVP). Ces messages sont visibles à tous les visiteurs ayant le lien. À décider : masquer le champ `message` dans la vue client, ou le réserver au dashboard agence.
-
-### Priorité 2 — Tester le paiement Chargily avec un compte non-admin ⚠️
+### Priorité 1 — Tester le paiement Chargily avec un compte non-admin ⚠️
 Le bypass admin fait que les paiements semblent fonctionner sur `aniskhelifiusthb@gmail.com` — c'est normal. Pour valider le vrai flux Chargily (Edahabia/CIB), créer un compte test avec un autre email et acheter un plan/crédit.
-
-### Priorité 3 — Ajouter CRON_SECRET en prod ⚠️
-Secret : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66`  
-Ajouter dans Vercel → Settings → Environment Variables → `CRON_SECRET` → Production.
 
 ### (Futur) Tests automatisés + Monitoring
 Zéro test automatisé, zéro Sentry / Vercel Analytics.
@@ -250,15 +242,14 @@ public/themes-preview/                    — 18 fichiers HTML statiques (previe
 | `CHARGILY_SECRET_KEY` + `CHARGILY_WEBHOOK_SECRET` | ✅ |
 | `RESEND_API_KEY` | ✅ |
 | `ADMIN_EMAIL` | ✅ `aniskhelifiusthb@gmail.com` |
-| `CRON_SECRET` | ⚠️ À ajouter en prod : `3e2072cff8afc24ae80d75b0c1e0d4564d64184a052ef87bb01a7c113318ca66` |
-| `ADMIN_EMAIL` | ✅ `aniskhelifiusthb@gmail.com` (bypass paiement + accès /admin) |
+| `CRON_SECRET` | ✅ Configuré en Production |
+| `ADMIN_EMAIL` | ⚠️ À ajouter si absent : `aniskhelifiusthb@gmail.com` (bypass paiement + accès /admin) |
 
 ---
 
 ## 🐞 Bugs connus / points d'attention
 
 - **Webhook abonnements Chargily** : non testé en prod avec un vrai paiement — tester avec un compte non-admin avant de vendre des plans
-- **Portail client /client/[accessToken]** : les messages RSVP des invités sont visibles → à décider si on les masque (priorité faible)
 - **Comptes d'essai** : isTrial=true, crédits=3 à la création — crédits effacés lors de la révocation
 - **Bypass admin** : le compte `aniskhelifiusthb@gmail.com` active tout sans paiement — comportement voulu, pas un bug
 - **Logo overlay** : affiché en `position:fixed` — convient aux logos petits/transparents ; pour les gros logos, envisager une intégration par thème
