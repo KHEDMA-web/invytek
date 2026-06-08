@@ -13,8 +13,9 @@ model User {
   image          String?
   password       String?
   credits        Int          @default(0)
-  plan           String       @default("free") // free | pro | business
+  plan           String       @default("free") // free | simple | pro | business
   planExpiresAt  DateTime?
+  isTrial        Boolean      @default(false)
   createdAt      DateTime     @default(now())
   invitations    Invitation[]
 }
