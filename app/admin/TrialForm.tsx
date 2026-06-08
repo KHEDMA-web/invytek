@@ -117,13 +117,14 @@ const labelText: React.CSSProperties = {
 };
 
 const inputStyle: React.CSSProperties = {
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid var(--hair-strong)",
+  background: "#1e1812",
+  border: "1px solid rgba(184,146,60,0.25)",
   borderRadius: 8,
   padding: "10px 14px",
-  color: "var(--fg)",
+  color: "#e8d5a8",
   fontSize: 14,
   outline: "none",
   width: "100%",
   boxSizing: "border-box",
+  colorScheme: "dark",
 };

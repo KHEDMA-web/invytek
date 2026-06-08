@@ -16,7 +16,6 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.email) return NextResponse.json({ error: "Non connecté" }, { status: 401 });
 
-  // Résoudre l'utilisateur par email — plus fiable que session.user.id après rotation de secret
   const dbUser = await prisma.user.upsert({
     where: { email: session.user.email },
     update: {},
@@ -27,20 +26,33 @@ export async function POST(req: Request) {
     },
   });
 
+  // Parser le body en premier — themeId nécessaire pour la vérification du plan
+  let body: unknown;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: "Requête invalide" }, { status: 400 }); }
+
+  const parsed = createSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+
+  const { themeId, slug, content, options } = parsed.data;
+
   // Vérifier les limites selon le plan
   const planActive = dbUser.plan !== "free" && dbUser.planExpiresAt && dbUser.planExpiresAt > new Date();
   const activePlan = planActive ? dbUser.plan : "free";
 
   if (activePlan === "free") {
-    // Sans abonnement : autorisé uniquement si l'utilisateur a des crédits IA
-    // (les crédits permettent de créer des invitations IA sans abonnement)
-    if (dbUser.credits <= 0) {
+    // Les crédits IA ne donnent accès qu'aux invitations IA (themeId "dynamic")
+    if (themeId !== "dynamic") {
       return NextResponse.json({
-        error: "Un abonnement est requis pour créer des invitations. Choisissez un plan dès 1 000 DA/mois, ou achetez des crédits IA pour créer avec l'IA.",
+        error: "Un abonnement est requis pour utiliser les thèmes. Créez avec l'IA en achetant des crédits (100 DA), ou souscrivez à un plan dès 1 000 DA/mois.",
         upgrade: true,
       }, { status: 403 });
     }
-    // Avec crédits : max 3 invitations sans abonnement
+    if (dbUser.credits <= 0) {
+      return NextResponse.json({
+        error: "Crédits IA épuisés. Rechargez pour continuer à créer avec l'IA, ou souscrivez à un plan.",
+        upgrade: true,
+      }, { status: 403 });
+    }
     const invCount = await prisma.invitation.count({ where: { userId: dbUser.id } });
     if (invCount >= 3) {
       return NextResponse.json({
@@ -59,14 +71,6 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
   }
-
-  let body: unknown;
-  try { body = await req.json(); } catch { return NextResponse.json({ error: "Requête invalide" }, { status: 400 }); }
-
-  const parsed = createSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
-
-  const { themeId, slug, content, options } = parsed.data;
 
   const exists = await prisma.invitation.findUnique({ where: { slug } });
   if (exists) return NextResponse.json({ error: "Ce lien est déjà utilisé." }, { status: 409 });
