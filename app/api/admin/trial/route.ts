@@ -67,6 +67,29 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true, user });
 }
 
+export async function PATCH(req: Request) {
+  const session = await auth();
+  if (session?.user?.email !== ADMIN_EMAIL)
+    return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
+
+  let body: { userId?: string; days?: number };
+  try { body = await req.json(); } catch { return NextResponse.json({ error: "Corps invalide" }, { status: 400 }); }
+
+  const { userId, days } = body;
+  if (!userId || typeof days !== "number" || days < 1 || days > 365)
+    return NextResponse.json({ error: "userId et days (1–365) requis" }, { status: 400 });
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { planExpiresAt: true } });
+  if (!user) return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
+
+  const base = user.planExpiresAt && user.planExpiresAt > new Date() ? user.planExpiresAt : new Date();
+  const newExpiry = new Date(base);
+  newExpiry.setDate(newExpiry.getDate() + days);
+
+  await prisma.user.update({ where: { id: userId }, data: { planExpiresAt: newExpiry } });
+  return NextResponse.json({ ok: true, planExpiresAt: newExpiry });
+}
+
 export async function DELETE(req: Request) {
   const session = await auth();
   if (session?.user?.email !== ADMIN_EMAIL) {
