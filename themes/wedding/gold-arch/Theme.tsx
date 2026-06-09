@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import { useTilt } from "@/hooks/useThemeEffects";
 import styles from "./Theme.module.css";
 
 interface Props {
@@ -39,6 +40,7 @@ export default function GoldArchTheme({ content, options = {}, invitationId, gue
   const cardRef = useRef<HTMLDivElement>(null);
   const sparklesRef = useRef<HTMLDivElement>(null);
   const petalRef = useRef<HTMLDivElement>(null);
+  useTilt(cardRef);
 
   // Countdown
   useEffect(() => {
@@ -101,29 +103,6 @@ export default function GoldArchTheme({ content, options = {}, invitationId, gue
       petals.push(p);
     }
     return () => petals.forEach(p => p.remove());
-  }, []);
-
-  // Parallax tilt on desktop
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    let raf: number;
-    const onMove = (e: MouseEvent) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const cx = innerWidth / 2, cy = innerHeight / 2;
-        const rx = (e.clientY - cy) / cy * -3;
-        const ry = (e.clientX - cx) / cx * 3;
-        card.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
-      });
-    };
-    const onLeave = () => { card.style.transform = "rotateX(0) rotateY(0)"; };
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseleave", onLeave);
-    return () => {
-      document.removeEventListener("mousemove", onMove);
-      document.removeEventListener("mouseleave", onLeave);
-    };
   }, []);
 
   // Toast auto-dismiss

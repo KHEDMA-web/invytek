@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import { useTilt } from "@/hooks/useThemeEffects";
 import styles from "./Theme.module.css";
 
 interface Props {
@@ -27,6 +28,8 @@ export default function IvoireMinimalTheme({ content, options = {}, invitationId
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [rsvpError, setRsvpError] = useState<string | null>(null);
   const sparklesRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  useTilt(cardRef);
 
   useEffect(() => {
     if (!showCountdown) return;
@@ -90,7 +93,7 @@ export default function IvoireMinimalTheme({ content, options = {}, invitationId
       <div className={styles.sparkles} ref={sparklesRef} />
 
       <div className={styles.scene}>
-        <div className={styles.card}>
+        <div className={styles.card} ref={cardRef}>
           {/* Medallion */}
           <div className={styles.medallion}>
             <div className={`${styles.medallionRing}`} />

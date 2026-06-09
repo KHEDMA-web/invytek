@@ -1,6 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import { usePetals, useTilt } from "@/hooks/useThemeEffects";
+import styles from "./Theme.module.css";
 
 interface Props {
   content: WeddingContent;
@@ -11,20 +14,43 @@ interface Props {
   alreadyResponded?: boolean;
 }
 
-export default function InaugurationTheme({ content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false }: Props) {
+function CornerIn() {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" width="60" height="60" aria-hidden>
+      <g stroke="#8B6820" strokeLinecap="round" fill="none" opacity=".35">
+        <path d="M8 8 C20 18 38 38 46 62" strokeWidth=".9"/>
+        <path d="M16 10 C20 20 20 30 16 40" strokeWidth=".7"/>
+        <path d="M10 22 C16 26 22 24 28 18" strokeWidth=".7"/>
+      </g>
+      <circle cx="8" cy="8" r="2" fill="#8B6820" opacity=".4"/>
+    </svg>
+  );
+}
+
+export default function InaugurationTheme({
+  content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false,
+}: Props) {
   const { showCountdown = true, showRsvp = true } = options;
-  const [cd, setCd] = useState({ j: "––", h: "––", m: "––" });
-  const [cdDone, setCdDone] = useState(false);
-  const [rsvpName, setRsvpName] = useState(guestName ?? "");
-  const [rsvpAttending, setRsvpAttending] = useState<"attending" | "declined" | null>(null);
-  const [rsvpSize, setRsvpSize] = useState(1);
-  const [rsvpMsg, setRsvpMsg] = useState("");
-  const [rsvpSent, setRsvpSent] = useState(false);
+
+  const petalsRef = useRef<HTMLDivElement>(null);
+  const cardRef   = useRef<HTMLDivElement>(null);
+  usePetals(petalsRef, { color: "rgba(139,104,32,.25)", count: 14, shape: "ellipse" });
+  useTilt(cardRef);
+
+  const [opened,      setOpened]      = useState(false);
+  const [toast,       setToast]       = useState<string | null>(null);
+  const [cd,          setCd]          = useState({ j: "––", h: "––", m: "––" });
+  const [cdDone,      setCdDone]      = useState(false);
+  const [rsvpName,    setRsvpName]    = useState(guestName ?? "");
+  const [rsvpStatus,  setRsvpStatus]  = useState<"attending" | "declined" | null>(null);
+  const [rsvpSize,    setRsvpSize]    = useState(1);
+  const [rsvpMsg,     setRsvpMsg]     = useState("");
+  const [rsvpSent,    setRsvpSent]    = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
 
-  // names[0] = event type, names[1] = subtitle, hosts = org
-  const evType = content.names[0];
-  const org = content.hosts;
+  const title   = content.names[0];
+  const subtitle = content.names[1] && content.names[1] !== "—" ? content.names[1] : "";
+  const company = content.hosts;
 
   useEffect(() => {
     if (!showCountdown) return;
@@ -33,131 +59,182 @@ export default function InaugurationTheme({ content, options = {}, invitationId,
       let diff = target.getTime() - Date.now();
       if (diff < 0) { setCdDone(true); return; }
       const j = Math.floor(diff / 86400000); diff %= 86400000;
-      const h = Math.floor(diff / 3600000); diff %= 3600000;
+      const h = Math.floor(diff / 3600000);  diff %= 3600000;
       const m = Math.floor(diff / 60000);
-      setCd({ j: String(j), h: String(h).padStart(2, "0"), m: String(m).padStart(2, "0") });
+      setCd({ j: String(j), h: String(h).padStart(2,"0"), m: String(m).padStart(2,"0") });
     }
     tick(); const id = setInterval(tick, 30000); return () => clearInterval(id);
   }, [content.date, content.time, showCountdown]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
+
   async function submitRsvp(e: React.FormEvent) {
     e.preventDefault();
-    if (!invitationId || !rsvpAttending || rsvpName.trim().length < 2) return;
+    if (!invitationId || !rsvpStatus || rsvpName.trim().length < 2) return;
     setRsvpLoading(true);
     try {
-      await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invitationId, name: rsvpName.trim(), status: rsvpAttending, partySize: rsvpSize, message: rsvpMsg.trim() || undefined, token: guestToken }) });
+      await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invitationId, name: rsvpName.trim(), status: rsvpStatus, partySize: rsvpSize, message: rsvpMsg || undefined, token: guestToken }) });
       setRsvpSent(true);
     } catch { /* silent */ } finally { setRsvpLoading(false); }
   }
 
-  const eventDate = new Date(content.date + "T12:00:00");
-  const dateStr = eventDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  function saveDate() {
+    const [y, mo, d] = content.date.split("-"); const [hh, mm] = content.time.split(":");
+    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Invytek//FR","CALSCALE:GREGORIAN","BEGIN:VEVENT",
+      `DTSTART:${y}${mo}${d}T${hh}${mm}00`,
+      `SUMMARY:${title}${subtitle ? " — " + subtitle : ""}`,
+      `LOCATION:${content.venue}${content.venueSub ? "\\, " + content.venueSub : ""}`,
+      `DESCRIPTION:${company}`,
+      "END:VEVENT","END:VCALENDAR"].join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    a.download = `inauguration-${title.toLowerCase().replace(/\s+/g, "-")}.ics`;
+    a.click(); setToast("Date enregistrée dans votre calendrier");
+  }
 
-  const C = { bg: "#FBF8F2", cream: "#F3EEE2", green: "#1F5B43", greenD: "#143b2c", ink: "#26302A", muted: "#5d685f", gold: "#C19A4B", vivid: "#D9B567", goldS: "rgba(193,154,75,.4)", line: "rgba(31,91,67,.18)" };
-  const inp: React.CSSProperties = { width: "100%", padding: ".75rem .9rem", background: `rgba(31,91,67,.04)`, border: `1px solid ${C.line}`, borderRadius: 4, color: C.ink, fontFamily: "'Cormorant Garamond',serif", fontSize: "1rem", outline: "none" };
-  const btnStyle = (primary?: boolean): React.CSSProperties => ({ display: "inline-flex", alignItems: "center", gap: 6, padding: ".9rem 1.5rem", borderRadius: 40, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: ".72rem", letterSpacing: ".1em", textTransform: "uppercase", cursor: "pointer", border: primary ? "none" : `1px solid ${C.goldS}`, background: primary ? `linear-gradient(135deg,${C.green},${C.greenD})` : "transparent", color: primary ? C.bg : C.greenD, transition: "all .25s" });
+  const dateObj = new Date(content.date + "T12:00:00");
+  const dateStr = dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div style={{ minHeight: "100dvh", background: `radial-gradient(130% 80% at 50% -8%,#fff 0%,${C.bg} 55%)`, display: "flex", alignItems: "center", justifyContent: "center", padding: "calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom))", overflow: "hidden", color: C.ink, fontFamily: "'Cormorant Garamond',serif" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
-      <style>{`@keyframes inaugRise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}} .inaug-rev{opacity:0;animation:inaugRise .8s cubic-bezier(.16,1,.3,1) forwards}`}</style>
+    <div className={styles.root}>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Marcellus&display=swap" rel="stylesheet"/>
+      <div className={styles.petals} ref={petalsRef} />
 
-      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 450 }}>
-        <div style={{ position: "relative", width: "100%", background: `linear-gradient(168deg,#fff,${C.cream})`, borderRadius: 6, padding: "3rem 2.4rem 2.8rem", textAlign: "center", boxShadow: `0 50px 100px -40px rgba(20,40,30,.4),0 0 0 1px ${C.line}`, overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 12, border: `1px solid ${C.line}`, pointerEvents: "none" }} />
-          <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 4, background: `linear-gradient(90deg,${C.gold},${C.vivid},${C.gold})` }} />
+      <div className={`${styles.gate} ${opened ? styles.out : ""}`} onClick={() => setOpened(true)}>
+        <div className={styles.ribbon} />
+        <div className={styles.gateLabel}>{content.invitationLine || "Cérémonie d'inauguration"}</div>
+        <div className={styles.gateTitle}>{title}</div>
+        {subtitle && <div className={styles.gateSub}>{subtitle}</div>}
+        <div className={styles.gateOrg}>{company}</div>
+        <button className={styles.gateBtn} onClick={e => { e.stopPropagation(); setOpened(true); }}>
+          Voir l&apos;invitation
+        </button>
+      </div>
 
-          {/* Guest badge */}
-          {guestName && (
-            <div className="inaug-rev" style={{ marginBottom: "1.2rem" }}>
-              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: ".65rem", letterSpacing: ".22em", textTransform: "uppercase", color: C.gold }}>À l&apos;attention de</p>
-              <p style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.4rem", color: C.ink }}>{guestName}</p>
+      <div className={styles.scene}>
+        <div className={styles.cardWrap} ref={cardRef}>
+          <div className={styles.card}>
+            <div className={styles.ribbon} />
+            <div className={styles.ribbon2} />
+            <div className={styles.innerBorder} />
+            <div className={`${styles.corner} ${styles.cornerTL}`}><CornerIn /></div>
+            <div className={`${styles.corner} ${styles.cornerTR}`}><CornerIn /></div>
+            <div className={`${styles.corner} ${styles.cornerBL}`}><CornerIn /></div>
+            <div className={`${styles.corner} ${styles.cornerBR}`}><CornerIn /></div>
+
+            {guestName && (
+              <div className={`${styles.guestBadge} ${styles.rev}`}>
+                <span className={styles.guestPre}>À l&apos;honneur de</span>
+                <span className={styles.guestName}>{guestName}</span>
+              </div>
+            )}
+
+            <p className={`${styles.eyebrow} ${styles.rev}`} style={{ animationDelay: ".05s" }}>
+              {content.invitationLine || "Cérémonie d'inauguration"}
+            </p>
+            <p className={`${styles.company} ${styles.rev}`} style={{ animationDelay: ".12s" }}>{company}</p>
+
+            <h1 className={`${styles.title} ${styles.rev}`} style={{ animationDelay: ".22s" }}>{title}</h1>
+            {subtitle && <p className={`${styles.subtitle} ${styles.rev}`} style={{ animationDelay: ".28s" }}>{subtitle}</p>}
+
+            <div className={`${styles.sep} ${styles.rev}`} style={{ animationDelay: ".36s" }}>
+              <span className={styles.sepLine} />
+              <svg viewBox="0 0 22 22" fill="none" width="18" height="18" aria-hidden>
+                <path d="M11 3 L13 9 L19 9 L14 13 L16 19 L11 15 L6 19 L8 13 L3 9 L9 9Z" fill="#8B6820" opacity=".6"/>
+              </svg>
+              <span className={styles.sepLine} />
             </div>
-          )}
 
-          {/* Crest */}
-          <div className="inaug-rev" style={{ width: 58, height: 58, margin: ".4rem auto 0", border: `1px solid ${C.goldS}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", animationDelay: ".05s" }}>
-            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: "1.1rem", color: C.green }}>{(content.initials[0] + content.initials[1]).toUpperCase()}</span>
-          </div>
-
-          <p className="inaug-rev" style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: ".66rem", fontWeight: 600, letterSpacing: ".28em", textTransform: "uppercase", color: C.gold, marginTop: "1.3rem", animationDelay: ".1s" }}>
-            {content.invitationLine}
-          </p>
-          <h1 className="inaug-rev" style={{ fontFamily: "'Marcellus',serif", fontSize: "clamp(2.1rem,8vw,3rem)", letterSpacing: ".04em", textTransform: "uppercase", color: C.greenD, marginTop: ".8rem", lineHeight: 1.05, animationDelay: ".2s" }}>{evType}</h1>
-          <p className="inaug-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.4rem", color: C.muted, marginTop: ".7rem", animationDelay: ".3s" }}>{org}</p>
-
-          {/* Sep */}
-          <div className="inaug-rev" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: ".8rem", margin: "1.8rem auto", width: "64%", animationDelay: ".4s" }}>
-            <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg,transparent,${C.goldS})` }} />
-            <span style={{ width: 8, height: 8, transform: "rotate(45deg)", background: C.gold, flexShrink: 0 }} />
-            <span style={{ flex: 1, height: 1, background: `linear-gradient(90deg,${C.goldS},transparent)` }} />
-          </div>
-
-          <p className="inaug-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1.2rem", color: C.ink, lineHeight: 1.6, maxWidth: "30ch", margin: "0 auto", animationDelay: ".42s" }}>
-            {content.names[1]}
-          </p>
-          <p className="inaug-rev" style={{ fontFamily: "'Marcellus',serif", fontSize: "1.04rem", letterSpacing: ".2em", textTransform: "uppercase", color: C.greenD, marginTop: "1.4rem", animationDelay: ".5s" }}>
-            {dateStr}
-          </p>
-          <p className="inaug-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.22rem", color: C.muted, marginTop: ".5rem", animationDelay: ".54s" }}>
-            {content.time.replace(":", "h")} · {content.venue}{content.venueSub ? `, ${content.venueSub}` : ""}
-          </p>
-          {content.note && <p className="inaug-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: "1rem", color: C.muted, marginTop: ".8rem", animationDelay: ".56s" }}>{content.note}</p>}
-
-          {/* Countdown */}
-          {showCountdown && !cdDone && (
-            <div className="inaug-rev" style={{ display: "flex", justifyContent: "center", gap: "1.1rem", margin: "2rem 0 .2rem", animationDelay: ".62s" }}>
-              {[{ val: cd.j, lab: "Jours" }, { val: cd.h, lab: "Heures" }, { val: cd.m, lab: "Min" }].map(({ val, lab }) => (
-                <div key={lab} style={{ textAlign: "center", minWidth: 54, padding: ".7rem .4rem", border: `1px solid ${C.line}`, borderRadius: 8, background: `rgba(31,91,67,.04)` }}>
-                  <span style={{ fontFamily: "'Marcellus',serif", fontSize: "1.6rem", color: C.greenD, display: "block", lineHeight: 1 }}>{val}</span>
-                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: ".58rem", letterSpacing: ".14em", textTransform: "uppercase", color: C.muted, display: "block", marginTop: ".4rem" }}>{lab}</span>
-                </div>
-              ))}
+            <div className={`${styles.dateBlock} ${styles.rev}`} style={{ animationDelay: ".44s" }}>
+              <span className={styles.dateStr}>{dateStr}</span>
+              <p className={styles.dateTime}>
+                {content.time.replace(":", " h ")}<br/>
+                <span className={styles.venue}>{content.venue}{content.venueSub ? ` · ${content.venueSub}` : ""}</span>
+              </p>
             </div>
-          )}
 
-          <p className="inaug-rev" style={{ fontFamily: "'Cormorant Garamond',serif", fontStyle: "italic", fontSize: "1.1rem", color: C.muted, marginTop: "1.2rem", animationDelay: ".68s" }}>{content.closing}</p>
-
-          {/* CTA */}
-          <div className="inaug-rev" style={{ marginTop: "2rem", display: "flex", gap: ".7rem", justifyContent: "center", flexWrap: "wrap", animationDelay: ".74s" }}>
-            {showRsvp && invitationId && <button style={btnStyle(true)} onClick={() => document.getElementById("inaug-rsvp")?.scrollIntoView({ behavior: "smooth" })}>Confirmer ma présence</button>}
-            {content.mapsUrl && <a href={content.mapsUrl} target="_blank" rel="noopener noreferrer" style={btnStyle()}>Itinéraire</a>}
-          </div>
-
-          {/* RSVP */}
-          {showRsvp && invitationId && (
-            <section id="inaug-rsvp" style={{ marginTop: "2rem", borderTop: `1px solid ${C.line}`, paddingTop: "1.8rem" }}>
-              <h2 style={{ fontFamily: "'Marcellus',serif", fontSize: "1.1rem", color: C.ink, marginBottom: "1rem" }}>Confirmez votre présence</h2>
-              {rsvpSent || alreadyResponded ? (
-                <p style={{ color: C.muted, fontFamily: "'Cormorant Garamond',serif", fontSize: "1rem", lineHeight: 1.8 }}>
-                  {alreadyResponded && !rsvpSent ? "Vous avez déjà répondu. Merci !" : <>Merci <strong style={{ color: C.green }}>{rsvpName}</strong> — réponse enregistrée.</>}
-                </p>
-              ) : (
-                <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={submitRsvp}>
-                  <input style={inp} type="text" placeholder="Votre nom" value={rsvpName} onChange={e => setRsvpName(e.target.value)} required minLength={2} />
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {(["attending", "declined"] as const).map((v, i) => (
-                      <button key={v} type="button" onClick={() => setRsvpAttending(v)} style={{ flex: 1, padding: ".65rem", border: `1.5px solid ${rsvpAttending === v ? C.green : C.line}`, background: rsvpAttending === v ? `rgba(31,91,67,.08)` : "transparent", color: rsvpAttending === v ? C.greenD : C.muted, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: ".68rem", letterSpacing: ".08em", textTransform: "uppercase", cursor: "pointer", borderRadius: 40 }}>
-                        {i === 0 ? "Confirmer" : "Décliner"}
-                      </button>
-                    ))}
+            {showCountdown && !cdDone && (
+              <div className={`${styles.countdown} ${styles.rev}`} style={{ animationDelay: ".52s" }}>
+                {[{ val: cd.j, lab: "Jours" }, { val: cd.h, lab: "Heures" }, { val: cd.m, lab: "Min" }].map(({ val, lab }) => (
+                  <div key={lab} className={styles.cdBox}>
+                    <span className={styles.cdNum}>{val}</span>
+                    <span className={styles.cdLab}>{lab}</span>
                   </div>
-                  {rsvpAttending === "attending" && (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: ".9rem", color: C.muted }}>Nombre de personnes</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        {([-1, null, 1] as const).map((d, i) => d !== null ? <button key={i} type="button" onClick={() => setRsvpSize(s => Math.max(1, Math.min(20, s + d)))} style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${C.line}`, background: "transparent", color: C.green, cursor: "pointer" }}>{d > 0 ? "+" : "−"}</button> : <span key={i} style={{ fontFamily: "'Marcellus',serif", fontSize: "1rem", color: C.ink, minWidth: 20, textAlign: "center" }}>{rsvpSize}</span>)}
-                      </div>
-                    </div>
-                  )}
-                  <textarea style={{ ...inp, resize: "vertical" }} placeholder="Message (optionnel)" value={rsvpMsg} onChange={e => setRsvpMsg(e.target.value)} rows={2} />
-                  <button type="submit" disabled={!rsvpAttending || rsvpName.trim().length < 2 || rsvpLoading} style={{ ...btnStyle(true), alignSelf: "center" } as React.CSSProperties}>{rsvpLoading ? "Envoi…" : "Confirmer →"}</button>
-                </form>
+                ))}
+              </div>
+            )}
+
+            <p className={`${styles.closing} ${styles.rev}`} style={{ animationDelay: ".6s" }}>
+              {content.closing}
+            </p>
+
+            <div className={`${styles.cta} ${styles.rev}`} style={{ animationDelay: ".66s" }}>
+              <button className={`${styles.btn} ${styles.btnGhost}`} onClick={saveDate}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" width={14} height={14}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                Enregistrer la date
+              </button>
+              {content.mapsUrl && (
+                <a className={`${styles.btn} ${styles.btnGhost}`} href={content.mapsUrl} target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width={14} height={14}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                  Itinéraire
+                </a>
               )}
-            </section>
-          )}
+              {showRsvp && invitationId && (
+                <button className={`${styles.btn} ${styles.btnPrimary}`}
+                  onClick={() => document.getElementById("in-rsvp")?.scrollIntoView({ behavior: "smooth" })}>
+                  Confirmer ma présence
+                </button>
+              )}
+            </div>
+
+            {showRsvp && invitationId && (
+              <section id="in-rsvp" className={`${styles.rsvp} ${styles.rev}`} style={{ animationDelay: ".76s" }}>
+                <h2 className={styles.rsvpTitle}>Votre réponse</h2>
+                {rsvpSent || alreadyResponded ? (
+                  <p className={styles.rsvpDone}>
+                    {alreadyResponded && !rsvpSent ? "Vous avez déjà répondu — merci !"
+                      : <>Merci <strong>{rsvpName}</strong> — réponse enregistrée.</>}
+                  </p>
+                ) : (
+                  <form className={styles.rsvpForm} onSubmit={submitRsvp}>
+                    <input className={styles.inp} type="text" placeholder="Votre nom complet"
+                      value={rsvpName} onChange={e => setRsvpName(e.target.value)} required minLength={2} maxLength={80}/>
+                    <div className={styles.toggle}>
+                      {(["attending","declined"] as const).map((v, i) => (
+                        <button key={v} type="button"
+                          className={`${styles.toggleBtn} ${rsvpStatus===v?(i===0?styles.active:styles.declined):""}`}
+                          onClick={() => setRsvpStatus(v)}>{i===0?"Confirmer":"Décliner"}</button>
+                      ))}
+                    </div>
+                    {rsvpStatus === "attending" && (
+                      <div className={styles.sizeRow}>
+                        <span className={styles.sizeLabel}>Nombre de personnes</span>
+                        <div className={styles.sizeCtrl}>
+                          <button type="button" className={styles.sizeBtn} onClick={() => setRsvpSize(s=>Math.max(1,s-1))}>−</button>
+                          <span className={styles.sizeVal}>{rsvpSize}</span>
+                          <button type="button" className={styles.sizeBtn} onClick={() => setRsvpSize(s=>Math.min(20,s+1))}>+</button>
+                        </div>
+                      </div>
+                    )}
+                    <textarea className={styles.inp} placeholder="Message (optionnel)"
+                      value={rsvpMsg} onChange={e=>setRsvpMsg(e.target.value)} rows={2} style={{resize:"vertical"}}/>
+                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} style={{alignSelf:"center"}}
+                      disabled={!rsvpStatus||rsvpName.trim().length<2||rsvpLoading}>
+                      {rsvpLoading?"Envoi…":"Envoyer →"}
+                    </button>
+                  </form>
+                )}
+              </section>
+            )}
+          </div>
         </div>
       </div>
+      <div className={`${styles.toast} ${toast ? styles.show : ""}`}>{toast}</div>
     </div>
   );
 }

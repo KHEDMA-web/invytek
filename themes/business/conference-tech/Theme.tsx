@@ -1,6 +1,9 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useRef, useState } from "react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
+import { useSparkles, useTilt } from "@/hooks/useThemeEffects";
+import styles from "./Theme.module.css";
 
 interface Props {
   content: WeddingContent;
@@ -11,21 +14,30 @@ interface Props {
   alreadyResponded?: boolean;
 }
 
-export default function ConferenceTechTheme({ content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false }: Props) {
+export default function ConferenceTechTheme({
+  content, options = {}, invitationId, guestName, guestToken, alreadyResponded = false,
+}: Props) {
   const { showCountdown = true, showRsvp = true } = options;
-  const [cd, setCd] = useState({ j: "––", h: "––", m: "––", s: "––" });
-  const [cdDone, setCdDone] = useState(false);
-  const [rsvpName, setRsvpName] = useState(guestName ?? "");
-  const [rsvpAttending, setRsvpAttending] = useState<"attending" | "declined" | null>(null);
-  const [rsvpSize, setRsvpSize] = useState(1);
-  const [rsvpMsg, setRsvpMsg] = useState("");
-  const [rsvpSent, setRsvpSent] = useState(false);
+
+  const sparklesRef = useRef<HTMLDivElement>(null);
+  const cardRef     = useRef<HTMLDivElement>(null);
+  useSparkles(sparklesRef, { color: "#3FA9D6", count: 30 });
+  useTilt(cardRef);
+
+  const [opened,      setOpened]      = useState(false);
+  const [toast,       setToast]       = useState<string | null>(null);
+  const [cd,          setCd]          = useState({ j: "––", h: "––", m: "––" });
+  const [cdDone,      setCdDone]      = useState(false);
+  const [rsvpName,    setRsvpName]    = useState(guestName ?? "");
+  const [rsvpStatus,  setRsvpStatus]  = useState<"attending" | "declined" | null>(null);
+  const [rsvpSize,    setRsvpSize]    = useState(1);
+  const [rsvpMsg,     setRsvpMsg]     = useState("");
+  const [rsvpSent,    setRsvpSent]    = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
 
-  // names[0] = conf title, names[1] = edition, hosts = org/speaker
-  const confTitle = content.names[0];
-  const edition = content.names[1];
-  const org = content.hosts;
+  const title   = content.names[0];
+  const edition = content.names[1] && content.names[1] !== "—" ? content.names[1] : "";
+  const company = content.hosts;
 
   useEffect(() => {
     if (!showCountdown) return;
@@ -34,134 +46,188 @@ export default function ConferenceTechTheme({ content, options = {}, invitationI
       let diff = target.getTime() - Date.now();
       if (diff < 0) { setCdDone(true); return; }
       const j = Math.floor(diff / 86400000); diff %= 86400000;
-      const h = Math.floor(diff / 3600000); diff %= 3600000;
-      const m = Math.floor(diff / 60000); diff %= 60000;
-      const s = Math.floor(diff / 1000);
-      setCd({ j: String(j), h: String(h).padStart(2, "0"), m: String(m).padStart(2, "0"), s: String(s).padStart(2, "0") });
+      const h = Math.floor(diff / 3600000);  diff %= 3600000;
+      const m = Math.floor(diff / 60000);
+      setCd({ j: String(j), h: String(h).padStart(2,"0"), m: String(m).padStart(2,"0") });
     }
-    tick(); const id = setInterval(tick, 1000); return () => clearInterval(id);
+    tick(); const id = setInterval(tick, 30000); return () => clearInterval(id);
   }, [content.date, content.time, showCountdown]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   async function submitRsvp(e: React.FormEvent) {
     e.preventDefault();
-    if (!invitationId || !rsvpAttending || rsvpName.trim().length < 2) return;
+    if (!invitationId || !rsvpStatus || rsvpName.trim().length < 2) return;
     setRsvpLoading(true);
     try {
-      await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ invitationId, name: rsvpName.trim(), status: rsvpAttending, partySize: rsvpSize, message: rsvpMsg.trim() || undefined, token: guestToken }) });
+      await fetch("/api/rsvp", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ invitationId, name: rsvpName.trim(), status: rsvpStatus, partySize: rsvpSize, message: rsvpMsg || undefined, token: guestToken }) });
       setRsvpSent(true);
     } catch { /* silent */ } finally { setRsvpLoading(false); }
   }
 
-  const eventDate = new Date(content.date + "T12:00:00");
-  const dateStr = eventDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  function saveDate() {
+    const [y, mo, d] = content.date.split("-"); const [hh, mm] = content.time.split(":");
+    const ics = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Invytek//FR","CALSCALE:GREGORIAN","BEGIN:VEVENT",
+      `DTSTART:${y}${mo}${d}T${hh}${mm}00`,
+      `SUMMARY:${title}${edition ? " — " + edition : ""}`,
+      `LOCATION:${content.venue}${content.venueSub ? "\\, " + content.venueSub : ""}`,
+      `DESCRIPTION:${company}`,
+      "END:VEVENT","END:VCALENDAR"].join("\r\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    a.download = `conference-${title.toLowerCase().replace(/\s+/g, "-")}.ics`;
+    a.click(); setToast("Date enregistrée dans votre calendrier");
+  }
 
-  const C = { bg: "#0B1020", cyan: "#38E1FF", blue: "#5B8CFF", violet: "#9A7BFF", white: "#EAF0FF", muted: "rgba(234,240,255,.6)", faint: "rgba(234,240,255,.34)", line: "rgba(91,140,255,.28)", lineS: "rgba(56,225,255,.5)" };
-  const inp: React.CSSProperties = { width: "100%", padding: ".75rem .9rem", background: `rgba(56,225,255,.04)`, border: `1px solid ${C.line}`, borderRadius: 8, color: C.white, fontFamily: "'IBM Plex Sans',sans-serif", fontSize: ".95rem", outline: "none" };
-  const btnStyle = (primary?: boolean): React.CSSProperties => ({ display: "inline-flex", flex: 1, minWidth: 140, alignItems: "center", justifyContent: "center", gap: 6, padding: ".95rem 1.2rem", borderRadius: 12, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: ".78rem", letterSpacing: ".08em", textTransform: "uppercase", cursor: "pointer", border: primary ? "none" : `1px solid ${C.lineS}`, background: primary ? `linear-gradient(135deg,${C.cyan},${C.blue})` : `rgba(56,225,255,.05)`, color: primary ? "#06101f" : C.white, transition: "all .25s" });
+  const dateObj = new Date(content.date + "T12:00:00");
+  const dateStr = dateObj.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return (
-    <div style={{ minHeight: "100dvh", background: `radial-gradient(120% 80% at 80% -10%,rgba(56,225,255,.12),transparent 50%),radial-gradient(120% 80% at 0% 110%,rgba(154,123,255,.14),transparent 55%),${C.bg}`, display: "flex", alignItems: "center", justifyContent: "center", padding: "calc(3rem + env(safe-area-inset-top)) 1.2rem calc(3rem + env(safe-area-inset-bottom))", overflow: "hidden", color: C.white, fontFamily: "'IBM Plex Sans',sans-serif", position: "relative" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-      <style>{`
-        @keyframes techRise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-        @keyframes techPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-        .tech-rev{opacity:0;animation:techRise .8s cubic-bezier(.16,1,.3,1) forwards}
-      `}</style>
+    <div className={styles.root}>
+      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+      <div className={styles.bgGrid} />
+      <div className={styles.bgGlow1} />
+      <div className={styles.bgGlow2} />
+      <div className={styles.sparkles} ref={sparklesRef} />
 
-      {/* Grid bg */}
-      <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", opacity: .5, backgroundImage: `linear-gradient(rgba(91,140,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(91,140,255,.06) 1px,transparent 1px)`, backgroundSize: "46px 46px", maskImage: "radial-gradient(circle at 50% 40%,#000,transparent 78%)" }} />
+      <div className={`${styles.gate} ${opened ? styles.out : ""}`} onClick={() => setOpened(true)}>
+        <div className={styles.accentLine} />
+        <div className={styles.gateLabel}>{content.invitationLine || "Invitation officielle"}</div>
+        <div className={styles.gateTitle}>{title}</div>
+        {edition && <div className={styles.gateSub}>{edition}</div>}
+        <div className={styles.gateOrg}>{company}</div>
+        <button className={styles.gateBtn} onClick={e => { e.stopPropagation(); setOpened(true); }}>
+          Accéder à l&apos;invitation
+        </button>
+      </div>
 
-      <div style={{ position: "relative", zIndex: 2, width: "100%", maxWidth: 460 }}>
-        <div style={{ position: "relative", width: "100%", borderRadius: 22, padding: "2.6rem 2rem 2.4rem", background: "linear-gradient(165deg,rgba(22,32,66,.82),rgba(12,18,40,.86))", border: `1px solid ${C.line}`, backdropFilter: "blur(14px)", boxShadow: `0 50px 110px -40px rgba(0,0,0,.8),inset 0 1px 0 rgba(255,255,255,.06),0 0 60px -28px rgba(56,225,255,.5)`, overflow: "hidden" }}>
+      <div className={styles.scene}>
+        <div className={styles.cardWrap} ref={cardRef}>
+          <div className={styles.card}>
+            <div className={styles.accentLine} />
+            <div className={styles.scanLine} />
+            <div className={styles.innerBorder} />
 
-          {/* Guest badge */}
-          {guestName && (
-            <div className="tech-rev" style={{ marginBottom: "1.2rem" }}>
-              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: ".65rem", letterSpacing: ".22em", textTransform: "uppercase", color: C.cyan }}>À l&apos;attention de</p>
-              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: "1.2rem", color: C.white, lineHeight: 1.2 }}>{guestName}</p>
-            </div>
-          )}
-
-          {/* Top row */}
-          <div className="tech-rev" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.8rem", animationDelay: ".05s" }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: ".5rem", fontFamily: "'Space Grotesk',sans-serif", fontSize: ".66rem", fontWeight: 600, letterSpacing: ".22em", textTransform: "uppercase", color: C.cyan, padding: ".4rem .8rem", border: `1px solid ${C.lineS}`, borderRadius: 40, background: `rgba(56,225,255,.06)` }}>
-              <span style={{ width: 7, height: 7, borderRadius: "50%", background: C.cyan, boxShadow: `0 0 10px ${C.cyan}`, animation: "techPulse 1.6s ease-in-out infinite", display: "block" }} />
-              {content.invitationLine}
-            </span>
-            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: ".72rem", letterSpacing: ".16em", color: C.faint }}>{edition}</span>
-          </div>
-
-          <p className="tech-rev" style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: ".74rem", fontWeight: 500, letterSpacing: ".3em", textTransform: "uppercase", color: C.blue, textIndent: ".3em", animationDelay: ".1s" }}>
-            {org}
-          </p>
-          <h1 className="tech-rev" style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: "clamp(2.4rem,9vw,3.4rem)", lineHeight: 1.02, letterSpacing: "-.02em", marginTop: ".7rem", background: `linear-gradient(120deg,${C.white},${C.cyan} 60%,${C.blue})`, WebkitBackgroundClip: "text", backgroundClip: "text", WebkitTextFillColor: "transparent", color: "transparent", animationDelay: ".2s" }}>
-            {confTitle}
-          </h1>
-
-          {/* Date/venue */}
-          <div className="tech-rev" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".8rem", marginTop: "1.4rem", animationDelay: ".35s" }}>
-            {[{ l: "Date", v: `${dateStr} · ${content.time.replace(":", "h")}` }, { l: "Lieu", v: `${content.venue}${content.venueSub ? ` · ${content.venueSub}` : ""}` }].map(({ l, v }) => (
-              <div key={l} style={{ textAlign: "left", padding: ".85rem 1rem", border: `1px solid ${C.line}`, borderRadius: 14, background: "rgba(12,18,40,.4)" }}>
-                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: ".6rem", letterSpacing: ".18em", textTransform: "uppercase", color: C.faint }}>{l}</div>
-                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: ".95rem", color: C.white, marginTop: ".25rem", lineHeight: 1.25 }}>{v}</div>
+            {guestName && (
+              <div className={`${styles.guestBadge} ${styles.rev}`}>
+                <span className={styles.guestPre}>Accès réservé à</span>
+                <span className={styles.guestName}>{guestName}</span>
               </div>
-            ))}
-          </div>
+            )}
 
-          {content.note && <p className="tech-rev" style={{ fontFamily: "'IBM Plex Sans',sans-serif", fontSize: ".9rem", color: C.muted, marginTop: "1rem", fontStyle: "italic", animationDelay: ".42s" }}>{content.note}</p>}
+            <p className={`${styles.eyebrow} ${styles.rev}`} style={{ animationDelay: ".05s" }}>
+              {content.invitationLine || "Invitation officielle"}
+            </p>
+            <h1 className={`${styles.title} ${styles.rev}`} style={{ animationDelay: ".15s" }}>{title}</h1>
+            {edition && <p className={`${styles.subtitle} ${styles.rev}`} style={{ animationDelay: ".22s" }}>{edition}</p>}
+            <p className={`${styles.company} ${styles.rev}`} style={{ animationDelay: ".28s" }}>{company}</p>
 
-          {/* Countdown */}
-          {showCountdown && !cdDone && (
-            <div className="tech-rev" style={{ display: "flex", justifyContent: "center", gap: ".7rem", margin: "1.8rem 0 .2rem", animationDelay: ".48s" }}>
-              {[{ val: cd.j, lab: "Jours" }, { val: cd.h, lab: "Heures" }, { val: cd.m, lab: "Min" }, { val: cd.s, lab: "Sec" }].map(({ val, lab }) => (
-                <div key={lab} style={{ flex: 1, textAlign: "center", padding: ".7rem .3rem", border: `1px solid ${C.line}`, borderRadius: 12, background: `rgba(56,225,255,.05)` }}>
-                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: "1.6rem", color: C.cyan, display: "block", lineHeight: 1 }}>{val}</span>
-                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: ".58rem", letterSpacing: ".14em", textTransform: "uppercase", color: C.faint, display: "block", marginTop: ".4rem" }}>{lab}</span>
-                </div>
-              ))}
+            <div className={`${styles.sep} ${styles.rev}`} style={{ animationDelay: ".35s" }}>
+              <span className={styles.sepLine} />
+              <svg viewBox="0 0 20 20" fill="none" width="16" height="16" aria-hidden>
+                <circle cx="10" cy="10" r="7" stroke="#3FA9D6" strokeWidth="1.2"/>
+                <path d="M10 6v4l3 2" stroke="#3FA9D6" strokeWidth="1.2" strokeLinecap="round"/>
+              </svg>
+              <span className={styles.sepLine} />
             </div>
-          )}
 
-          <p className="tech-rev" style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 500, fontSize: ".85rem", color: C.muted, margin: "1.2rem 0 0", animationDelay: ".56s" }}>{content.closing}</p>
+            <div className={`${styles.statGrid} ${styles.rev}`} style={{ animationDelay: ".42s" }}>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>Date</span>
+                <span className={styles.statVal}>{dateStr.split(" ").slice(1, 4).join(" ")}</span>
+              </div>
+              <div className={styles.statCard}>
+                <span className={styles.statLabel}>Heure</span>
+                <span className={styles.statVal}>{content.time.replace(":", " h ")}</span>
+              </div>
+              <div className={styles.statCard} style={{ gridColumn: "1/-1" }}>
+                <span className={styles.statLabel}>Lieu</span>
+                <span className={styles.statVal}>{content.venue}{content.venueSub ? ` — ${content.venueSub}` : ""}</span>
+              </div>
+            </div>
 
-          {/* CTA */}
-          <div className="tech-rev" style={{ marginTop: "1.8rem", display: "flex", gap: ".7rem", flexWrap: "wrap", animationDelay: ".62s" }}>
-            {showRsvp && invitationId && <button style={btnStyle(true)} onClick={() => document.getElementById("tech-rsvp")?.scrollIntoView({ behavior: "smooth" })}>S&apos;inscrire</button>}
-            {content.mapsUrl && <a href={content.mapsUrl} target="_blank" rel="noopener noreferrer" style={btnStyle()}>Itinéraire</a>}
-          </div>
-
-          {/* RSVP */}
-          {showRsvp && invitationId && (
-            <section id="tech-rsvp" style={{ marginTop: "2rem", borderTop: `1px solid ${C.line}`, paddingTop: "1.8rem" }}>
-              <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: "1rem", color: C.white, marginBottom: "1rem" }}>Confirmez votre présence</h2>
-              {rsvpSent || alreadyResponded ? (
-                <p style={{ color: C.muted, fontSize: ".95rem" }}>{alreadyResponded && !rsvpSent ? "Vous avez déjà répondu. Merci !" : <>Merci <strong style={{ color: C.cyan }}>{rsvpName}</strong> — inscription confirmée.</>}</p>
-              ) : (
-                <form style={{ display: "flex", flexDirection: "column", gap: 10 }} onSubmit={submitRsvp}>
-                  <input style={inp} type="text" placeholder="Votre nom" value={rsvpName} onChange={e => setRsvpName(e.target.value)} required minLength={2} />
-                  <div style={{ display: "flex", gap: 8 }}>
-                    {(["attending", "declined"] as const).map((v, i) => (
-                      <button key={v} type="button" onClick={() => setRsvpAttending(v)} style={{ flex: 1, padding: ".65rem", border: `1.5px solid ${rsvpAttending === v ? C.cyan : C.line}`, background: rsvpAttending === v ? `rgba(56,225,255,.1)` : "transparent", color: rsvpAttending === v ? C.cyan : C.faint, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: ".68rem", letterSpacing: ".08em", textTransform: "uppercase", cursor: "pointer", borderRadius: 8 }}>
-                        {i === 0 ? "Je participe" : "Je décline"}
-                      </button>
-                    ))}
+            {showCountdown && !cdDone && (
+              <div className={`${styles.countdown} ${styles.rev}`} style={{ animationDelay: ".52s" }}>
+                {[{ val: cd.j, lab: "Jours" }, { val: cd.h, lab: "Heures" }, { val: cd.m, lab: "Min" }].map(({ val, lab }) => (
+                  <div key={lab} className={styles.cdBox}>
+                    <span className={styles.cdNum}>{val}</span>
+                    <span className={styles.cdLab}>{lab}</span>
                   </div>
-                  {rsvpAttending === "attending" && (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: ".9rem", color: C.muted }}>Nombre de personnes</span>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                        {([-1, null, 1] as const).map((d, i) => d !== null ? <button key={i} type="button" onClick={() => setRsvpSize(s => Math.max(1, Math.min(20, s + d)))} style={{ width: 28, height: 28, borderRadius: "50%", border: `1px solid ${C.line}`, background: "transparent", color: C.cyan, cursor: "pointer" }}>{d > 0 ? "+" : "−"}</button> : <span key={i} style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: "1rem", color: C.white, minWidth: 20, textAlign: "center" }}>{rsvpSize}</span>)}
-                      </div>
-                    </div>
-                  )}
-                  <textarea style={{ ...inp, resize: "vertical" }} placeholder="Message (optionnel)" value={rsvpMsg} onChange={e => setRsvpMsg(e.target.value)} rows={2} />
-                  <button type="submit" disabled={!rsvpAttending || rsvpName.trim().length < 2 || rsvpLoading} style={{ ...btnStyle(true), alignSelf: "center" } as React.CSSProperties}>{rsvpLoading ? "Envoi…" : "Confirmer →"}</button>
-                </form>
+                ))}
+              </div>
+            )}
+
+            <p className={`${styles.closing} ${styles.rev}`} style={{ animationDelay: ".6s" }}>
+              {content.closing}
+            </p>
+
+            <div className={`${styles.cta} ${styles.rev}`} style={{ animationDelay: ".66s" }}>
+              <button className={`${styles.btn} ${styles.btnGhost}`} onClick={saveDate}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" width={14} height={14}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                Save the date
+              </button>
+              {content.mapsUrl && (
+                <a className={`${styles.btn} ${styles.btnGhost}`} href={content.mapsUrl} target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width={14} height={14}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                  Itinéraire
+                </a>
               )}
-            </section>
-          )}
+              {showRsvp && invitationId && (
+                <button className={`${styles.btn} ${styles.btnPrimary}`}
+                  onClick={() => document.getElementById("ct-rsvp")?.scrollIntoView({ behavior: "smooth" })}>
+                  Confirmer ma participation
+                </button>
+              )}
+            </div>
+
+            {showRsvp && invitationId && (
+              <section id="ct-rsvp" className={`${styles.rsvp} ${styles.rev}`} style={{ animationDelay: ".76s" }}>
+                <h2 className={styles.rsvpTitle}>Votre réponse</h2>
+                {rsvpSent || alreadyResponded ? (
+                  <p className={styles.rsvpDone}>
+                    {alreadyResponded && !rsvpSent ? "Vous avez déjà répondu — merci !"
+                      : <>Merci <strong>{rsvpName}</strong> — participation enregistrée.</>}
+                  </p>
+                ) : (
+                  <form className={styles.rsvpForm} onSubmit={submitRsvp}>
+                    <input className={styles.inp} type="text" placeholder="Votre nom complet"
+                      value={rsvpName} onChange={e => setRsvpName(e.target.value)} required minLength={2} maxLength={80}/>
+                    <div className={styles.toggle}>
+                      {(["attending","declined"] as const).map((v, i) => (
+                        <button key={v} type="button"
+                          className={`${styles.toggleBtn} ${rsvpStatus===v?(i===0?styles.active:styles.declined):""}`}
+                          onClick={() => setRsvpStatus(v)}>{i===0?"Je participe":"Je décline"}</button>
+                      ))}
+                    </div>
+                    {rsvpStatus === "attending" && (
+                      <div className={styles.sizeRow}>
+                        <span className={styles.sizeLabel}>Nombre de participants</span>
+                        <div className={styles.sizeCtrl}>
+                          <button type="button" className={styles.sizeBtn} onClick={() => setRsvpSize(s=>Math.max(1,s-1))}>−</button>
+                          <span className={styles.sizeVal}>{rsvpSize}</span>
+                          <button type="button" className={styles.sizeBtn} onClick={() => setRsvpSize(s=>Math.min(20,s+1))}>+</button>
+                        </div>
+                      </div>
+                    )}
+                    <textarea className={styles.inp} placeholder="Message (optionnel)"
+                      value={rsvpMsg} onChange={e=>setRsvpMsg(e.target.value)} rows={2} style={{resize:"vertical"}}/>
+                    <button type="submit" className={`${styles.btn} ${styles.btnPrimary}`} style={{alignSelf:"center"}}
+                      disabled={!rsvpStatus||rsvpName.trim().length<2||rsvpLoading}>
+                      {rsvpLoading?"Envoi…":"Envoyer →"}
+                    </button>
+                  </form>
+                )}
+              </section>
+            )}
+          </div>
         </div>
       </div>
+      <div className={`${styles.toast} ${toast ? styles.show : ""}`}>{toast}</div>
     </div>
   );
 }
