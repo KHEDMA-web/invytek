@@ -1,15 +1,14 @@
-:global {
-  @keyframes spkFloat {
-    0%   { transform: translateY(0) scale(1); opacity: 0; }
-    8%   { opacity: 1; }
-    92%  { opacity: 0.6; }
-    100% { transform: translateY(-98vh) scale(0.5); opacity: 0; }
-  }
-  @keyframes confRain {
-    0%   { transform: translateY(-2vh) rotate(var(--r, 0deg)); opacity: 1; }
-    100% { transform: translateY(108vh) rotate(calc(var(--r, 0deg) + 540deg)); opacity: 0; }
-  }
+@keyframes spkFloat {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 0.6; }
+  100% { transform: translateY(-98vh) scale(0.5); opacity: 0; }
 }
+@keyframes confRain {
+  0%   { transform: translateY(-2vh) rotate(var(--r, 0deg)); opacity: 1; }
+  100% { transform: translateY(108vh) rotate(calc(var(--r, 0deg) + 540deg)); opacity: 0; }
+}
+
 @keyframes coRise  { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:none } }
 @keyframes coGate  { from { opacity:0; transform:scale(.96) } to { opacity:1; transform:scale(1) } }
 @keyframes coToast { 0%,100%{opacity:0;transform:translateX(-50%) translateY(8px)} 15%,85%{opacity:1;transform:translateX(-50%) translateY(0)} }

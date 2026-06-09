@@ -1,11 +1,10 @@
-:global {
-  @keyframes petalFall {
-    0%   { transform: translateY(-20px) rotate(-15deg); opacity: 0; }
-    5%   { opacity: 0.85; }
-    88%  { opacity: 0.55; }
-    100% { transform: translateY(108vh) rotate(50deg); opacity: 0; }
-  }
+@keyframes petalFall {
+  0%   { transform: translateY(-20px) rotate(-15deg); opacity: 0; }
+  5%   { opacity: 0.85; }
+  88%  { opacity: 0.55; }
+  100% { transform: translateY(108vh) rotate(50deg); opacity: 0; }
 }
+
 @keyframes gbRise  { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:none } }
 @keyframes gbFlap  { from { transform:rotateX(0deg) } to { transform:rotateX(-180deg) } }
 @keyframes gbSeal  { to   { transform:translate(-50%,-50%) scale(.6); opacity:0 } }

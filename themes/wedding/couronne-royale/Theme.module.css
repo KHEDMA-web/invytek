@@ -1,11 +1,10 @@
-:global {
-  @keyframes spkFloat {
-    0%   { transform: translateY(0) scale(1); opacity: 0; }
-    8%   { opacity: 1; }
-    92%  { opacity: 0.6; }
-    100% { transform: translateY(-98vh) scale(0.5); opacity: 0; }
-  }
+@keyframes spkFloat {
+  0%   { transform: translateY(0) scale(1); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 0.6; }
+  100% { transform: translateY(-98vh) scale(0.5); opacity: 0; }
 }
+
 @keyframes crRise  { from { opacity:0; transform:translateY(18px) } to { opacity:1; transform:none } }
 @keyframes crCrown { from { opacity:0; transform:translateY(-22px) scale(.85) } to { opacity:1; transform:none } }
 @keyframes crGate  { from { opacity:0 } to { opacity:1 } }
