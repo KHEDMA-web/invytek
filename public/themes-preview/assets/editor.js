@@ -138,11 +138,14 @@
   ].join('');
   document.head.appendChild(style);
 
-  // launcher
+  // launcher — désactivé (bouton masqué sur la vitrine publique)
+  /* RÉACTIVER si besoin :
   var launch = document.createElement('button');
   launch.className = 'ivk-launch';
   launch.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Personnaliser';
   document.body.appendChild(launch);
+  */
+  var launch = { addEventListener: function() {} }; // stub pour éviter les erreurs de référence
 
   // back to gallery
   var back = document.createElement('a');
