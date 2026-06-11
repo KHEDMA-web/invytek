@@ -178,6 +178,7 @@ function CreateForm() {
   const [dayLabel, setDayLabel] = useState("Samedi");
   const [venue, setVenue] = useState("");
   const [venueSub, setVenueSub] = useState("");
+  const [customMapsUrl, setCustomMapsUrl] = useState("");
   const [closing, setClosing] = useState(d.closing);
   const [note, setNote] = useState("");
   const [bismillah, setBismillah] = useState(true);
@@ -246,7 +247,7 @@ function CreateForm() {
       const dayLabels = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
       const n2 = isWedding ? name2 : (name2 || "—");
       const mapsQuery = [venue, venueSub].filter(Boolean).join(", ");
-      const mapsUrl = mapsQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}` : undefined;
+      const mapsUrl = customMapsUrl.trim() || (mapsQuery ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}` : undefined);
       const content = {
         hosts, invitationLine: invLine,
         names: [name1, n2] as [string, string],
@@ -888,13 +889,27 @@ function CreateForm() {
               <Row label="Lieu">
                 <input value={venue} onChange={e => setVenue(e.target.value)} placeholder={isEvent ? "Hôtel El Aurassi" : "Salle Al Baraka"} style={inp} />
                 <input value={venueSub} onChange={e => setVenueSub(e.target.value)} placeholder="Adresse, Ville (optionnel)" style={{ ...inp, marginTop: 8 }} />
-                {venue && (
-                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue, venueSub].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 6, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--gold)", textDecoration: "none", letterSpacing: ".1em" }}>
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13 }}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
-                    Voir sur Google Maps →
+                <div style={{ position: "relative", marginTop: 8 }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "var(--gold)", pointerEvents: "none" }}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                  <input
+                    value={customMapsUrl}
+                    onChange={e => setCustomMapsUrl(e.target.value)}
+                    placeholder="Lien Google Maps (optionnel) — coller le lien ici"
+                    style={{ ...inp, paddingLeft: 34 }}
+                  />
+                </div>
+                {customMapsUrl ? (
+                  <a href={customMapsUrl} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 5, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--gold)", textDecoration: "none", letterSpacing: ".1em" }}>
+                    ✓ Lien personnalisé — Tester →
                   </a>
-                )}
+                ) : venue ? (
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue, venueSub].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer"
+                    style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 5, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--muted)", textDecoration: "none", letterSpacing: ".1em" }}>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13 }}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    Itinéraire auto depuis le nom de la salle →
+                  </a>
+                ) : null}
               </Row>
 
               <Row label="Logo (optionnel)">
@@ -1065,6 +1080,27 @@ function ContentStep({ theme, d, isWedding, isEvent, name1, setName1, name2, set
         <Row label="Lieu">
           <input value={venue} onChange={e => setVenue(e.target.value)} placeholder={isEvent ? "Hôtel El Aurassi" : "Salle Al Baraka"} style={inp} />
           <input value={venueSub} onChange={e => setVenueSub(e.target.value)} placeholder="Adresse, Ville (optionnel)" style={{ ...inp, marginTop: 8 }} />
+          <div style={{ position: "relative", marginTop: 8 }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "var(--gold)", pointerEvents: "none" }}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+            <input
+              value={customMapsUrl}
+              onChange={e => setCustomMapsUrl(e.target.value)}
+              placeholder="Lien Google Maps (optionnel) — coller le lien ici"
+              style={{ ...inp, paddingLeft: 34 }}
+            />
+          </div>
+          {customMapsUrl ? (
+            <a href={customMapsUrl} target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 5, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--gold)", textDecoration: "none", letterSpacing: ".1em" }}>
+              ✓ Lien personnalisé — Tester →
+            </a>
+          ) : venue ? (
+            <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([venue, venueSub].filter(Boolean).join(", "))}`} target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, marginTop: 5, fontFamily: "var(--font-title)", fontSize: 11, color: "var(--muted)", textDecoration: "none", letterSpacing: ".1em" }}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" style={{ width: 13, height: 13 }}><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+              Itinéraire auto depuis le nom de la salle →
+            </a>
+          ) : null}
         </Row>
         <Row label="Mot de clôture"><input value={closing} onChange={e => setClosing(e.target.value)} placeholder={d.closing} style={inp} /></Row>
         <Row label={d.noteLabel}><input value={note} onChange={e => setNote(e.target.value)} placeholder={d.notePh} style={inp} /></Row>
