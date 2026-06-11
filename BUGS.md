@@ -1,30 +1,21 @@
-# Bugs à corriger — détectés le 2026-06-10
+# Bugs — détectés le 2026-06-10
 
-## 🔴 Critique
+## ✅ Réglés
 
-### 1. `/admin` accessible sans authentification
-- **Symptôme** : GET `/admin` sans session retourne 200 au lieu de rediriger vers `/auth`
-- **Impact** : Page admin visible par n'importe qui
-- **À faire** : Ajouter la protection Auth.js dans le middleware ou dans le layout `/app/admin`
+### 1. `/admin` accessible sans authentification ✅ réglé 2026-06-11
+- Ajout `middleware.ts` — Auth.js v5 protège `/admin/*` côté serveur
 
-### 2. CLS = 0.727 (Cumulative Layout Shift)
-- **Symptôme** : Lighthouse score CLS = 0.727 sur `/i/demo-mariage-2026` (cible < 0.1)
-- **Impact** : Expérience dégradée pour les invités sur mobile, pénalité SEO
-- **Causes probables** : images sans dimensions fixées, fonts qui swappent, contenu dynamique sans réservation d'espace
-- **À faire** : Ajouter `width`/`height` sur les images, `font-display: optional`, skeleton loaders
+### 2. CLS = 0.727 ✅ réglé 2026-06-11
+- `display=swap` → `display=optional` sur 19 fichiers thèmes
+- `preconnect` fonts.googleapis.com + fonts.gstatic.com dans root layout
 
-## 🟡 Important
+### 3. Portail client `/client/[token]` → 404 ✅ faux positif
+- Le test utilisait un token d'invité (`guests.token`) au lieu du `clientAccessToken`
+- La route `/client/[accessToken]` est correcte — elle retourne 404 si pas de token configuré sur l'invitation
 
-### 3. Portail client `/client/[token]` retourne 404
-- **Symptôme** : GET `/client/demo-tk-ahmed` → 404
-- **Impact** : Les clients ne peuvent pas accéder à leur portail avec le token de demo
-- **À faire** : Vérifier la route `/app/client/[token]` et la logique de lookup du token
-
-### 4. LCP = 4.2s (Largest Contentful Paint)
-- **Symptôme** : LCP = 4.2s sur la page invitation (cible < 2.5s)
-- **Impact** : Chargement perçu lent pour les invités, pénalité Google Core Web Vitals
-- **Causes probables** : images non optimisées, pas de preload sur l'image principale, fonts bloquants
-- **À faire** : `next/image` avec `priority` sur l'image hero, preconnect fonts, réduire JS bloquant
+### 4. LCP = 4.2s ✅ réglé 2026-06-11
+- Suppression `@import url(...)` render-blocking dans `gold-arch/Theme.module.css` et `DynamicTheme.module.css`
+- Migration vers `<link rel="stylesheet">` dans le JSX (pattern déjà utilisé par les 17 autres thèmes)
 
 ---
 
