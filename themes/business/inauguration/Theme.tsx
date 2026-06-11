@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useRef, useState } from "react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
@@ -102,7 +102,7 @@ export default function InaugurationTheme({
 
   return (
     <div className={styles.root}>
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Marcellus&display=swap" rel="stylesheet"/>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Marcellus&display=optional" rel="stylesheet"/>
       <div className={styles.petals} ref={petalsRef} />
 
       <div className={`${styles.gate} ${opened ? styles.out : ""}`} onClick={() => setOpened(true)}>

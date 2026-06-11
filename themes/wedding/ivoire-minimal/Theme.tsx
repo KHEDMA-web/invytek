@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 import { useEffect, useRef, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { WeddingContent, WeddingOptions } from "@/lib/schemas/wedding";
@@ -87,7 +87,7 @@ export default function IvoireMinimalTheme({ content, options = {}, invitationId
 
   return (
     <div className={styles.root}>
-      <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Marcellus&family=Cormorant+Garamond:wght@400;500&family=Amiri:wght@400&display=swap" rel="stylesheet" />
+      <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Marcellus&family=Cormorant+Garamond:wght@400;500&family=Amiri:wght@400&display=optional" rel="stylesheet" />
       <div className={`${styles.glow} ${styles.glowTop}`} />
       <div className={`${styles.glow} ${styles.glowBot}`} />
       <div className={styles.sparkles} ref={sparklesRef} />
