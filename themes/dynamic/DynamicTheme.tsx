@@ -245,7 +245,6 @@ export default function DynamicTheme({ spec, invitationId, guestName, guestToken
       className={s.root}
       style={{ background: `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${palette.primary} 12%, ${palette.bg}), ${palette.bg} 60%)`, fontFamily: bodyFont, color: palette.text, direction: typography.rtl ? "rtl" : "ltr" }}
     >
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Marcellus&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Amiri:ital,wght@0,400;0,700;1,400&display=optional" />
       {/* Ambient glows */}
       <div className={s.ambience}>
         <div className={s.glow} style={{ background: `radial-gradient(circle, ${palette.primary}, transparent 70%)` }} />

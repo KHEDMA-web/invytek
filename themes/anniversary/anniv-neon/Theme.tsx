@@ -82,7 +82,6 @@ export default function AnnivNeonTheme({
 
   return (
     <div className={styles.root}>
-      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Caveat:wght@500;700&display=optional" rel="stylesheet"/>
       <div className={styles.grid} />
       <div className={styles.glow1} />
       <div className={styles.glow2} />

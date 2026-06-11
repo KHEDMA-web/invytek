@@ -173,7 +173,6 @@ export default function GoldArchTheme({ content, options = {}, invitationId, gue
 
   return (
     <div className={styles.root}>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Pinyon+Script&family=Cormorant+Garamond:wght@300;400;500&family=Marcellus&family=Amiri:ital,wght@0,400;0,700;1,400&display=optional" />
       {/* Envelope intro */}
       <div
         className={`${styles.envelope} ${opened ? styles.envelopeOpened : ""}`}

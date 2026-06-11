@@ -89,7 +89,6 @@ export default function ConferenceTechTheme({
 
   return (
     <div className={styles.root}>
-      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,400&display=optional" rel="stylesheet"/>
       <div className={styles.bgGrid} />
       <div className={styles.bgGlow1} />
       <div className={styles.bgGlow2} />

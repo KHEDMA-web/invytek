@@ -87,7 +87,6 @@ export default function BabyShowerTheme({
 
   return (
     <div className={styles.root}>
-      <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;700&display=optional" rel="stylesheet"/>
       <div className={styles.topBar} />
       <div className={styles.floats} ref={floatsRef} />
 

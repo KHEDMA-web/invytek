@@ -115,7 +115,6 @@ export default function ConfettisOrTheme({
 
   return (
     <div className={styles.root}>
-      <link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&family=Marcellus&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&display=optional" rel="stylesheet"/>
       <div className={styles.sparkles} ref={sparklesRef} />
       <div className={styles.confetti} ref={confettiRef} />
 
