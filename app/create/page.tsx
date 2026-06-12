@@ -505,7 +505,7 @@ function CreateForm() {
             </div>
           )}
 
-          {step === 2 && <ContentStep {...{ theme: THEMES.find(t => t.id === themeId)!, d: DEFAULTS[THEMES.find(t => t.id === themeId)!.cat] || DEFAULTS["Mariage"], isWedding: ["Mariage","Mariage · RTL"].includes(THEMES.find(t => t.id === themeId)!.cat), isEvent: ["Business","Médical"].includes(THEMES.find(t => t.id === themeId)!.cat), name1, setName1, name2, setName2, hosts, setHosts, invLine, setInvLine, date, setDate, time, setTime, venue, setVenue, venueSub, setVenueSub, closing, setClosing, note, setNote, bismillah, setBismillah, showArabic, setShowArabic, showCountdown, setShowCountdown, showRsvp, setShowRsvp, onBack: () => setStep(1), onNext: () => setStep(3), canContinue: !!name1 && !!date && !!venue && !!hosts }} />}
+          {step === 2 && <ContentStep {...{ theme: THEMES.find(t => t.id === themeId)!, d: DEFAULTS[THEMES.find(t => t.id === themeId)!.cat] || DEFAULTS["Mariage"], isWedding: ["Mariage","Mariage · RTL"].includes(THEMES.find(t => t.id === themeId)!.cat), isEvent: ["Business","Médical"].includes(THEMES.find(t => t.id === themeId)!.cat), name1, setName1, name2, setName2, hosts, setHosts, invLine, setInvLine, date, setDate, time, setTime, venue, setVenue, venueSub, setVenueSub, customMapsUrl, setCustomMapsUrl, closing, setClosing, note, setNote, bismillah, setBismillah, showArabic, setShowArabic, showCountdown, setShowCountdown, showRsvp, setShowRsvp, onBack: () => setStep(1), onNext: () => setStep(3), canContinue: !!name1 && !!date && !!venue && !!hosts }} />}
 
           {step === 3 && <SlugStep {...{ slug, setSlug, slugAvailable, slugChecking, isWedding: ["Mariage","Mariage · RTL"].includes(THEMES.find(t => t.id === themeId)!.cat), name1, name2, hosts, date, venue, venueSub, themeName: THEMES.find(t => t.id === themeId)!.name, error, loading, onBack: () => setStep(2), onPublish: publish }} />}
         </div>
@@ -1043,6 +1043,7 @@ interface ContentStepProps {
   time: string; setTime: (v: string) => void;
   venue: string; setVenue: (v: string) => void;
   venueSub: string; setVenueSub: (v: string) => void;
+  customMapsUrl: string; setCustomMapsUrl: (v: string) => void;
   closing: string; setClosing: (v: string) => void;
   note: string; setNote: (v: string) => void;
   bismillah: boolean; setBismillah: (v: boolean) => void;
@@ -1053,7 +1054,7 @@ interface ContentStepProps {
   extraTop?: React.ReactNode;
 }
 
-function ContentStep({ theme, d, isWedding, isEvent, name1, setName1, name2, setName2, hosts, setHosts, invLine, setInvLine, date, setDate, time, setTime, venue, setVenue, venueSub, setVenueSub, closing, setClosing, note, setNote, bismillah, setBismillah, showArabic, setShowArabic, showCountdown, setShowCountdown, showRsvp, setShowRsvp, onBack, onNext, canContinue, extraTop }: ContentStepProps) {
+function ContentStep({ theme, d, isWedding, isEvent, name1, setName1, name2, setName2, hosts, setHosts, invLine, setInvLine, date, setDate, time, setTime, venue, setVenue, venueSub, setVenueSub, customMapsUrl, setCustomMapsUrl, closing, setClosing, note, setNote, bismillah, setBismillah, showArabic, setShowArabic, showCountdown, setShowCountdown, showRsvp, setShowRsvp, onBack, onNext, canContinue, extraTop }: ContentStepProps) {
   return (
     <div>
       <h2 style={{ fontFamily: "var(--font-title)", fontSize: "clamp(1.6rem,4vw,2.4rem)", color: "var(--ivory)", marginBottom: "0.5rem" }}>Votre événement</h2>
